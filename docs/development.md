@@ -1,8 +1,8 @@
 # 麻雀諗 development
 
-This file is the coder-ready tech and development document as of 14 November 2026 (Asia/Hong Kong). It records the chosen development approach, the wireless second-screen plan for first release, suggested libraries (re-checked on this date), official API constraints, and remaining open technical decisions.
+This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong). It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
 
-**麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, `expo-dev-client` plus prebuild for unique second-screen work) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
+**麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
 Product rules that this file implements against are in [`docs/product.md`](product.md) and [`docs/features.md`](features.md). Visual UI/UX is still designed later; command-line setup for that later skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 
@@ -16,7 +16,7 @@ The recorded approach is [Expo](https://docs.expo.dev/) / React Native. Current 
 
 Unique second-screen work needs custom native code (or a third-party native module) that is not in Expo Go. Official Expo documentation describes a [development build](https://docs.expo.dev/develop/development-builds/introduction/) as a debug build that includes [`expo-dev-client`](https://docs.expo.dev/versions/latest/sdk/dev-client/) (recommended version on the SDK 58 docs: `~58.0.20`; npm latest this pass was `58.0.20`, published 13 November 2026, 00:41 HKT). A development build is the app’s own compiled client, in which native libraries and native configuration can be changed. Expo also documents [Continuous Native Generation / prebuild](https://docs.expo.dev/workflow/prebuild/) (`npx expo prebuild`) to generate the `android` and `ios` projects. `npx expo run:android` and `npx expo run:ios` run prebuild automatically if those directories do not yet exist. After installing a library with native code, changing app config, or upgrading the SDK, official guidance is to regenerate with `npx expo prebuild --clean` and rebuild.
 
-Expo Go cannot host that native code. Official prebuild documentation states that Expo Go can load a project only if it includes JavaScript fallbacks for native code absent from the Expo Go runtime. Unique 現時賽果 on a second display therefore cannot be developed or verified in Expo Go; use a development build.
+Expo Go cannot host that native code. Official prebuild documentation states that Expo Go can load a project only if it includes JavaScript fallbacks for native code absent from the Expo Go runtime. Unique 現時賽果 on a second display is second-release work and cannot be developed or verified in Expo Go; use a development build for that work.
 
 ## Local-only constraints
 
@@ -26,20 +26,20 @@ These are already-decided 麻雀諗 product rules:
 - Data is local only: no backup, no cloud, and no account.
 - The app keeps all in-game records across sessions, stored locally only, and storage should be kept light.
 - The app does not share metadata or session data.
-- Share-screen is a local display connection, not a data share.
+- For the second-release external display, share-screen is a local display connection, not a data share.
 
 Google Cast, if it is later chosen, tensions with those rules. The supported custom-scoreboard path is a [Custom Web Receiver](https://developers.google.com/cast/docs/web_receiver): an HTML5 app you host, registered in the [Google Cast SDK Developer Console](https://developers.google.com/cast/docs/registration). A published receiver must be fetched over HTTPS. During development the URL may use HTTP on a private network, but not `localhost`. Live scores can travel on the Cast channel without storing session data on a server, but the TV still downloads receiver code from a hosted URL. Relay casting is an optional console checkbox that allows senders not on the same Wi-Fi as the receiver; whether it should be off is an open decision. The official [Android Sender SDK](https://developers.google.com/cast/docs/android_sender/integrate) is the Play services Cast framework (`com.google.android.gms.cast.framework`) and currently documents a minimum API level of 24. This file records those facts as caveats, not as a decision to adopt Cast.
 
 ## External display product rules
 
-These are 麻雀諗 product decisions:
+These are 麻雀諗 product decisions for the **second release**. They are not first-release fulfilment. The first release develops the point-counter / table scorekeeper features.
 
-- The first-release plan is a **wireless** connection to a smart TV, required on both iOS and Android.
+- The second-release plan is a **wireless** connection to a smart TV, on both iOS and Android.
 - Start and end with the same in-app share-screen button.
 - The external display shows **現時賽果 only**. Settlement and every other page are opened in the app.
 - On iOS / iPhone, the path is AirPlay unique (not only mirrored) content.
 - On Android, the path must be an official wireless Android-to-smart-TV path. Unofficial or commercial Android AirPlay senders are not fulfilment. There is no official Apple AirPlay sender SDK or API for Android apps.
-- Official wired HDMI / USB-C Presentation exists on both platforms, but it is **not** the chosen first-release fulfilment.
+- Official wired HDMI / USB-C Presentation exists on both platforms, but it is **not** the chosen fulfilment.
 
 If unique 現時賽果 stops while the system route stays up, default mirroring of the phone UI would violate the 現時賽果-only rule.
 
@@ -72,7 +72,7 @@ Suggested ways to implement this under Expo (not locked):
 
 The official pattern for a dedicated second surface is: the system creates a presentation display, then the app attaches `android.app.Presentation`. [`DisplayManager.getDisplays(DISPLAY_CATEGORY_PRESENTATION)`](https://developer.android.com/reference/android/hardware/display/DisplayManager) lists secondary displays suitable for presentations, including external or wireless displays; when several exist, the first entry is preferred. `DisplayManager.DisplayListener` reports added, changed, and removed displays.
 
-There is no first-party Expo API for Android `Presentation`, `DisplayManager`, or unique iOS external-display scenes in the Expo SDK 58 docs fetched for this pass. A custom native module under Expo is likely required for the Miracast-class path. Samsung Smart View and other manufacturer-only paths are not a portable official Android API and should not be described as first-release fulfilment across Android devices.
+There is no first-party Expo API for Android `Presentation`, `DisplayManager`, or unique iOS external-display scenes in the Expo SDK 58 docs fetched for this pass. A custom native module under Expo is likely required for the Miracast-class path. Samsung Smart View and other manufacturer-only paths are not a portable official Android API and should not be described as fulfilment across Android devices.
 
 ### Wi-Fi Display / Miracast-class
 
@@ -105,7 +105,7 @@ These remain suggestions after the 14 November 2026 re-check, except where a sen
 | Area | Suggestion | Version observed this pass | Caveats |
 |---|---|---|---|
 | Expo SDK | Expo SDK 58 | `expo` `58.0.25` (13 Nov 2026, 00:40 HKT). Docs current: v58. | Development approach is chosen; this exact patch is not locked. |
-| Dev client | `expo-dev-client` + prebuild | `58.0.20` (13 Nov 2026, 00:41 HKT). SDK 58 docs recommend `~58.0.20`. | Required for unique second-screen native code. Expo Go cannot do that work. |
+| Dev client | `expo-dev-client` + prebuild | `58.0.20` (13 Nov 2026, 00:41 HKT). SDK 58 docs recommend `~58.0.20`. | Required for unique second-screen native code in the second release. Expo Go cannot do that work. |
 | Local store | `expo-sqlite` | `58.0.17` (13 Nov 2026, 00:42 HKT). SDK 58 docs recommend `~58.0.17`. | Fits local sessions, history, tables, and statistics. Backup exclusion is **not** in the `expo-sqlite` API docs fetched this pass; it must be applied at the file or manifest layer. |
 | Exact scores | `fraction.js` or `decimal.js` (optional smaller alternative: `big.js`) | `fraction.js` `5.3.4` (22 Aug 2025, 19:44 HKT); `decimal.js` `10.6.0` (7 Jul 2025, 06:50 HKT); `big.js` `7.0.1` (22 Apr 2025, 04:13 HKT). All MIT. | Never use raw JavaScript `Number` for scores. Construct from strings or an integer numerator/denominator, never from a previously rounded `Number`. `fraction.js` keeps exact rationals (for example 32/3 stays 32/3). `decimal.js` is a better fit if the product thinks in decimal money. Display rounding of non-terminating amounts remains an open product gap. |
 | Locale | `expo-localization` + `Intl`, pin `zh-Hant-HK` | `expo-localization` `58.0.5` (19 Oct 2026, 21:22 HKT). SDK 58 docs recommend `~58.0.5`. Included in Expo Go; `supportedLocales` config plugin is documented. | `getLocales()` / `useLocales()` return BCP 47 tags such as `zh-Hant-HK`. The product is Traditional Chinese — Hong Kong only, so the app can pin that locale even when the device locale differs. |
@@ -174,14 +174,14 @@ No other official-page conflicts were found on this pass for the APIs and packag
 
 ## Remaining open technical decisions
 
-Do not invent product answers for these gaps:
+Do not invent product answers for these gaps. Items 1–5 belong to second-release planning, not first-release blockers.
 
-1. **Android wireless path:** Miracast-class Presentation, Cast, or both. Wireless is chosen; wired is not the first-release fulfilment.
+1. **Android wireless path:** Miracast-class Presentation, Cast, or both. Wireless is chosen for the second-release TV path; wired is not the chosen fulfilment.
 2. **Whether a hosted Cast receiver is acceptable** under local-only / no-cloud / no-account, and whether relay casting should be off.
 3. **Which TV classes / receiver hardware to design for** (Miracast-compatible TV versus Chromecast / Google TV / other Cast-enabled set).
 4. **How far the in-app share-screen button may rely on a system picker** rather than a fully silent connect and disconnect. Official iOS and Android APIs typically present system route UI.
 5. **Connection-drop / no-mirror fallback behaviour.** Still unspecified as a product rule, including whether unique 現時賽果 must be torn down in a way that also ends the system route so the display does not fall back to mirroring the phone.
-6. **Rounding and storage of non-terminating decimals** (already an open product gap, for example some 半銃 splits such as 32/3).
+6. **Rounding and storage of non-terminating decimals** (already an open first-release product gap, for example some 半銃 splits such as 32/3).
 7. **Distribution accounts** (Apple Developer Program, Play Console, sideload / TestFlight, and similar) remain an open technical decision. This file does not recommend buying accounts.
 
 ### Conservative suggestion (not a locked decision)

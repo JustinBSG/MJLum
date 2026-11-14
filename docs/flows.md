@@ -11,7 +11,7 @@ Exact tables and additional worked examples live in [`docs/guide.md`](guide.md).
 1. Choose a rules setup (a Hong Kong preset, a saved custom setup, or a one-off 直接使用).
 2. Seat four players and enter a name for each. Avatars identify the players. Each running balance starts at 0.
 3. If 紀錄莊家及圈風 is on, the board shows a dealer and a circle/wind (a demonstrated start is 東圈東風, with one player marked 莊).
-4. Optionally start the external display with the share-screen button. It should show 現時賽果 only. End it with the same button.
+4. Optionally, in the second release, start the external display with the share-screen button. It should show 現時賽果 only. End it with the same button.
 
 ## 2. Record an ordinary discard win (全銃)
 
@@ -178,15 +178,17 @@ An empty-session card for d showed 0/0/0, 0 平均番數, 0% rates, 0 平均出�
 
 **麻雀諗 product decision:** open 找數 and show each player’s net balance, including anyone on the roster with a non-zero balance. The user finishes payment themselves. Do not generate a transfer list, payment instructions, or a currency label.
 
-The reference’s own demonstrated transfer list, kept only as reference context, is in `docs/guide.md`. How a Jackpot pool would appear in this result view remains unspecified. This view is in the app, not on the external display.
+The reference’s own demonstrated transfer list, kept only as reference context, is in `docs/guide.md`. How a Jackpot pool would appear in this result view remains unspecified. This view is in the app, not on a second-release external display.
 
 ## 18. Substitute a player and start a new session
 
 1. Add a reserve to the roster and substitute them into a seat. The departing player’s result stays with that person; the substitute starts at 0; unseated players do not pay later hands.
 2. 新牌局 is distinct from recording the next hand. 沿用現有玩家 and 沿用現時玩法 can be chosen independently. With both off, the flow returns to rules selection and empty seats.
 
-## 19. External display during play
+## 19. External display during play (second release)
 
-1. Press the in-app share-screen button to start a local display connection (AirPlay is required; another similar path is welcome if supported).
+This flow is second-release work, not first-release fulfilment.
+
+1. Press the in-app share-screen button to start a local display connection. On iOS / iPhone the path is AirPlay for unique 現時賽果. On Android the path must be an official wireless Android-to-smart-TV path (not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment.
 2. The external display shows 現時賽果 only. Open statistics, 找數, settings, history, dice, or any other page in the app.
 3. Press the same button to end the connection. Behaviour when the connection drops remains unspecified.

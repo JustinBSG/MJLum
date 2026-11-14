@@ -4,20 +4,17 @@ The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum
 
 麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game.
 
-This file is the short product-direction summary as of 14 November 2026. Detailed scoring and session behaviour is in [`docs/guide.md`](guide.md). The feature inventory is in [`docs/features.md`](features.md). Demonstrated controls are in [`docs/controls.md`](controls.md). Handover flows are in [`docs/flows.md`](flows.md). How facts are labelled is explained in [`docs/README.md`](README.md). The recorded development approach is in [`docs/development.md`](development.md). Command-line setup for the later UI/UX skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
+This file is the short product-direction summary as of 15 November 2026. Detailed scoring and session behaviour is in [`docs/guide.md`](guide.md). The feature inventory is in [`docs/features.md`](features.md). Demonstrated controls are in [`docs/controls.md`](controls.md). Handover flows are in [`docs/flows.md`](flows.md). How facts are labelled is explained in [`docs/README.md`](README.md). The recorded development approach is in [`docs/development.md`](development.md). Command-line setup for the later UI/UX skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 
 ## Already-decided 麻雀諗 product rules
 
-These rules apply to the first release. They are 麻雀諗 product decisions, not extra features postponed to a later release:
+These are 麻雀諗 product decisions. The rules in this list apply to the first release. External-display / wireless TV rules are second-release work and are listed under First release and second release below.
 
 - The app is a cross-platform mobile app. First-release platforms are iOS and Android.
 - The app has no ads.
 - At the current stage the app is completely free.
 - The UI/UX is distinct, and is not a copy of the existing iPhone app 麻將計數機.
 - All UI/UX should be designed by AI. AI should follow the product documents to design the most user-friendly UI/UX, and should use https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. How a coder would install that skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md). This pass does not include those designs.
-- The first-release plan is to show the scoreboard on a smart TV wirelessly. This is required on all first-release platforms (iOS and Android). On iOS / iPhone, the path is AirPlay, showing unique 現時賽果 only (not only a phone-UI mirror). On Android, the path must be an official wireless Android-to-smart-TV path (Wi-Fi Display / Miracast-class Presentation and/or Google Cast — which of those to ship is not yet chosen). Unofficial or commercial Android AirPlay senders are not the fulfilment path. Official wired HDMI / USB-C Presentation exists, but it is not the chosen first-release fulfilment. Technical detail is in [`docs/development.md`](development.md).
-- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. Share-screen is a local display connection, not sharing of metadata.
-- The external display should show 現時賽果 only. Any other page, including settlement, must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
@@ -27,11 +24,22 @@ These rules apply to the first release. They are 麻雀諗 product decisions, no
 
 ## First release and second release
 
-The first release has exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules listed above.
+The first release develops the point-counter / table scorekeeper features: exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules listed above that are not about external display / wireless TV.
 
 Same-functionality includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot, including cases whose formulas were later demonstrated and are now recorded in `docs/guide.md`. It also includes the reference’s other regional rule categories and the utilities: statistics, titles, a radar chart, a dice utility, and fan-help. Formulas and tables that are still not demonstrated remain **unspecified** and must not be invented.
 
-A second release is for extra features: anything beyond that same-functionality first release.
+The second release is the wireless connection to a smart TV, together with the related external-display product rules:
+
+- The plan is to show the scoreboard on a smart TV wirelessly, on both iOS and Android. This is second-release work, not first-release fulfilment.
+- On iOS / iPhone, the path is AirPlay, showing unique 現時賽果 only (not only a phone-UI mirror).
+- On Android, the path must be an official wireless Android-to-smart-TV path (Wi-Fi Display / Miracast-class Presentation and/or Google Cast — which of those to ship is not yet chosen). Unofficial or commercial Android AirPlay senders are not the fulfilment path.
+- Official wired HDMI / USB-C Presentation exists, but it is not the chosen fulfilment.
+- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. Share-screen is a local display connection, not sharing of metadata.
+- The external display should show 現時賽果 only. Any other page, including settlement, must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
+
+Open technical decisions about the Android wireless path, Cast hosting, TV classes, the system picker, and connection-drop / no-mirror fallback belong to second-release planning, not first-release blockers. Details are in [`docs/development.md`](development.md).
+
+Other extra features beyond that first-release point-counter scope can also come in a later release.
 
 Visual design and navigation remain to be designed later. Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md).
 
