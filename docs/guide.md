@@ -20,6 +20,7 @@ The following points are decided:
 - The app has no ads.
 - The UI/UX is distinct, and is not a copy of the existing iPhone app 麻將計數機.
 - The app supports showing the scoreboard on a larger screen through a projector or external display, via AirPlay or another similar path.
+- The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 
 Platform list, visual design, navigation, and scoring rules beyond this direction are unspecified.
 
