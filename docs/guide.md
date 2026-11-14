@@ -28,14 +28,24 @@ The following points are decided:
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
-- The first release supports Hong Kong Mahjong only. Other regional categories, including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將, are omitted.
-- The first release includes statistics, titles, a radar chart, a dice utility, and fan-help. Formulas, award rules, radar weights, and help contents that were not established in the local reference remain unspecified.
+- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, and Jackpot, even when some formulas were not demonstrated and remain unspecified (those formulas must not be invented). It also includes the reference’s rule categories (including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將) and utilities (statistics, titles, a radar chart, a dice utility, and fan-help). The already-decided 麻雀諗 product rules in the list above are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; no metadata sharing; and the required AirPlay / share-screen external display.
+- A second release is for extra features: anything beyond that same-functionality first release.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
 - Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in the sections below. Behavior that was not found in the reference remains unspecified.
 
 Visual design, navigation, and the technical approach for building the iOS and Android apps are unspecified.
+
+## First release and second release
+
+The first release should have exactly the same functionality as the local reference, together with the already-decided 麻雀諗 product rules listed above. Those product rules are not extra features and are not postponed to a later release.
+
+Same-functionality here means the scoring, session, settings, statistics, titles, radar chart, dice utility, fan-help, and other behaviors established in the local reference, including options whose formulas were not demonstrated. Those undemonstrated formulas stay **unspecified** and must not be invented. The first release does not copy the reference UI.
+
+The already-decided 麻雀諗 product rules that apply in the first release are: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data with all in-game records kept across sessions; no sharing of metadata or session data; and the required AirPlay / share-screen external display.
+
+A second release is for extra features: anything beyond that same-functionality first release.
 
 ## How screens and functions fit together
 
@@ -126,9 +136,9 @@ Visible Hong Kong preset minimum and cap amounts:
 | 一二蚊 辣辣上 | 3 fan | 32 | 8 fan | 1024 |
 | 3番4 半辣上（三人） | 3 fan | 3 | 8 fan | 24 |
 
-The first release of 麻雀諗 supports Hong Kong Mahjong only. Other regional categories appear in the reference (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) but are omitted from the first release.
+The first release includes the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) as part of the same-functionality scope. Detailed scoring for those categories was not established in the reference, remains **unspecified**, and must not be invented.
 
-**Unspecified:** saved-rule rename, delete, name-length, and duplicate-name behavior.
+**Unspecified:** saved-rule rename, delete, name-length, and duplicate-name behavior; and the detailed scoring tables and payout rules for those other regional categories.
 
 ### Player count and payment mode
 
@@ -137,7 +147,9 @@ The first release of 麻雀諗 supports Hong Kong Mahjong only. Other regional c
 - Player count is a format choice of four-player (四人麻雀) or three-player (三人麻雀), and is separate from how many people are on the session roster. Only four-player scoring was fully demonstrated.
 - Payment modes in the reference include 全銃 and 半銃. Under demonstrated 全銃, an ordinary discard win transfers only the configured ordinary-win amount from the discarder to the winner; the other seated players are unchanged for that hand.
 
-**Unspecified:** 半銃 payer split, rounding, and interaction with special cases; detailed three-player layout, score-table construction, and self-draw allocation; and whether first-release 麻雀諗 keeps 半銃 as a visible option.
+The first release includes 半銃 as a visible option, even though its calculation was not demonstrated.
+
+**Unspecified:** 半銃 payer split, rounding, and interaction with special cases; and detailed three-player layout, score-table construction, and self-draw allocation. These formulas must not be invented.
 
 ### Fan range and the score table
 
@@ -169,7 +181,9 @@ Example of the self-draw derivation: 512 × 1.50 = 768 total; 256 paid by each o
 
 **Taken from the local reference:** Jackpot is an optional shared pool. When it is enabled, the rules specify how much each player contributes to the pool on a drawn hand. The demonstrated scoring sequence had Jackpot off.
 
-**Unspecified:** default on/off and default contribution amount; how the pool is displayed, awarded, withdrawn, or settled; and whether first-release 麻雀諗 keeps Jackpot as a visible option.
+The first release includes Jackpot as a visible option, even though award and distribution were not demonstrated.
+
+**Unspecified:** default on/off and default contribution amount; and how the pool is displayed, awarded, withdrawn, or settled. These formulas must not be invented.
 
 ### Dealer, wind, and session progress
 
@@ -225,7 +239,9 @@ Total received 128 + 4 + 256 = 388, matching b’s loss. The increments correspo
 
 After confirmation, running totals, session progress, statistics, and the hand history update.
 
-**Unspecified:** 詐糊 penalty, who pays whom, and effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸; whether first-release 麻雀諗 keeps 詐糊 and 出銃者包自摸 as visible options; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局.
+The first release includes 詐糊 and 出銃者包自摸 as visible options, even though their formulas were not demonstrated.
+
+**Unspecified:** 詐糊 penalty, who pays whom, and effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局. The undemonstrated formulas must not be invented.
 
 ### Undo
 
@@ -278,7 +294,7 @@ How the final settlement is presented on a connected external display is left to
 
 ## Statistics, titles, radar, dice, and fan-help
 
-These features are in the first release. Layout and visual design are left to later AI design. This section records established behavior, not a UI to copy.
+These utilities are part of the same-functionality first release, not extra features for a later release. Layout and visual design are left to later AI design. This section records established behavior, not a UI to copy.
 
 **Taken from the local reference:**
 
@@ -308,11 +324,11 @@ Settings follow the local reference. This is a behavior and options inventory, n
 |---|---|---|
 | 玩法名稱 | Name of this rules setup | Demonstrated default: 新玩法 |
 | 人數 | Game format: 四人麻雀 or 三人麻雀 | In the demonstrated custom-setup flow, four-player remained selected. Not independently labelled as a global product default. |
-| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. 半銃 is offered, but its calculation is unspecified. Whether first-release 麻雀諗 keeps 半銃 as a visible option is also unspecified. | In the demonstrated custom-setup flow, 全銃 remained selected. Not independently labelled as a global default. |
+| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. 半銃 is included in the first release as a visible option, but its calculation is unspecified and must not be invented. | In the demonstrated custom-setup flow, 全銃 remained selected. Not independently labelled as a global default. |
 | 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. In the custom-setup demonstration the cap is first seen at 8 and is then moved to 9 and 10; the minimum stays at 3. Allowed endpoints are unspecified. |
 | 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section. |
 | 自摸分數 | Displayed self-draw total, derived from the ordinary amount | Displayed multiplier ×1.50 in verified examples. Whether the multiplier can be edited is unspecified. |
-| Jackpot 啟用 | Optional shared pool associated with drawn hands. Whether first-release 麻雀諗 keeps this as a visible option is unspecified. | Default not stated. |
+| Jackpot 啟用 | Optional shared pool associated with drawn hands. Included in the first release as a visible option. Award and distribution remain unspecified and must not be invented. | Default not stated. |
 | 流局時每位玩家須付彩池 | When Jackpot is on: numeric contribution each player owes the pool on a drawn hand | Default amount not stated. The field is hidden when Jackpot is off. Decimal and rounding rules are unspecified. |
 | 紀錄莊家及圈風 | Enable dealer and circle/wind progress tracking (does not change score-table amounts) | Default not stated. Enabled in the played reference session. |
 | 流局時過莊 | When dealer/wind tracking is on: whether the dealer passes on a drawn hand | Default not stated. Enabled in the demonstrated configuration. Off-state is unspecified. |
@@ -352,11 +368,11 @@ The local reference does not demonstrate live external-display behavior. The sha
 
 ## Unanswered questions
 
-These decisions are still open and should be specified before implementation is treated as complete:
+These decisions are still open and should be specified before implementation is treated as complete. The first release still includes the corresponding options and categories; the gaps below are missing formulas or flows, not a decision to omit the feature.
 
 1. 半銃 calculation (payer split, rounding, and interaction with self-draw, 一炮多響, 出銃者包自摸, and three-player play).
-2. Whether first-release 麻雀諗 keeps 半銃, 詐糊, 出銃者包自摸, and Jackpot as visible options.
-3. Three-player scoring details (layout, score table, self-draw allocation, and the three-player preset table).
+2. Three-player scoring details (layout, score table, self-draw allocation, and the three-player preset table).
+3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將).
 4. 詐糊 penalty, who pays whom, and effects on dealer progress and statistics.
 5. 出銃者包自摸 eligible situations and exact calculation.
 6. Jackpot award, balance, withdrawal, and settlement behavior, plus default on/off and default contribution.

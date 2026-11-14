@@ -16,8 +16,8 @@ Product direction as of 14 November 2026:
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
-- The first release supports Hong Kong Mahjong only. Other regional categories are omitted.
-- The first release includes statistics, titles, a radar chart, a dice utility, and fan-help. Formulas and award rules that were not established in the local reference remain unspecified.
+- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, and Jackpot, even when some formulas were not demonstrated and remain unspecified (those formulas must not be invented). It also includes the reference’s rule categories and utilities, including statistics, titles, a radar chart, a dice utility, and fan-help. The already-decided 麻雀諗 product rules in the bullets above are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; no metadata sharing; and the required AirPlay / share-screen external display.
+- A second release is for extra features: anything beyond that same-functionality first release.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
