@@ -129,6 +129,37 @@ export function seatedPlayerIds(session: Session): string[] {
   return session.seats.flatMap((seat) => (seat.playerId ? [seat.playerId] : []));
 }
 
+const WIND_ORDER: Wind[] = ['east', 'south', 'west', 'north'];
+
+/** One step of 圈風: 東風, 南風, 西風, 北風, then the next round's 東風. */
+export function stepWind(roundWind: Wind, seatWind: Wind): { roundWind: Wind; seatWind: Wind } {
+  const seatIndex = WIND_ORDER.indexOf(seatWind);
+  if (seatIndex >= 0 && seatIndex < WIND_ORDER.length - 1) {
+    return { roundWind, seatWind: WIND_ORDER[seatIndex + 1] };
+  }
+  const roundIndex = WIND_ORDER.indexOf(roundWind);
+  const nextRound = WIND_ORDER[(roundIndex + 1) % WIND_ORDER.length] ?? 'east';
+  return { roundWind: nextRound, seatWind: 'east' };
+}
+
+/**
+ * A dealer win keeps the same 莊 and raises 連N.
+ * 圈風 stays on 東, 南, and 西. A win as 北 莊 moves to the next round's 東風.
+ */
+export function retainDealer(session: Session): Pick<BoardState, 'dealerId' | 'dealerMark' | 'roundWind' | 'seatWind'> {
+  const winds =
+    session.seatWind === 'north'
+      ? stepWind(session.roundWind, session.seatWind)
+      : { roundWind: session.roundWind, seatWind: session.seatWind };
+  const count = session.dealerMark.kind === 'consecutive' ? session.dealerMark.count + 1 : 1;
+  return {
+    dealerId: session.dealerId,
+    dealerMark: { kind: 'consecutive', count },
+    roundWind: winds.roundWind,
+    seatWind: winds.seatWind,
+  };
+}
+
 export function formatWind(roundWind: Wind, seatWind: Wind): string {
   return `${WIND_LABEL[roundWind]}圈${WIND_LABEL[seatWind]}風`;
 }

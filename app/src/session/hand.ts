@@ -1,6 +1,6 @@
 import { formatAmount, formatMultiplier } from '../rules/setup.ts';
 import { Score } from '../score/score.ts';
-import { commitBoard, seatedPlayerIds } from './session.ts';
+import { commitBoard, retainDealer, seatedPlayerIds } from './session.ts';
 import type { Session } from './types.ts';
 
 export type WinInput = {
@@ -49,7 +49,7 @@ export function formatWinPreview(preview: WinPreview): string[] {
   return [`${formatAmount(preview.ordinary)} × ${formatMultiplier(multiplier)}`, `總分 ${formatAmount(preview.total)}`];
 }
 
-/** Confirms a preview. 莊, 圈風, and the Jackpot pool stay as they are. */
+/** Confirms a preview. A dealer win keeps 莊. Passing 莊 is a later step. The Jackpot pool stays as it is. */
 export function recordWin(session: Session, input: WinInput): Session {
   const preview = previewWin(session, input);
   if (!preview) return session;
@@ -70,13 +70,22 @@ export function recordWin(session: Session, input: WinInput): Session {
     };
   });
   const label = preview.kind === 'multi' ? '一炮多響' : preview.kind === 'self-draw' ? `${preview.fan}番 自摸` : `${preview.fan}番 食糊`;
+  const dealerWins = preview.kind !== 'multi' && session.rules.trackDealer && preview.winnerId === session.dealerId;
+  const dealer = dealerWins
+    ? retainDealer(session)
+    : {
+        dealerId: session.dealerId,
+        dealerMark: session.dealerMark,
+        roundWind: session.roundWind,
+        seatWind: session.seatWind,
+      };
   return commitBoard(session, label, {
     players,
     seats: session.seats,
-    dealerId: session.dealerId,
-    dealerMark: session.dealerMark,
-    roundWind: session.roundWind,
-    seatWind: session.seatWind,
+    dealerId: dealer.dealerId,
+    dealerMark: dealer.dealerMark,
+    roundWind: dealer.roundWind,
+    seatWind: dealer.seatWind,
     handCount: session.handCount + 1,
     pool: session.pool,
   });

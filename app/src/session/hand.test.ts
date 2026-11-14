@@ -12,7 +12,8 @@ import {
   setPlayerFormat,
 } from '../rules/setup.ts';
 import { formatWinPreview, previewWin, recordWin } from './hand.ts';
-import { addReserve, commitBoard, formatWind, startSession, undoLatest } from './session.ts';
+import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, undoLatest } from './session.ts';
+import type { Wind } from './types.ts';
 
 const startedAt = '2026-11-15T02:00:00.000Z';
 
@@ -263,6 +264,40 @@ describe('一炮多響', () => {
   });
 });
 
+describe('連莊', () => {
+  it('raises 連1, 連2, and 連3 while the dealer keeps winning on the same 圈風', () => {
+    let session = withDealer(four('custom'), '丁家');
+    for (const mark of ['連1', '連2', '連3']) {
+      session = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 3, discarderId: idOf(session, '甲家') });
+      assert.equal(session.dealerId, idOf(session, '丁家'));
+      assert.equal(formatDealerBadge(session.dealerMark), mark);
+      assert.equal(formatWind(session.roundWind, session.seatWind), '東圈東風');
+    }
+    const restored = undoLatest(session);
+    assert.equal(formatDealerBadge(restored.dealerMark), '連2');
+    assert.equal(restored.dealerId, idOf(restored, '丁家'));
+  });
+
+  it('leaves a three-player dealer 自摸 on the same 圈風 with 連1', () => {
+    const session = withDealer(startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']), '乙家');
+    const next = recordWin(session, { winnerId: idOf(session, '乙家'), fan: 4, discarderId: null });
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '連1');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
+    assert.equal(balance(next, '乙家'), '8');
+    assert.equal(balance(next, '甲家'), '-4');
+    assert.equal(balance(next, '丙家'), '-4');
+  });
+
+  it('keeps the dealer and moves 北 莊 to the next round’s 東風', () => {
+    const session = withDealer(four('custom'), '丁家', 'east', 'north');
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 3, discarderId: idOf(session, '甲家') });
+    assert.equal(next.dealerId, idOf(next, '丁家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '連1');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '南圈東風');
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');
@@ -279,6 +314,19 @@ describe('undo of a confirmed win', () => {
     assert.deepEqual(restored.ledger, []);
   });
 });
+
+function withDealer(session: ReturnType<typeof startNamed>, name: string, roundWind: Wind = 'east', seatWind: Wind = 'east') {
+  return commitBoard(session, '莊', {
+    players: session.players,
+    seats: session.seats,
+    dealerId: idOf(session, name),
+    dealerMark: { kind: 'plain' },
+    roundWind,
+    seatWind,
+    handCount: session.handCount,
+    pool: session.pool,
+  });
+}
 
 function four(kind: 'custom' | '51', rules = kind === '51' ? createPresetDraft('51-full') : createCustomDraft()) {
   return startNamed(rules, ['甲家', '乙家', '丙家', '丁家']);
