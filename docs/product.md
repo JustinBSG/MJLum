@@ -4,22 +4,50 @@ The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum
 
 麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game.
 
-Product direction as of 14 November 2026:
+This file is the short product-direction summary as of 14 November 2026. Detailed scoring and session behaviour is in [`docs/guide.md`](guide.md). The feature inventory is in [`docs/features.md`](features.md). Demonstrated controls are in [`docs/controls.md`](controls.md). Handover flows are in [`docs/flows.md`](flows.md). How facts are labelled is explained in [`docs/README.md`](README.md).
+
+## Already-decided 麻雀諗 product rules
+
+These rules apply to the first release. They are 麻雀諗 product decisions, not extra features postponed to a later release:
 
 - The app is a cross-platform mobile app. First-release platforms are iOS and Android.
 - The app has no ads.
 - At the current stage the app is completely free.
 - The UI/UX is distinct, and is not a copy of the existing iPhone app 麻將計數機.
-- All UI/UX should be designed by AI. AI should follow the product guide to design the most user-friendly UI/UX, and should use https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
+- All UI/UX should be designed by AI. AI should follow the product documents to design the most user-friendly UI/UX, and should use https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. This pass does not include those designs.
 - The app supports showing the scoreboard on a larger screen through a projector or external display. This is required on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported, but AirPlay is a must.
-- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle.
-- The external display should show 現時賽果 only. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
+- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. Share-screen is a local display connection, not sharing of metadata.
+- The external display should show 現時賽果 only. Any other page, including settlement, must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
-- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot, even when some formulas were not demonstrated and remain unspecified (those formulas must not be invented). It also includes the reference’s rule categories and utilities, including statistics, titles, a radar chart, a dice utility, and fan-help. The already-decided 麻雀諗 product rules in the bullets above are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; no metadata sharing; and the required AirPlay / share-screen external display. Further 麻雀諗 product decisions, recorded in `docs/guide.md` and not as reference-established fact, are: title-award rules derived from the meaning of each badge; a radar-chart mapping from 食糊率, 自摸率, and 出銃率; and settlement that shows the session result and lets the user finish payment themselves, without a transfer-choice algorithm.
-- A second release is for extra features: anything beyond that same-functionality first release.
-- The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
-- The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
-- Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in `docs/guide.md`. Additional demonstrated detail now recorded there includes the four-player 半銃 discard-win split, a 半銃 一炮多響 example, a 詐糊 settlement with 詐糊賠位自摸 off, the 五一辣辣上 score table through 13 fan, and Jackpot defaults in rule setup. 麻雀諗 product decisions for title awards, the radar-chart mapping, and settlement-as-result-only are also recorded there and must not be treated as reference-established fact. Behavior that was not found in the reference and has not been decided remains unspecified.
+- The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
+- The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool.
+
+## First release and second release
+
+The first release has exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules listed above.
+
+Same-functionality includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot, including cases whose formulas were later demonstrated and are now recorded in `docs/guide.md`. It also includes the reference’s other regional rule categories and the utilities: statistics, titles, a radar chart, a dice utility, and fan-help. Formulas and tables that are still not demonstrated remain **unspecified** and must not be invented.
+
+A second release is for extra features: anything beyond that same-functionality first release.
+
+Visual design, navigation, and the technical approach for building the iOS and Android apps are unspecified. Do not record a technical stack in these documents.
+
+## Further 麻雀諗 product decisions
+
+These are also 麻雀諗 product decisions, not reference-established fact. The exact wording and any remaining gaps are in `docs/guide.md`.
+
+- **Titles:** 食糊王, 自摸王, and 出銃王 go to every player tied for the highest count of that event, if that count is at least 1. 大牌王 and 細牌王 go to the highest and lowest 平均番數 among players with at least one 食糊 (the same player may hold both if those averages are equal). 陪跑員 goes to every player who holds none of 食糊王, 自摸王, 出銃王, or 大牌王. Holding 細牌王 does not prevent 陪跑員. Titles are not automatically exclusive. How 平均番數 is computed stays unspecified unless a demonstration printed a denominator (it did not).
+- **Radar:** 0–100, no extra weights. 進攻 = 食糊率, 牌力 = 自摸率, 防守 = 100 − 出銃率. A missing rate is 0 on that axis. Rate denominators stay unspecified (they were not printed).
+- **找數:** shows each player’s net balance, including anyone on the roster with a non-zero balance. The user finishes payment themselves. No payment instructions, transfer-choice algorithm, tie-breaking, or currency label. The reference’s demonstrated transfer list stays in `docs/guide.md` as what the reference showed, not as a 麻雀諗 requirement. How a Jackpot pool would appear in this result view remains unspecified.
+- **Dice:** only a roll so players can see where they start collecting tiles from the four walls (bridges) in real life. Minimum 1 die, maximum 9 dice. The roll does not assign the dealer or write scores. The purpose text is not on-screen copy from the reference. The demonstrated reference UI is recorded in `docs/guide.md`.
+- **滿糊:** in the local reference, the slider’s right end is 13, there is no 14番 row, and no out-of-range typed entry was shown. For 麻雀諗, 滿糊 is user-decidable and may be set above 13; money for 番 above 13 should be calculated. Do not invent the exact progression above 13. Use the demonstrated tables in `docs/guide.md` only where they were recorded.
+- **番數?:** not a separate page. It is opened from the 食糊! dialog by the circled ? beside 番數. The full reference-demonstrated help text is only: title 現時設定下; body 這裏只需輸入牌型番數 (這裏 uses 裏 U+88CF, not 這裡). That is the entire help. This help text is reference-demonstrated, not a 麻雀諗 invention.
+
+## Scoring and settings
+
+Scoring, session, and settings behaviour follow the local reference where that behaviour is established, as recorded in `docs/guide.md`. That file now includes the demonstrated four-player 半銃 splits (including when F is not divisible by 4), 半銃 自摸 and an editable self-draw multiplier, 半銃 一炮多響, 詐糊 with 詐糊賠位自摸 off and on, 出銃者包自摸 and 出銃者包輸, the demonstrated 辣辣上 and 半辣上 tables, custom 新玩法 edit and delete behaviour, 起糊 down to 0, Jackpot 流局 contributions, 贏取Jackpot, 平分Jackpot, 莊 / 連莊 / 過莊, 流局時過莊 on and off, demonstrated three-player settlements, statistics fields, and the dice UI.
+
+Behaviour that was not found in the reference and has not been decided remains unspecified.
