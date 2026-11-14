@@ -2,7 +2,7 @@
 
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
-This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 14 November 2026, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
+This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 15 November 2026, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
 
 Scoring, session, and settings behaviour that is marked **taken from the local reference** (reference-demonstrated) is established by that reference and should be followed. **麻雀諗 product decisions** are decided for this app and must not be treated as reference-established fact. Behaviour that was not found in the reference and has not been decided is marked **unspecified** and must not be invented. This document does not copy a competitor UI. Ads that appear in the local reference are the reference app’s, not 麻雀諗 features.
 
@@ -12,7 +12,7 @@ Scoring, session, and settings behaviour that is marked **taken from the local r
 
 麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game: it does not deal, draw, or display a playable wall of tiles, and it is not meant to replace physical tiles at the table.
 
-Players use the app to keep and show scores during a live game. The scoreboard can also be shown on a larger screen through a projector or external display.
+Players use the app to keep and show scores during a live game. In the second release, the scoreboard can also be shown on a smart TV wirelessly.
 
 ## Decided product direction
 
@@ -23,43 +23,40 @@ The following points are decided:
 - At the current stage the app is completely free.
 - The UI/UX is distinct, and is not a copy of the existing iPhone app 麻將計數機.
 - All UI/UX should be designed by AI. AI should follow this guide to design the most user-friendly UI/UX, and should use https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. This is a design-process decision; this document does not include those designs.
-- The app supports showing the scoreboard on a larger screen through a projector or external display. This is required on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported, but AirPlay is a must.
-- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle.
-- The external display should show 現時賽果 only. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
-- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. The first release also includes the reference’s rule categories (including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將) and utilities (statistics, titles, a radar chart, a dice utility, and fan-help). The already-decided 麻雀諗 product rules in the list above are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; no metadata sharing; and the required AirPlay / share-screen external display.
-- A second release is for extra features: anything beyond that same-functionality first release.
+- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. The first release also includes the reference’s rule categories (including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將) and utilities (statistics, titles, a radar chart, a dice utility, and fan-help). The already-decided 麻雀諗 product rules in the list above that are not about external display / wireless TV are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; and no metadata sharing.
+- The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section. Other extra features beyond the first-release point-counter scope can also come in a later release.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
-- The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
+- The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
 - Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in the sections below. Behavior that was not found in the reference remains unspecified.
 
 Visual design, navigation, and the technical approach for building the iOS and Android apps are unspecified.
 
 ## First release and second release
 
-The first release should have exactly the same functionality as the local reference, together with the already-decided 麻雀諗 product rules listed above. Those product rules are not extra features and are not postponed to a later release.
+The first release develops the point-counter / table scorekeeper features: exactly the same functionality as the local reference, together with the already-decided 麻雀諗 product rules listed above that are not about external display / wireless TV.
 
 Same-functionality here means the scoring, session, settings, statistics, titles, radar chart, dice utility, fan-help, and other behaviors established in the local reference, including options whose formulas were not demonstrated. Those undemonstrated formulas stay **unspecified** and must not be invented. The first release does not copy the reference UI.
 
-The already-decided 麻雀諗 product rules that apply in the first release are: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data with all in-game records kept across sessions; no sharing of metadata or session data; and the required AirPlay / share-screen external display.
+The already-decided 麻雀諗 product rules that apply in the first release are: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data with all in-game records kept across sessions; and no sharing of metadata or session data.
 
-A second release is for extra features: anything beyond that same-functionality first release.
+The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section. Other extra features beyond that first-release point-counter scope can also come in a later release.
 
 ## How screens and functions fit together
 
 The following function areas are planned so the app can serve as a table scorekeeper. Screen names, information architecture, and how the user moves between them are **unspecified**. UI/UX for these areas is to be designed later by AI, following this guide and using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
 
-- **Scoreboard / table view:** planned as the in-app view that shows current scores. Other pages are opened in the app to check; the external display shows 現時賽果 only.
+- **Scoreboard / table view:** planned as the in-app view that shows current scores. Other pages are opened in the app to check. In the second release, the external display shows 現時賽果 only.
 - **Session and scoring entry:** planned as the way players start or continue a game and record scoring events. Scoring and session behavior that was taken from the local reference is recorded below.
 - **Settlement:** a user-requested view of current net session balances. 麻雀諗 shows those results and lets the user finish payment themselves (product decision). Details are in the Settlement section.
 - **Statistics, titles, and radar chart:** included in the first release. Session-wide statistics follow the local reference where that behaviour is established. Title-award rules and the radar mapping are 麻雀諗 product decisions, recorded below. Rate denominators and the 平均番數 formula remain unspecified.
 - **Dice utility and fan-help:** included in the first release. These are table utilities; their established behaviour, the 麻雀諗 dice purpose, and the demonstrated 番數? text are recorded below.
 - **Sharing of metadata or session data:** not supported. The app is a simple local tool and does not share results, history, player information, settlement, or other session information.
 - **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only.
-- **External display:** planned as a projector or larger-screen display of 現時賽果 only, on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified.
+- **External display (second release):** planned as a wireless connection to a smart TV, showing 現時賽果 only, on iOS and Android. On iOS / iPhone the path is AirPlay for unique 現時賽果. On Android the path must be an official wireless path (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified. Technical detail is in `docs/development.md`.
 - **History:** the app keeps all in-game records across sessions, stored locally only. How the user browses, resumes, or deletes past sessions is unspecified, except that storage is local only and should be kept light.
 
 No wireframes, component list, or visual style are specified in this document on purpose.
@@ -70,13 +67,13 @@ Intended use, at a high level:
 
 1. People play Hong Kong Mahjong in person with physical tiles.
 2. One device at the table is used to keep the table's scores in 麻雀諗. The recorder enters who won, the fan value, and how the win happened; the app applies the chosen score table.
-3. Optionally, 現時賽果 is shown on a larger screen through a projector or external display. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check. AirPlay is required for this; another similar path is welcome if it is supported.
+3. Optionally, in the second release, 現時賽果 is shown on a smart TV wirelessly. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check.
 
 Detailed first-run, player-setup, and in-game screen layout are **unspecified** and are left to later AI UI/UX design, following this guide. End-to-end functional flows, with demonstrated numbers to check against, are in `docs/flows.md`.
 
 ## Platforms
 
-First-release platforms are iOS and Android. Projector and external-display support is required on all first-release platforms.
+First-release platforms are iOS and Android. Wireless connection to a smart TV is second-release work, not first-release fulfilment.
 
 The technical approach for building the iOS and Android apps is **unspecified**.
 
@@ -481,7 +478,7 @@ The transfer list above is what the local reference demonstrated. It is not a �
 
 **麻雀諗 product decision (14 November 2026):** settlement (找數) should show the session result — each player’s net balance, including anyone on the roster who still has a non-zero balance — and let the user finish the payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out. How a Jackpot pool would appear in this result view remains unspecified.
 
-Settlement is checked in the app, not on the external display. The external display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
+Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
 ## Statistics, titles, radar, dice, and fan-help
 
@@ -546,7 +543,7 @@ Use the displayed rates as they are. If a rate is not yet available, that axis i
 
 The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool.
 
-The share-screen control for an external display is a local display connection, not sharing of metadata. Do not add result-card, profile, or settlement sharing.
+The second-release share-screen control for an external display is a local display connection, not sharing of metadata. Do not add result-card, profile, or settlement sharing.
 
 ## Settings
 
@@ -584,23 +581,25 @@ After configuration, the setup is confirmed. An edited-preset path may offer to 
 
 ## External display
 
-External-display support is a decided product requirement: 現時賽果 can be shown on a larger screen through a projector or external display.
+External-display support is a decided 麻雀諗 product requirement for the **second release**, not first-release fulfilment: 現時賽果 can be shown on a smart TV wirelessly.
 
-The following are decided:
+The following are decided for the second release:
 
-- This is required on all first-release platforms (iOS and Android).
-- AirPlay is required. Another similar path is welcome if it is supported, but AirPlay is a must.
-- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle.
+- The plan is a wireless connection to a smart TV, on both iOS and Android.
+- On iOS / iPhone, the path is AirPlay, showing unique 現時賽果 only (not only a phone-UI mirror).
+- On Android, the path must be an official wireless Android-to-smart-TV path (Wi-Fi Display / Miracast-class Presentation and/or Google Cast — which of those to ship is not yet chosen). Unofficial or commercial Android AirPlay senders are not fulfilment.
+- Official wired HDMI / USB-C Presentation exists, but it is not the chosen fulfilment.
+- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. Share-screen is a local display connection, not sharing of metadata.
 - The external display should show 現時賽果 only. Any other page must be opened in the app to check.
 - The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display.
 - The look of that 現時賽果 display is left to later AI design.
 
-The following are still **unspecified**:
+The following are still **unspecified** (second-release planning, not first-release blockers):
 
 - What happens if the external display disconnects during a session
-- Which other similar path, if any, ships in addition to AirPlay
+- Which official Android wireless path to ship (Miracast-class Presentation, Cast, or both), and the other open technical decisions recorded in `docs/development.md`
 
-The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above remain the decided 麻雀諗 display model.
+The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above remain the decided 麻雀諗 display model for the second release. Technical detail is in `docs/development.md`.
 
 ## Unanswered questions
 
@@ -636,7 +635,7 @@ Still open:
 13. On-state behaviour of new-session reuse options (retain players and/or rules).
 14. Exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, the 平均番數 formula, and how 冧莊王 is awarded. (Title awards, the radar-chart mapping, dice min/max and purpose, and the 番數? text are now recorded.)
 15. Special abortive-hand types or reason codes beyond the demonstrated 流局.
-16. What happens if the external display disconnects during a session.
+16. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 17. What technical approach will be used to build the iOS and Android apps? Do not record a stack here until it is decided.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.

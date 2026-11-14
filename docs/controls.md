@@ -6,6 +6,8 @@ Confirm score changes on a stable board after a confirmation completes. Do not t
 
 Ads, store-rating prompts, and similar promotional surfaces that appear in the local reference are the reference app’s. They are not 麻雀諗 controls or features.
 
+The share-screen button and the External display section below are second-release work, not first-release fulfilment.
+
 ## Rule setup (玩法設定)
 
 | Control | What it does |
@@ -57,13 +59,13 @@ Ads, store-rating prompts, and similar promotional surfaces that appear in the l
 | 詳細紀錄 | Ledger of recorded hands/events. Can emphasize events, scores, or a combined view, and can be shown in forward or reverse order. During a demonstrated 流局時過莊-off sequence, the 分數 tab stayed in 東圈1. |
 | 統計數據 | Session-wide statistics, titles, and radar. Includes everyone on the roster. Fields are in `docs/guide.md`. |
 | On-board Jackpot amount | Tapping the pool amount opens 請選擇 → 平分Jackpot → 平分給哪些玩家？ (在位玩家), then confirm. A demonstrated all-four split of 200 paid 50 to each player and cleared the pool to 0, leaving 莊 and 圈風 unchanged. Confirmed subset splits remain unspecified. |
-| 找數 | Opens settlement. In 麻雀諗 this shows net balances only; see `docs/guide.md`. Checked in the app, not on the external display. |
+| 找數 | Opens settlement. In 麻雀諗 this shows net balances only; see `docs/guide.md`. Checked in the app, not on a second-release external display. |
 | 莊家設定 | Manually selects the current dealer. |
 | 重置連莊數 | When setting the dealer manually, can reset the consecutive-dealer count. Shown on in the inspected reference dialog; downstream count behaviour was not independently tested. |
 | 重新開始計算圈風 | When setting the dealer manually, can restart circle/wind counting. Shown off in the inspected reference dialog; on-state remains unspecified. |
 | 進度顯示方式: 圈風 / 局數 | Display choice for session progress; it does not itself change scores. |
 | 擲骰 | Opens the dice utility. See below. |
-| Share-screen button | Starts a local external-display connection; pressing the same button again ends it. The external display shows 現時賽果 only. |
+| Share-screen button (second release) | Starts a local external-display connection; pressing the same button again ends it. The external display shows 現時賽果 only. This control is second-release work, not first-release fulfilment. |
 
 ## Dice (擲骰)
 
@@ -76,6 +78,6 @@ Demonstrated reference UI, not a layout to copy:
 
 **麻雀諗 product decision:** the roll is only so players can see where they start collecting tiles from the four walls (bridges) in real life. It does not assign the dealer or write scores. That purpose sentence is not on-screen copy from the reference.
 
-## External display
+## External display (second release)
 
-There are no separate controls on the external display. The only connection control is the in-app share-screen button. The external surface shows 現時賽果 only; any other page is opened in the app.
+This section is second-release work, not first-release fulfilment. There are no separate controls on the external display. The only connection control is the in-app share-screen button. The external surface shows 現時賽果 only; any other page is opened in the app.
