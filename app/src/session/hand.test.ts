@@ -391,6 +391,55 @@ describe('詐糊', () => {
     assert.equal(balance(next, '丙家'), '32');
   });
 
+  it('multiplies each payment when 詐糊賠位自摸 is on and passes 莊 from the dealer', () => {
+    const rules = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
+    const seated = startSession({
+      rules,
+      names: ['丁家', '丙家', '甲家', '乙家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const session = withBalances(seated, { 甲家: '-3.75', 乙家: '-3.75', 丙家: '-135.5', 丁家: '143' });
+    const input = {
+      winnerId: idOf(session, '丁家'),
+      fan: 13,
+      discarderId: null,
+      falseWin: true,
+      falseWinAsSelfDraw: true,
+    };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['-16384 × 1.50 × 3', '總分 -73728']);
+
+    const next = recordWin(session, input);
+    assert.equal(formatAmount(balance(next, '甲家')), '24572.25');
+    assert.equal(formatAmount(balance(next, '乙家')), '24572.25');
+    assert.equal(formatAmount(balance(next, '丙家')), '24440.5');
+    assert.equal(balance(next, '丁家'), '-73585');
+    assert.equal(balance(next, '甲家'), '98289/4');
+    assert.equal(balance(next, '丙家'), '48881/2');
+    assert.equal(player(next, '丁家').wins, 0);
+    assert.equal(player(next, '丁家').selfDraws, 0);
+    assert.equal(next.dealerId, idOf(next, '丙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
+  });
+
+  it('uses another 自摸倍數 in the 詐糊賠位自摸 total', () => {
+    const rules = setMultiplier(setFanRange(createPresetDraft('51-full'), 3, 13), '2');
+    const session = four('51', rules);
+    const preview = previewWin(session, {
+      winnerId: idOf(session, '甲家'),
+      fan: 13,
+      discarderId: null,
+      falseWin: true,
+      falseWinAsSelfDraw: true,
+    });
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['-16384 × 2.00 × 3', '總分 -98304']);
+    assert.equal(preview.deltas.find((item) => item.playerId === idOf(session, '乙家'))?.delta, '32768');
+  });
+
   it('passes 莊 when the dealer declares 詐糊', () => {
     const session = withDealer(wide51(), '丁家');
     const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 13, discarderId: null, falseWin: true });

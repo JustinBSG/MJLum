@@ -12,6 +12,8 @@ export type WinInput = {
   also?: { playerId: string; fan: number }[];
   /** 詐糊. winnerId is the player who declared the false win. */
   falseWin?: boolean;
+  /** 詐糊賠位自摸. Each other seated player receives the ordinary amount × 自摸倍數. */
+  falseWinAsSelfDraw?: boolean;
 };
 
 export type WinPreview = {
@@ -135,8 +137,9 @@ function holdDraw(session: Session): { dealerId: string | null; dealerMark: Deal
 
 /**
  * Four seated players. 詐糊賠位自摸 off: the false-win player pays the ordinary
- * amount to each other seated player. A dealer 詐糊 passes 莊. A non-dealer
- * 詐糊 does not move 莊; that progression was not recorded.
+ * amount to each other seated player. On: that payment is × 自摸倍數.
+ * A dealer 詐糊 passes 莊. A non-dealer 詐糊 does not move 莊; that progression
+ * was not recorded.
  */
 function falseWin(session: Session, input: WinInput): WinPreview | null {
   if ((input.also?.length ?? 0) > 0) return null;
@@ -147,7 +150,8 @@ function falseWin(session: Session, input: WinInput): WinPreview | null {
   if (seated.length !== 4 || !seated.includes(input.winnerId)) return null;
   const opponents = seated.filter((id) => id !== input.winnerId);
   if (opponents.length !== 3) return null;
-  const perPlayer = Score.fromString(ordinary);
+  const multiplier = input.falseWinAsSelfDraw ? session.rules.multiplier : null;
+  const perPlayer = multiplier ? Score.fromString(ordinary).multiply(Score.fromString(multiplier)) : Score.fromString(ordinary);
   const total = perPlayer.multiply(Score.fromRational(opponents.length, 1));
   return {
     kind: 'false-win',
@@ -156,7 +160,7 @@ function falseWin(session: Session, input: WinInput): WinPreview | null {
     winnerIds: [],
     discarderId: null,
     ordinary,
-    multiplier: null,
+    multiplier,
     total: total.toExact(),
     deltas: [
       { playerId: input.winnerId, delta: negate(total) },
@@ -168,6 +172,9 @@ function falseWin(session: Session, input: WinInput): WinPreview | null {
 function formatFalseWin(preview: WinPreview): string[] {
   const loss = formatAmount(negate(Score.fromString(preview.ordinary)));
   const total = formatAmount(negate(Score.fromString(preview.total)));
+  if (preview.multiplier) {
+    return [`${loss} × ${formatMultiplier(preview.multiplier)} × 3`, `總分 ${total}`];
+  }
   return [`${preview.fan}番分數 詐糊 ${loss} ×3`, `總分 ${total}`];
 }
 
