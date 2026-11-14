@@ -15,7 +15,7 @@ The first release has exactly the same functionality as the local reference, plu
 - Personal/table tool only, not a public store app yet.
 - Local-only data: no backup, no cloud, no account. Keep storage light. Keep all in-game records across sessions, locally.
 - No sharing of metadata or session data (results, history, player information, settlement, or other session information).
-- External display of 現時賽果 only, started and ended with the same in-app share-screen button. AirPlay is required on first-release platforms; another similar path is welcome if supported. Settlement and every other page are opened in the app.
+- External display of 現時賽果 only, started and ended with the same in-app share-screen button. The first-release plan is a wireless connection to a smart TV. iOS / iPhone uses AirPlay for unique 現時賽果. Android uses an official wireless path (Miracast-class Presentation and/or Cast — path not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but it is not the chosen first-release fulfilment. Settlement and every other page are opened in the app. See [`docs/development.md`](development.md) for the technical plan.
 
 ## Scoring and rule setups (reference-demonstrated functionality)
 
@@ -70,9 +70,10 @@ The first release has exactly the same functionality as the local reference, plu
 
 - Share-screen toggle in the app starts and ends a local display connection.
 - The external display shows 現時賽果 only.
-- AirPlay is required; another similar path is welcome if supported.
+- The documented first-release plan is wireless to a smart TV: AirPlay on iOS for unique 現時賽果; an official wireless path on Android (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired Presentation exists, but is not the chosen first-release fulfilment.
 - Behaviour when the connection drops remains unspecified.
 - The look of the 現時賽果 display is left to later AI design.
+- The technical plan is in [`docs/development.md`](development.md).
 
 ## Second release
 

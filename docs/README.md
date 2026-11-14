@@ -2,7 +2,7 @@
 
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
-麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game. These documents are the product and behaviour source a coder should use to start work. Visual UI/UX is to be designed later and is not specified here. No technical stack is recorded in these documents.
+麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game. These documents are the product and behaviour source a coder should use to start work. Visual UI/UX is to be designed later and is not specified here. The recorded development approach — Expo / React Native, the wireless second-screen plan, suggested libraries, and open technical decisions — is in [`docs/development.md`](development.md).
 
 The app name is only 麻雀諗 (the third character is U+8AD7). Use that spelling in the product, in code comments that name the app, and in further documentation.
 
@@ -25,11 +25,12 @@ Ads that appear in the local reference are the reference app’s ads. They are n
 | [guide.md](guide.md) | Scoring, session, settings, statistics, and exact demonstrated numbers. This is the rules source. |
 | [controls.md](controls.md) | What each demonstrated control does. Control names are from the reference, recorded as behaviour, not as a UI to copy. |
 | [flows.md](flows.md) | Handover scenes: end-to-end flows a coder can implement and check against, with the demonstrated numbers to expect. |
+| [development.md](development.md) | Tech and development: the Expo approach, the wireless second-screen plan, suggested libraries, and open technical decisions. |
+| [ui-ux-pro-max-skill.md](ui-ux-pro-max-skill.md) | Command-line setup introduction for the later UI/UX skill. This is documentation only; the skill is not installed in this repository by these documents. |
 
-Read `product.md` and `features.md` first for scope, then `guide.md` for rules, then `controls.md` and `flows.md` for the work sequences.
+Read `product.md` and `features.md` first for scope, then `guide.md` for rules, then `controls.md` and `flows.md` for the work sequences. See `development.md` for the tech plan and `ui-ux-pro-max-skill.md` for later skill setup.
 
 ## What is deliberately not in these documents
 
-- Screen layout, wireframes, visual style, or a component library. All UI/UX should be designed later by AI, following these documents, using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
-- A technical approach or framework choice for building the iOS and Android apps.
+- Screen layout, wireframes, visual style, or a component library. All UI/UX should be designed later by AI, following these documents, using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. How a coder would install that skill later is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 - Invented score tables, including any exact progression for 番 above 13, and the unopened preset tables noted in `guide.md`.
