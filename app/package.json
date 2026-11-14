@@ -43,7 +43,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "node --experimental-strip-types --test src/score/score.test.ts"
+    "test": "node --experimental-strip-types --test src/score/score.test.ts src/rules/setup.test.ts"
   },
   "private": true
 }
