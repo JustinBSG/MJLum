@@ -461,6 +461,66 @@ describe('詐糊', () => {
   });
 });
 
+describe('出銃者包自摸', () => {
+  it('makes only the discarder pay the self-draw total and counts the hand as 自摸', () => {
+    const rules = setPaymentMode(setOrdinary(setFanRange(createPresetDraft('51-full'), 3, 13), 3, '15'), 'half-discard');
+    const session = withBalances(addReserve(four('51', rules), '戊家'), {
+      甲家: '-15/4',
+      乙家: '-15/4',
+      丙家: '-15/2',
+      丁家: '15',
+    });
+    const input = {
+      winnerId: idOf(session, '丁家'),
+      fan: 5,
+      discarderId: idOf(session, '丙家'),
+      discarderPaysSelfDraw: true,
+    };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.equal(preview.kind, 'self-draw');
+    assert.deepEqual(formatWinPreview(preview), ['64 × 1.50', '總分 96']);
+
+    const next = recordWin(session, input);
+    assert.equal(formatAmount(balance(next, '甲家')), '-3.75');
+    assert.equal(formatAmount(balance(next, '乙家')), '-3.75');
+    assert.equal(formatAmount(balance(next, '丙家')), '-103.5');
+    assert.equal(formatAmount(balance(next, '丁家')), '111');
+    assert.equal(balance(next, '丙家'), '-207/2');
+    assert.equal(balance(next, '戊家'), '0');
+    assert.equal(player(next, '丁家').wins, 1);
+    assert.equal(player(next, '丁家').selfDraws, 1);
+    assert.equal(player(next, '丙家').discards, 0);
+    assert.equal(next.ledger.at(-1)?.label, '5番 自摸');
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
+  });
+
+  it('does not score a three-player 包自摸 or a 包自摸 一炮多響', () => {
+    const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
+    assert.equal(
+      previewWin(three, {
+        winnerId: idOf(three, '甲家'),
+        fan: 4,
+        discarderId: idOf(three, '丙家'),
+        discarderPaysSelfDraw: true,
+      }),
+      null,
+    );
+    const session = four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
+    assert.equal(
+      previewWin(session, {
+        winnerId: idOf(session, '丁家'),
+        fan: 5,
+        discarderId: idOf(session, '丙家'),
+        discarderPaysSelfDraw: true,
+        also: [{ playerId: idOf(session, '乙家'), fan: 4 }],
+      }),
+      null,
+    );
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');

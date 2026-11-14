@@ -14,6 +14,8 @@ export type WinInput = {
   falseWin?: boolean;
   /** 詐糊賠位自摸. Each other seated player receives the ordinary amount × 自摸倍數. */
   falseWinAsSelfDraw?: boolean;
+  /** 出銃者包自摸. The selected 出銃者 alone pays the self-draw total. */
+  discarderPaysSelfDraw?: boolean;
 };
 
 export type WinPreview = {
@@ -34,12 +36,19 @@ export type WinPreview = {
  * An unrecorded fan amount is not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
-  if (input.falseWin) return falseWin(session, input);
-  if ((input.also?.length ?? 0) > 0) return multiDiscard(session, input);
+  if (input.falseWin) {
+    if (input.discarderPaysSelfDraw) return null;
+    return falseWin(session, input);
+  }
+  if ((input.also?.length ?? 0) > 0) {
+    if (input.discarderPaysSelfDraw) return null;
+    return multiDiscard(session, input);
+  }
   const ordinary = ordinaryAmount(session, input.fan);
   if (!ordinary) return null;
   if (!seatedPlayerIds(session).includes(input.winnerId)) return null;
   if (input.discarderId === null) return selfDraw(session, input, ordinary);
+  if (input.discarderPaysSelfDraw) return discarderCoversSelfDraw(session, input, ordinary);
   if (session.rules.paymentMode === 'half-discard') return halfDiscard(session, input, ordinary);
   return fullDiscard(session, input, ordinary);
 }
@@ -239,6 +248,36 @@ function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPr
       { playerId: input.winnerId, delta: amount.toExact() },
       { playerId: discarderId, delta: negate(half) },
       ...others.map((playerId) => ({ playerId, delta: negate(quarter) })),
+    ],
+  };
+}
+
+/**
+ * 出銃者包自摸. Four seated players. Only the 出銃者 pays the self-draw total.
+ * The hand counts as 自摸. Three-player and 一炮多響 combinations were not recorded.
+ */
+function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: string): WinPreview | null {
+  if (session.rules.playerFormat !== 'four') return null;
+  const discarderId = input.discarderId;
+  if (!discarderId || discarderId === input.winnerId) return null;
+  const seated = seatedPlayerIds(session);
+  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
+  const opponents = seated.filter((id) => id !== input.winnerId);
+  if (selfDrawPayers(session, opponents.length) === null) return null;
+  const multiplier = session.rules.multiplier;
+  const total = Score.fromString(ordinary).multiply(Score.fromString(multiplier));
+  return {
+    kind: 'self-draw',
+    fan: input.fan,
+    winnerId: input.winnerId,
+    winnerIds: [input.winnerId],
+    discarderId,
+    ordinary,
+    multiplier,
+    total: total.toExact(),
+    deltas: [
+      { playerId: input.winnerId, delta: total.toExact() },
+      { playerId: discarderId, delta: negate(total) },
     ],
   };
 }
