@@ -60,8 +60,11 @@ export function setPaymentMode(setup: RuleSetup, paymentMode: PaymentMode): Rule
 
 export function setPlayerFormat(setup: RuleSetup, playerFormat: PlayerFormat): RuleSetup {
   const next: RuleSetup = { ...setup, playerFormat };
-  if (setup.presetId === '3fan4-full' && !setup.multiplierEdited) {
-    next.multiplier = playerFormat === 'three' ? '4/3' : DEFAULT_SELF_DRAW_MULTIPLIER;
+  if (setup.presetId === '3fan4-full') {
+    next.rows = [];
+    if (!setup.multiplierEdited) {
+      next.multiplier = playerFormat === 'three' ? '4/3' : DEFAULT_SELF_DRAW_MULTIPLIER;
+    }
   }
   return rebuildRows(next);
 }
@@ -146,6 +149,9 @@ function rebuildRows(setup: RuleSetup): RuleSetup {
 }
 
 function ordinaryFor(setup: RuleSetup, fan: number): string | null {
+  const existing = setup.rows.find((row) => row.fan === fan);
+  if (existing) return existing.ordinary;
+
   if (setup.presetId) {
     const preset = hongKongPreset(setup.presetId);
     if (setup.playerFormat === 'three' && preset.threePlayer) {

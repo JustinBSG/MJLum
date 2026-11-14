@@ -132,6 +132,14 @@ describe('custom 新玩法', () => {
     assert.equal(selfDrawAmount(through14, 14), null);
   });
 
+  it('keeps an edited preset cell when 滿糊 rises', () => {
+    const edited = setOrdinary(createPresetDraft('3fan4-half'), 5, '20');
+    const extended = setFanRange(edited, 3, 9);
+    assert.equal(row(extended, 5)?.ordinary, '20');
+    assert.equal(row(extended, 6)?.ordinary, '16');
+    assert.equal(row(extended, 9)?.ordinary, '48');
+  });
+
   it('does not recalculate later fans after one cell is edited', () => {
     const edited = setOrdinary(setFanRange(createCustomDraft(), 3, 8), 6, '64');
     assert.equal(row(edited, 6)?.ordinary, '64');
