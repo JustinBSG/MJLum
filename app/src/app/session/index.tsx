@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
+import { formatWinPreview, previewWin, recordWin } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
   addReserve,
@@ -23,7 +24,8 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'swap' | 'dealer' | 'undo' | 'fresh' | null;
+type Panel = 'win' | 'swap' | 'dealer' | 'undo' | 'fresh' | null;
+type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
   const theme = useTheme();
@@ -39,6 +41,9 @@ export default function SessionScreen() {
   const [reusePlayers, setReusePlayers] = useState(false);
   const [reuseRules, setReuseRules] = useState(false);
   const [direction, setDirection] = useState<'forward' | 'reverse'>('forward');
+  const [winnerId, setWinnerId] = useState<string | null>(null);
+  const [fanText, setFanText] = useState('');
+  const [payer, setPayer] = useState<Payer>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -113,8 +118,34 @@ export default function SessionScreen() {
     setPanel('fresh');
   }
 
+  function openWin() {
+    setWinnerId(null);
+    setFanText('');
+    setPayer(null);
+    setPanel('win');
+  }
+
+  async function confirmWin() {
+    if (!session || !winnerId || payer === null) return;
+    const fan = readFan(fanText);
+    if (fan === null) return;
+    const next = recordWin(session, {
+      winnerId,
+      fan,
+      discarderId: payer === 'self-draw' ? null : payer,
+    });
+    if (next === session) return;
+    setPanel(null);
+    await persist(next);
+  }
+
   const seated = session ? new Set(seatedPlayerIds(session)) : new Set<string>();
   const reserves = session?.players.filter((player) => !seated.has(player.id)) ?? [];
+  const fan = readFan(fanText);
+  const winPreview =
+    session && winnerId && fan !== null && payer !== null
+      ? previewWin(session, { winnerId, fan, discarderId: payer === 'self-draw' ? null : payer })
+      : null;
 
   return (
     <ThemedView style={styles.screen}>
@@ -173,10 +204,64 @@ export default function SessionScreen() {
 
           {panel === null ? (
             <ThemedView style={styles.row}>
+              <Choice label="食糊!" onPress={openWin} selected={false} />
               <Choice label="換人" onPress={() => setPanel('swap')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
               <Choice label="新牌局" onPress={openFresh} selected={false} />
+            </ThemedView>
+          ) : null}
+
+          {panel === 'win' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>食糊!</ThemedText>
+              {session.seats.map((seat) => {
+                const player = session.players.find((item) => item.id === seat.playerId);
+                if (!player) return null;
+                return (
+                  <Choice
+                    key={player.id}
+                    label={player.name}
+                    onPress={() => {
+                      setWinnerId(player.id);
+                      if (payer === player.id) setPayer(null);
+                    }}
+                    selected={winnerId === player.id}
+                  />
+                );
+              })}
+              <TextInput
+                accessibilityLabel="番數"
+                accessibilityLanguage={APP_LOCALE}
+                keyboardType="number-pad"
+                onChangeText={setFanText}
+                placeholder="番數"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={fanText}
+              />
+              <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />
+              {session.seats.map((seat) => {
+                const player = session.players.find((item) => item.id === seat.playerId);
+                if (!player || player.id === winnerId) return null;
+                return (
+                  <Choice
+                    key={`discard-${player.id}`}
+                    label={`出銃者 ${player.name}`}
+                    onPress={() => setPayer(player.id)}
+                    selected={payer === player.id}
+                  />
+                );
+              })}
+              {winPreview ? formatWinPreview(winPreview).map((line) => (
+                <ThemedText accessibilityLanguage={APP_LOCALE} key={line}>
+                  {line}
+                </ThemedText>
+              )) : null}
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice label="確定" onPress={confirmWin} selected={false} />
+              </ThemedView>
             </ThemedView>
           ) : null}
 
@@ -293,6 +378,13 @@ export default function SessionScreen() {
       ) : null}
     </ThemedView>
   );
+}
+
+function readFan(text: string): number | null {
+  const trimmed = text.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const fan = Number(trimmed);
+  return Number.isSafeInteger(fan) ? fan : null;
 }
 
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
