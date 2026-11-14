@@ -137,9 +137,40 @@ Visible Hong Kong preset minimum and cap amounts:
 | 一二蚊 辣辣上 | 3 fan | 32 | 8 fan | 1024 |
 | 3番4 半辣上（三人） | 3 fan | 3 | 8 fan | 24 |
 
+Two opened Hong Kong preset tables were recorded in full for the range then on screen.
+
+**五一辣辣上**, after 滿糊 was extended from the default 8 to 13 (the range control sat at its right-hand end at 13; no higher cap was shown). 自摸分數 is labelled ×1.50:
+
+| Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
+|---:|---:|---:|
+| 3 | 16 | 24 |
+| 4 | 32 | 48 |
+| 5 | 64 | 96 |
+| 6 | 128 | 192 |
+| 7 | 256 | 384 |
+| 8 | 512 | 768 |
+| 9 | 1024 | 1536 |
+| 10 | 2048 | 3072 |
+| 11 | 4096 | 6144 |
+| 12 | 8192 | 12288 |
+| 13 | 16384 | 24576 |
+
+**二五雞辣辣上**, with the default 3–8 range:
+
+| Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
+|---:|---:|---:|
+| 3 | 8 | 12 |
+| 4 | 16 | 24 |
+| 5 | 32 | 48 |
+| 6 | 64 | 96 |
+| 7 | 128 | 192 |
+| 8 | 256 | 384 |
+
+A saved custom setup can be deleted: the reference asks 確定刪除嗎?, and after confirmation the custom list can show 未有自訂玩法. Adding a custom setup (增加玩法) creates another 新玩法. The default custom table starts at 3番起糊 with ordinary-win amount 4 and 8番滿糊, doubling each fan (3: 4/6, 4: 8/12, 5: 16/24, 6: 32/48). Extending 滿糊 to 13 kept doubling through 13: 4096/6144. Ordinary-win cells are individually editable; the matching 自摸分數 updates to ×1.50 of that cell. Editing one fan does not automatically recalculate later fans: after raising fans 3–6, fan 7 stayed 64/96, so 6 and 7 tied. That unsaved custom was then abandoned (放棄設定嗎? confirmed), returning to 未有自訂玩法. After configuration, 儲存此玩法嗎？ offers 取消, 直接使用, or 儲存; a saved setup appears under 自訂玩法.
+
 The first release includes the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) as part of the same-functionality scope. Detailed scoring for those categories was not established in the reference, remains **unspecified**, and must not be invented.
 
-**Unspecified:** saved-rule rename, delete, name-length, and duplicate-name behavior; and the detailed scoring tables and payout rules for those other regional categories.
+**Unspecified:** saved-rule rename, name-length, and duplicate-name behavior; intermediate amounts for Hong Kong presets that were not opened in full (including 半辣上 tables); and the detailed scoring tables and payout rules for those other regional categories.
 
 ### Player count and payment mode
 
@@ -147,16 +178,35 @@ The first release includes the reference’s other regional categories (台灣�
 
 - Player count is a format choice of four-player (四人麻雀) or three-player (三人麻雀), and is separate from how many people are on the session roster. Only four-player scoring was fully demonstrated.
 - Payment modes in the reference include 全銃 and 半銃. Under demonstrated 全銃, an ordinary discard win transfers only the configured ordinary-win amount from the discarder to the winner; the other seated players are unchanged for that hand.
+- Under demonstrated four-player 半銃, with 出銃者包自摸 and 出銃者包輸 off, an ordinary discard win is split as follows, where F is the ordinary-win amount (食糊分數) for the entered fan: the winner receives F; the discarder (出銃者) pays F/2; each of the other two losers pays F/4. In the demonstrated hands the dealer did not pay a different amount from the other non-discarder.
 
-The first release includes 半銃 as a visible option, even though its calculation was not demonstrated.
+Demonstrated 11-fan 半銃 ordinary win, F = 4096, 出銃者 d. a was dealer (西圈西風) and paid the same 1024 as c, not double:
 
-**Unspecified:** 半銃 payer split, rounding, and interaction with special cases; and detailed three-player layout, score-table construction, and self-draw allocation. These formulas must not be invented.
+| Player | Before | After | Change |
+|---|---:|---:|---:|
+| a | 9716 | 8692 | −1024 |
+| b | 10404 | 14500 | +4096 |
+| c | 8428 | 7404 | −1024 |
+| d | −28548 | −30596 | −2048 |
+
+Demonstrated 4-fan 半銃 ordinary win, F = 32, 出銃者 d:
+
+| Player | Before | After | Change |
+|---|---:|---:|---:|
+| a | 8692 | 8684 | −8 |
+| b | 14500 | 14532 | +32 |
+| c | 7404 | 7396 | −8 |
+| d | −30596 | −30612 | −16 |
+
+A later four-player 半銃 self-draw of 12 fan matched the already-recorded self-draw rule (winner total = ordinary amount × 1.50; each of the three opponents pays one third). 12-fan amounts: 8192 × 1.50 = 12288 total; each of a, b, and c paid 4096; d received 12288.
+
+**Unspecified:** 半銃 rounding when F is not divisible by 4; 半銃 interaction with 出銃者包自摸, 出銃者包輸, and three-player play; and detailed three-player layout, score-table construction, and self-draw allocation. These formulas must not be invented.
 
 ### Fan range and the score table
 
 **Taken from the local reference:**
 
-- Fan range has a minimum winning threshold (起糊) and a cap (滿糊). A two-handle range control is used in the reference; the demonstrated custom setup keeps the minimum at 3 and changes the cap from 8 to 9 to 10. Those observations do not establish the complete allowed range.
+- Fan range has a minimum winning threshold (起糊) and a cap (滿糊). A two-handle range control is used in the reference. In demonstrated setups, 起糊 stayed at 3, and 滿糊 was moved from 8 through 10 to 13, where the control sat at its right-hand end. No cap above 13 and no 起糊 below 3 were shown. Those observations do not by themselves prove the complete allowed range.
 - Ordinary-win amounts (食糊分數) are entered per fan level in the rules.
 - Self-draw amounts (自摸分數) are derived in the demonstrated rules as ordinary amount × 1.50, and that figure is the winner’s **total** gain. In four-player self-draw, each of the three opponents pays one third of that total.
 - Those table values belong to a given rules setup, not a single universal Hong Kong table.
@@ -176,15 +226,17 @@ The main demonstrated custom table, with minimum 3 and cap 10:
 
 Example of the self-draw derivation: 512 × 1.50 = 768 total; 256 paid by each of the three opponents.
 
-**Unspecified:** allowed min/max endpoints; what happens if a user tries to enter a fan below 起糊 or above 滿糊; whether the 1.50 multiplier can be edited; decimal handling, rounding, and three-player self-draw allocation.
+**Unspecified:** allowed min/max endpoints beyond the demonstrated 起糊 3 and 滿糊 sitting at 13 on the right-hand end of the control; what happens if a user tries to enter a fan below 起糊 or above 滿糊; whether the 1.50 multiplier can be edited; decimal handling, rounding, and three-player self-draw allocation.
 
 ### Jackpot
 
-**Taken from the local reference:** Jackpot is an optional shared pool. When it is enabled, the rules specify how much each player contributes to the pool on a drawn hand. The demonstrated scoring sequence had Jackpot off.
+**Taken from the local reference:** Jackpot is an optional shared pool. When it is enabled, the rules specify how much each player contributes to the pool on a drawn hand.
 
-The first release includes Jackpot as a visible option, even though award and distribution were not demonstrated.
+In the opened 五一辣辣上 rule setup, Jackpot 啟用 was off by default. Turning it on reveals 流局時每位玩家須付彩池, which started at 0 and is editable; a value of 10 was later shown in the save-or-use dialog. In the following play, the Jackpot display stayed at 0, and no drawn-hand contribution was recorded, so how a 流局 payment hits the pool, and how the pool is awarded, withdrawn, or settled, were not demonstrated.
 
-**Unspecified:** default on/off and default contribution amount; and how the pool is displayed, awarded, withdrawn, or settled. These formulas must not be invented.
+The first release includes Jackpot as a visible option. Default off, and a contribution field that starts at 0 when first enabled, are now recorded; award and distribution remain unspecified.
+
+**Unspecified:** how the pool is awarded, withdrawn, or settled in play, including a 流局 contribution actually being applied. These formulas must not be invented.
 
 ### Dealer, wind, and session progress
 
@@ -193,7 +245,7 @@ The first release includes Jackpot as a visible option, even though award and di
 - Tracking dealer and circle/wind progress is an optional rules setting, independent of the point table. When it is on, a further setting controls whether the dealer passes on a drawn hand (流局時過莊).
 - In the demonstrated configuration (both settings on, Jackpot off), a recorded draw advances dealer/wind progress and leaves balances unchanged.
 - A dealer can be selected manually. When doing so, a consecutive-dealer count (連莊) can be reset, and circle/wind counting can be restarted, as separate choices.
-- Session progress can be shown as circle/wind (for example 東圈東風) or as a hand count. The session can also show the active rules name, start date, and hand count.
+- Session progress can be shown as circle/wind (for example 東圈東風) or as a hand count. The session can also show the active rules name, start date, and hand count (for example 玩法, 開始日期, 總局數, 牌局進度, and 進度顯示方式 圈風 or 局數). A consecutive-dealer mark (連N) can appear on the dealer tile after a consecutive dealer win; 連1 was shown.
 - Mid-session rule values can be inspected. Whether they can be edited, and what that would do to already-recorded hands, is not established.
 
 **Unspecified:** the complete dealer-progression algorithm for every result type (including when the winner is or is not the dealer); the off-state of 流局時過莊; the exact 連莊 counting convention; and mid-session rule edits.
@@ -234,15 +286,38 @@ The first release includes Jackpot as a visible option, even though award and di
 
 Total received 128 + 4 + 256 = 388, matching b’s loss. The increments correspond to the configured 8-fan, 3-fan, and 9-fan ordinary-win amounts.
 
-- **False-win (詐糊):** a false or invalid win option exists in the fan selector. Its outcome was not exercised.
-- **Special payer option (出銃者包自摸):** a distinct liability/payment setting whose wording refers to the discarder covering a self-draw-related liability. It was off in the inspected examples, and an enabled transaction was not demonstrated.
+A later four-player 半銃 一炮多響 hand used a different split. Winners were d at 7 fan (F1 = 256) and b at 6 fan (F2 = 128), 出銃者 c, other loser a. The entry preview for the then-selected winner d showed 7番分數 256 and 總分 224 (that selected winner’s net, not a raw sum of the two ordinary amounts). After confirmation:
+
+| Player | Before | After | Change |
+|---|---:|---:|---:|
+| a | 11876 | 11780 | −96 |
+| b | 12388 | 12452 | +64 |
+| c | 10684 | 10492 | −192 |
+| d | −34948 | −34724 | +224 |
+
+This matches: the discarder pays (F1 + F2) / 2 = 192; the other loser pays (F1 + F2) / 4 = 96; each winner’s net is their own ordinary amount minus a quarter of the other winner’s ordinary amount (256 − 32 = 224, and 128 − 64 = 64). The entry can add a second winner, and tapping a winner sets that winner’s fan.
+
+- **False-win (詐糊):** a false or invalid win option in the entry. A related toggle, 詐糊賠位自摸, was shown.
+
+Demonstrated 13-fan 詐糊, with 詐糊賠位自摸 off. The preview footer showed 13番分數 詐糊 −16384 ×3 and 總分 −49152. After confirmation, the false-win player d paid 16384 to each of a, b, and c:
+
+| Player | Before | After | Change |
+|---|---:|---:|---:|
+| a | 116 | 16500 | +16384 |
+| b | 488 | 16872 | +16384 |
+| c | −508 | 15876 | +16384 |
+| d | −96 | −49248 | −49152 |
+
+A preview only, not confirmed on a stable board: 詐糊賠位自摸 on, 13 fan, −16384 × 1.50 × 3 = 總分 −73728. That preview must not be treated as a confirmed settlement.
+
+- **Special payer options (出銃者包自摸 and 出銃者包輸):** two distinct toggles. Enabled transactions were not confirmed on a stable board. Previews only: 出銃者包自摸 on, 5 fan, 出銃者 selected, footer 64 × 1.50 and 總分 96; 出銃者包輸 on (包自摸 off), 4 fan, 出銃者 selected, footer 32 and 總分 32. These previews must not be treated as confirmed settlements.
 - **Drawn hand (流局):** used when a hand ends without a winner and should still be recorded as session progress, after confirmation. In the demonstrated setup (流局時過莊 on, Jackpot off), draws advance dealer/wind indicators while balances remain unchanged.
 
 After confirmation, running totals, session progress, statistics, and the hand history update.
 
-The first release includes 詐糊 and 出銃者包自摸 as visible options, even though their formulas were not demonstrated.
+The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as visible options. The 詐糊 settlement with 詐糊賠位自摸 off is now recorded; 詐糊賠位自摸 on, 出銃者包自摸, and 出銃者包輸 remain unspecified.
 
-**Unspecified:** 詐糊 penalty, who pays whom, and effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局. The undemonstrated formulas must not be invented.
+**Unspecified:** 詐糊 when 詐糊賠位自摸 is on; 詐糊 effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸 and 出銃者包輸; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局. The undemonstrated formulas must not be invented.
 
 ### Undo
 
@@ -302,12 +377,23 @@ These utilities are part of the same-functionality first release, not extra feat
 - Statistics are session-wide. They include everyone on the roster, including a player who has left a seat and a reserve player added before taking a seat.
 - The overview counts recorded wins (食糊), self-draw wins (自摸), and occasions of dealing a winning discard (出銃). In the demonstrated totals, 自摸 is a subset of 食糊, not an extra category added on top of it.
 - Individual player details also show average fan, win rate, self-draw rate, deal-in rate, and average deal-in fan. Exact denominators, rounding, substitution treatment, and multiple-winner aggregation are not established.
-- Title badges summarize performance, including 自摸王, 出銃王, 食糊王, 大牌王, and 跑龍套. More than one player can hold the same title at once, so a title is not automatically exclusive. Exact award criteria and tie-breaking rules are unspecified.
+- Title badges summarize performance. Demonstrated titles include 自摸王, 出銃王, 食糊王, 大牌王, 細牌王, and 陪跑員. More than one player can hold the same title at once, so a title is not automatically exclusive (in the demonstrated list, c and d both had 6 出銃 and both showed 出銃王). Exact award criteria and tie-breaking rules are unspecified.
 - A radar chart is a visual summary of a player across three labelled dimensions: 進攻, 牌力, and 防守. No numeric scale, weights, or formula was established.
 - A dice utility can be used at the table to roll dice. In the demonstration, a dice result does not automatically choose the dealer, record a hand, or change a balance. Any count-adjustment limits, randomness details, and extra input methods are unspecified.
 - Fan-help is an assistance entry associated with fan input. Its contents were not opened, so the help content itself is unspecified.
 
-**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, radar-chart weights, title-award and tie-break rules, dice count limits, and fan-help contents.
+Demonstrated statistics list in one session:
+
+| Player | 食糊 | 自摸 | 出銃 | Titles shown |
+|---|---:|---:|---:|---|
+| a | 4 | 1 | 0 | 細牌王, 陪跑員 |
+| b | 8 | 0 | 2 | 食糊王 |
+| c | 2 | 0 | 6 | 出銃王 |
+| d | 7 | 3 | 6 | 自摸王, 大牌王, 出銃王 |
+
+The same session’s detail card for d showed 7食糊, 3自摸, 6出銃, 7平均番數, 37%食糊率, 43%自摸率, 32%出銃率, and 5平均出銃番數, plus a radar chart labelled 進攻, 牌力, and 防守. In that card, 43% 自摸率 matches 3/7. 37% 食糊率 and 32% 出銃率 are consistent with 7/19 and 6/19, but the card did not itself display the denominator, and an earlier session-info view in the same session had shown 總局數 8, so the denominators stay unspecified.
+
+**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, radar-chart weights, title-award and tie-break rules (including 細牌王 and 陪跑員), dice count limits, and fan-help contents.
 
 ## Sharing
 
@@ -325,14 +411,14 @@ Settings follow the local reference. This is a behavior and options inventory, n
 |---|---|---|
 | 玩法名稱 | Name of this rules setup | Demonstrated default: 新玩法 |
 | 人數 | Game format: 四人麻雀 or 三人麻雀 | In the demonstrated custom-setup flow, four-player remained selected. Not independently labelled as a global product default. |
-| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. 半銃 is included in the first release as a visible option, but its calculation is unspecified and must not be invented. | In the demonstrated custom-setup flow, 全銃 remained selected. Not independently labelled as a global default. |
-| 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. In the custom-setup demonstration the cap is first seen at 8 and is then moved to 9 and 10; the minimum stays at 3. Allowed endpoints are unspecified. |
-| 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section. |
+| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. Four-player 半銃 ordinary discard and 一炮多響 splits are recorded in the Player count and Score entry sections. Rounding when F is not divisible by 4, and interaction with 出銃者包自摸, 出銃者包輸, and three-player play, remain unspecified. | In one demonstrated custom-setup flow, 全銃 remained selected. A later edited 五一辣辣上 configuration was used with 半銃. Not independently labelled as a global default. |
+| 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. Demonstrated flows keep 起糊 at 3 and move 滿糊 from 8 through 10 to 13, where the control sat at its right-hand end. Allowed endpoints beyond that are unspecified. |
+| 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section; the opened 五一辣辣上 and 二五雞辣辣上 tables are recorded in the Rules, presets section. Editing one cell does not automatically recalculate later fans. |
 | 自摸分數 | Displayed self-draw total, derived from the ordinary amount | Displayed multiplier ×1.50 in verified examples. Whether the multiplier can be edited is unspecified. |
-| Jackpot 啟用 | Optional shared pool associated with drawn hands. Included in the first release as a visible option. Award and distribution remain unspecified and must not be invented. | Default not stated. |
-| 流局時每位玩家須付彩池 | When Jackpot is on: numeric contribution each player owes the pool on a drawn hand | Default amount not stated. The field is hidden when Jackpot is off. Decimal and rounding rules are unspecified. |
-| 紀錄莊家及圈風 | Enable dealer and circle/wind progress tracking (does not change score-table amounts) | Default not stated. Enabled in the played reference session. |
-| 流局時過莊 | When dealer/wind tracking is on: whether the dealer passes on a drawn hand | Default not stated. Enabled in the demonstrated configuration. Off-state is unspecified. |
+| Jackpot 啟用 | Optional shared pool associated with drawn hands. Included in the first release as a visible option. Award and distribution remain unspecified and must not be invented. | Off in the opened 五一辣辣上 rule setup. |
+| 流局時每位玩家須付彩池 | When Jackpot is on: numeric contribution each player owes the pool on a drawn hand | The field is hidden when Jackpot is off. When first revealed, the value started at 0 and is editable. Decimal and rounding rules, and applying the contribution in play, are unspecified. |
+| 紀錄莊家及圈風 | Enable dealer and circle/wind progress tracking (does not change score-table amounts) | On in the opened 五一辣辣上 rule setup, and enabled in the played reference sessions. Not independently labelled as a global product default. |
+| 流局時過莊 | When dealer/wind tracking is on: whether the dealer passes on a drawn hand | On in the opened 五一辣辣上 rule setup, and enabled in the demonstrated configuration. Off-state is unspecified. |
 
 After configuration, the setup is confirmed. An edited-preset path may offer to cancel, use the configuration once without saving, or save it as a custom rules entry.
 
@@ -373,16 +459,16 @@ The local reference does not demonstrate live external-display behavior. The sha
 
 These decisions are still open and should be specified before implementation is treated as complete. The first release still includes the corresponding options and categories; the gaps below are missing formulas or flows, not a decision to omit the feature.
 
-1. 半銃 calculation (payer split, rounding, and interaction with self-draw, 一炮多響, 出銃者包自摸, and three-player play).
+1. 半銃 rounding when F is not divisible by 4, and 半銃 interaction with 出銃者包自摸, 出銃者包輸, and three-player play. (The four-player ordinary discard split, a matching self-draw, and a 半銃 一炮多響 example are now recorded above.)
 2. Three-player scoring details (layout, score table, self-draw allocation, and the three-player preset table).
-3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將).
-4. 詐糊 penalty, who pays whom, and effects on dealer progress and statistics.
-5. 出銃者包自摸 eligible situations and exact calculation.
-6. Jackpot award, balance, withdrawal, and settlement behavior, plus default on/off and default contribution.
-7. Fan min/max endpoints, and what happens if a fan is entered outside the configured range.
+3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將); and intermediate amounts for Hong Kong presets that were not opened in full.
+4. 詐糊 when 詐糊賠位自摸 is on (previewed, not confirmed); and 詐糊 effects on dealer progress and statistics. (The 詐糊 settlement with 詐糊賠位自摸 off is now recorded above.)
+5. 出銃者包自摸 and 出銃者包輸 eligible situations and exact confirmed calculations. (Previews are recorded above and must not be treated as confirmed settlements.)
+6. Jackpot award, withdrawal, in-play 流局 contribution, and settlement. (Default off, and a contribution field that starts at 0 when first enabled, are now recorded.)
+7. Fan min/max endpoints beyond the demonstrated 起糊 3 and 滿糊 sitting at 13 on the right-hand end of the control; and what happens if a fan is entered outside the configured range.
 8. Whether the 1.50 self-draw multiplier is editable, and rounding / decimal rules.
 9. The complete dealer / 連莊 progression algorithm, including the off-state of 流局時過莊.
-10. Saved-rules rename, delete, name-length, and duplicate-name behavior; mid-session rule edits.
+10. Saved-rules rename, name-length, and duplicate-name behavior; mid-session rule edits. (Delete of a saved custom setup was demonstrated.)
 11. Invalid-entry handling and numeric validation.
 12. Roster limits, and editing or deleting an existing player.
 13. Undo depth, redo, and editing or deleting an older history row.
