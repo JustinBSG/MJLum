@@ -184,6 +184,85 @@ describe('自摸', () => {
   });
 });
 
+describe('一炮多響', () => {
+  it('pays each 全銃 winner their ordinary amount and the discarder the sum', () => {
+    const session = four('51', setFanRange(createPresetDraft('3fan4-full'), 3, 13));
+    const input = {
+      winnerId: idOf(session, '丁家'),
+      fan: 9,
+      discarderId: idOf(session, '乙家'),
+      also: [
+        { playerId: idOf(session, '甲家'), fan: 8 },
+        { playerId: idOf(session, '丙家'), fan: 3 },
+      ],
+    };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['9番分數 256', '總分 256']);
+    const next = recordWin(session, input);
+    assert.equal(balance(next, '甲家'), '128');
+    assert.equal(balance(next, '乙家'), '-388');
+    assert.equal(balance(next, '丙家'), '4');
+    assert.equal(balance(next, '丁家'), '256');
+    assert.equal(player(next, '甲家').wins, 1);
+    assert.equal(player(next, '丙家').wins, 1);
+    assert.equal(player(next, '丁家').wins, 1);
+    assert.equal(player(next, '乙家').discards, 1);
+    assert.equal(player(next, '丁家').selfDraws, 0);
+    assert.equal(next.handCount, 1);
+    assert.equal(next.dealerId, session.dealerId);
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
+    assert.deepEqual(undoLatest(next).ledger, []);
+  });
+
+  it('uses the demonstrated two-winner 半銃 nets', () => {
+    const rules = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
+    const session = four('51', rules);
+    const input = {
+      winnerId: idOf(session, '丁家'),
+      fan: 7,
+      discarderId: idOf(session, '丙家'),
+      also: [{ playerId: idOf(session, '乙家'), fan: 6 }],
+    };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['7番分數 256', '總分 224']);
+    const other = previewWin(session, { ...input, winnerId: idOf(session, '乙家'), fan: 6, also: [{ playerId: idOf(session, '丁家'), fan: 7 }] });
+    assert.equal(other?.total, '64');
+    const next = recordWin(session, input);
+    assert.equal(balance(next, '丁家'), '224');
+    assert.equal(balance(next, '乙家'), '64');
+    assert.equal(balance(next, '丙家'), '-192');
+    assert.equal(balance(next, '甲家'), '-96');
+  });
+
+  it('does not score a three-winner 半銃 split or a three-player 一炮多響', () => {
+    const half = four('51', setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 8), 'half-discard'));
+    assert.equal(
+      previewWin(half, {
+        winnerId: idOf(half, '丁家'),
+        fan: 7,
+        discarderId: idOf(half, '丙家'),
+        also: [
+          { playerId: idOf(half, '乙家'), fan: 6 },
+          { playerId: idOf(half, '甲家'), fan: 5 },
+        ],
+      }),
+      null,
+    );
+    const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
+    assert.equal(
+      previewWin(three, {
+        winnerId: idOf(three, '甲家'),
+        fan: 3,
+        discarderId: idOf(three, '丙家'),
+        also: [{ playerId: idOf(three, '乙家'), fan: 4 }],
+      }),
+      null,
+    );
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');
