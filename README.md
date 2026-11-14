@@ -1,2 +1,2 @@
 # MJLum
-麻雀諸 — Hong Kong Mahjong scorekeeper
+麻雀諗 — Hong Kong Mahjong scorekeeper
