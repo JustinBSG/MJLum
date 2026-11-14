@@ -2,7 +2,7 @@
 
 This inventory is for the first release, unless a row says otherwise. Behaviour details and exact numbers are in [`docs/guide.md`](guide.md). Labels follow [`docs/README.md`](README.md).
 
-The first release has exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules. A second release is for extra features beyond that scope. UI/UX for every feature is to be designed later; this list is functional, not a screen inventory. Ads are not a feature of 麻雀諗.
+The first release develops the point-counter / table scorekeeper features: exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules that are not about external display / wireless TV. The second release is the wireless connection to a smart TV, together with the related external-display product rules. UI/UX for every feature is to be designed later; this list is functional, not a screen inventory. Ads are not a feature of 麻雀諗.
 
 ## Product frame (麻雀諗 product decisions)
 
@@ -15,7 +15,6 @@ The first release has exactly the same functionality as the local reference, plu
 - Personal/table tool only, not a public store app yet.
 - Local-only data: no backup, no cloud, no account. Keep storage light. Keep all in-game records across sessions, locally.
 - No sharing of metadata or session data (results, history, player information, settlement, or other session information).
-- External display of 現時賽果 only, started and ended with the same in-app share-screen button. The first-release plan is a wireless connection to a smart TV. iOS / iPhone uses AirPlay for unique 現時賽果. Android uses an official wireless path (Miracast-class Presentation and/or Cast — path not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but it is not the chosen first-release fulfilment. Settlement and every other page are opened in the app. See [`docs/development.md`](development.md) for the technical plan.
 
 ## Scoring and rule setups (reference-demonstrated functionality)
 
@@ -57,7 +56,7 @@ The first release has exactly the same functionality as the local reference, plu
 - 麻雀諗 shows those net results and lets the user finish payment themselves. It does not compute payment instructions, choose transfers, tie-break, or show a currency label.
 - The reference’s demonstrated transfer list is recorded in `docs/guide.md` as what the reference showed, not as a 麻雀諗 requirement.
 - How a Jackpot pool would appear in this result view remains unspecified.
-- Settlement is checked in the app, not on the external display.
+- Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display.
 
 ## Statistics, titles, radar, and dice
 
@@ -66,15 +65,18 @@ The first release has exactly the same functionality as the local reference, plu
 - A three-axis radar chart labelled 進攻, 牌力, and 防守. The 0–100 mapping is a 麻雀諗 product decision, recorded in `docs/guide.md`.
 - Dice utility (擲骰): a roll only, so players can see where they start collecting tiles from the four walls (bridges) in real life. This purpose wording is a 麻雀諗 product decision, not on-screen copy. Minimum 1 die, maximum 9. The roll does not assign the dealer or write scores. The demonstrated reference UI is in `docs/guide.md` and `docs/controls.md`.
 
-## External display (麻雀諗 product decisions)
+## External display (second release; 麻雀諗 product decisions)
 
+These rules belong to the second release, not first-release fulfilment.
+
+- The second release is the wireless connection to a smart TV.
 - Share-screen toggle in the app starts and ends a local display connection.
-- The external display shows 現時賽果 only.
-- The documented first-release plan is wireless to a smart TV: AirPlay on iOS for unique 現時賽果; an official wireless path on Android (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired Presentation exists, but is not the chosen first-release fulfilment.
+- The external display shows 現時賽果 only. Settlement and every other page are opened in the app.
+- The documented plan is wireless to a smart TV: AirPlay on iOS for unique 現時賽果; an official wireless path on Android (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment.
 - Behaviour when the connection drops remains unspecified.
 - The look of the 現時賽果 display is left to later AI design.
-- The technical plan is in [`docs/development.md`](development.md).
+- The technical plan is in [`docs/development.md`](development.md). Open technical decisions about that path belong to second-release planning, not first-release blockers.
 
 ## Second release
 
-Anything beyond the same-functionality first release, plus the already-decided product rules above, is for a second release. Do not treat unspecified formulas as postponed features: the corresponding options still belong in the first release; only the missing formula stays unspecified.
+The second release is the wireless connection to a smart TV, together with the related external-display product rules in the section above. Other extra features beyond the first-release point-counter scope can also come in a later release. Do not treat unspecified formulas as postponed features: the corresponding scoring options and categories still belong in the first release; only the missing formula stays unspecified.
