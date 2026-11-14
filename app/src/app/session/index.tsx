@@ -44,6 +44,10 @@ export default function SessionScreen() {
   const [winnerId, setWinnerId] = useState<string | null>(null);
   const [fanText, setFanText] = useState('');
   const [payer, setPayer] = useState<Payer>(null);
+  const [multi, setMulti] = useState(false);
+  const [winnerIds, setWinnerIds] = useState<string[]>([]);
+  const [selectedWinnerId, setSelectedWinnerId] = useState<string | null>(null);
+  const [fans, setFans] = useState<Record<string, string>>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -122,11 +126,65 @@ export default function SessionScreen() {
     setWinnerId(null);
     setFanText('');
     setPayer(null);
+    setMulti(false);
+    setWinnerIds([]);
+    setSelectedWinnerId(null);
+    setFans({});
     setPanel('win');
   }
 
+  function toggleMulti() {
+    if (multi) {
+      setMulti(false);
+      if (selectedWinnerId) {
+        setWinnerId(selectedWinnerId);
+        setFanText(fans[selectedWinnerId] ?? '');
+      }
+      return;
+    }
+    setMulti(true);
+    if (payer === 'self-draw') setPayer(null);
+    if (winnerId) {
+      setWinnerIds([winnerId]);
+      setSelectedWinnerId(winnerId);
+      setFans({ [winnerId]: fanText });
+    } else {
+      setWinnerIds([]);
+      setSelectedWinnerId(null);
+    }
+  }
+
+  function chooseWinner(playerId: string) {
+    if (!multi) {
+      setWinnerId(playerId);
+      if (payer === playerId) setPayer(null);
+      return;
+    }
+    if (payer === playerId) setPayer(null);
+    if (!winnerIds.includes(playerId) && winnerIds.length >= 3) return;
+    setSelectedWinnerId(playerId);
+    if (!winnerIds.includes(playerId)) setWinnerIds([...winnerIds, playerId]);
+  }
+
   async function confirmWin() {
-    if (!session || !winnerId || payer === null) return;
+    if (!session || payer === null) return;
+    if (multi) {
+      if (!selectedWinnerId || payer === 'self-draw') return;
+      const fan = readFan(fans[selectedWinnerId] ?? '');
+      if (fan === null) return;
+      const also = winnerIds.flatMap((id) => {
+        if (id === selectedWinnerId) return [];
+        const value = readFan(fans[id] ?? '');
+        return value === null ? [] : [{ playerId: id, fan: value }];
+      });
+      if (also.length !== winnerIds.filter((id) => id !== selectedWinnerId).length) return;
+      const next = recordWin(session, { winnerId: selectedWinnerId, fan, discarderId: payer, also });
+      if (next === session) return;
+      setPanel(null);
+      await persist(next);
+      return;
+    }
+    if (!winnerId || payer === null) return;
     const fan = readFan(fanText);
     if (fan === null) return;
     const next = recordWin(session, {
@@ -141,10 +199,24 @@ export default function SessionScreen() {
 
   const seated = session ? new Set(seatedPlayerIds(session)) : new Set<string>();
   const reserves = session?.players.filter((player) => !seated.has(player.id)) ?? [];
-  const fan = readFan(fanText);
+  const previewWinnerId = multi ? selectedWinnerId : winnerId;
+  const previewFan = multi ? (selectedWinnerId ? readFan(fans[selectedWinnerId] ?? '') : null) : readFan(fanText);
+  const also = multi
+    ? winnerIds.flatMap((id) => {
+        if (id === selectedWinnerId) return [];
+        const value = readFan(fans[id] ?? '');
+        return value === null ? [] : [{ playerId: id, fan: value }];
+      })
+    : [];
+  const alsoComplete = !multi || also.length === winnerIds.filter((id) => id !== selectedWinnerId).length;
   const winPreview =
-    session && winnerId && fan !== null && payer !== null
-      ? previewWin(session, { winnerId, fan, discarderId: payer === 'self-draw' ? null : payer })
+    session && previewWinnerId && previewFan !== null && payer !== null && alsoComplete
+      ? previewWin(session, {
+          winnerId: previewWinnerId,
+          fan: previewFan,
+          discarderId: payer === 'self-draw' ? null : payer,
+          also,
+        })
       : null;
 
   return (
@@ -218,15 +290,13 @@ export default function SessionScreen() {
               {session.seats.map((seat) => {
                 const player = session.players.find((item) => item.id === seat.playerId);
                 if (!player) return null;
+                const chosen = multi ? winnerIds.includes(player.id) : winnerId === player.id;
                 return (
                   <Choice
                     key={player.id}
-                    label={player.name}
-                    onPress={() => {
-                      setWinnerId(player.id);
-                      if (payer === player.id) setPayer(null);
-                    }}
-                    selected={winnerId === player.id}
+                    label={multi && player.id === selectedWinnerId ? `${player.name} · 番數` : player.name}
+                    onPress={() => chooseWinner(player.id)}
+                    selected={chosen}
                   />
                 );
               })}
@@ -234,16 +304,25 @@ export default function SessionScreen() {
                 accessibilityLabel="番數"
                 accessibilityLanguage={APP_LOCALE}
                 keyboardType="number-pad"
-                onChangeText={setFanText}
+                onChangeText={(text) => {
+                  if (!multi) {
+                    setFanText(text);
+                    return;
+                  }
+                  if (!selectedWinnerId) return;
+                  setFans((current) => ({ ...current, [selectedWinnerId]: text }));
+                }}
                 placeholder="番數"
                 placeholderTextColor={theme.textSecondary}
                 style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
-                value={fanText}
+                value={multi ? (selectedWinnerId ? (fans[selectedWinnerId] ?? '') : '') : fanText}
               />
-              <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />
+              <Choice label={`一炮多響 ${multi ? '開' : '關'}`} onPress={toggleMulti} selected={multi} />
+              {multi ? null : <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />}
               {session.seats.map((seat) => {
                 const player = session.players.find((item) => item.id === seat.playerId);
-                if (!player || player.id === winnerId) return null;
+                const blocked = multi ? winnerIds.includes(player?.id ?? '') : player?.id === winnerId;
+                if (!player || blocked) return null;
                 return (
                   <Choice
                     key={`discard-${player.id}`}
