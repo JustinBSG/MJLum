@@ -1,6 +1,6 @@
 import { formatAmount, formatMultiplier } from '../rules/setup.ts';
 import { Score } from '../score/score.ts';
-import { commitBoard, retainDealer, seatedPlayerIds } from './session.ts';
+import { commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
 import type { Session } from './types.ts';
 
 export type WinInput = {
@@ -49,7 +49,7 @@ export function formatWinPreview(preview: WinPreview): string[] {
   return [`${formatAmount(preview.ordinary)} × ${formatMultiplier(multiplier)}`, `總分 ${formatAmount(preview.total)}`];
 }
 
-/** Confirms a preview. A dealer win keeps 莊. Passing 莊 is a later step. The Jackpot pool stays as it is. */
+/** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 does not move 莊. */
 export function recordWin(session: Session, input: WinInput): Session {
   const preview = previewWin(session, input);
   if (!preview) return session;
@@ -70,15 +70,17 @@ export function recordWin(session: Session, input: WinInput): Session {
     };
   });
   const label = preview.kind === 'multi' ? '一炮多響' : preview.kind === 'self-draw' ? `${preview.fan}番 自摸` : `${preview.fan}番 食糊`;
-  const dealerWins = preview.kind !== 'multi' && session.rules.trackDealer && preview.winnerId === session.dealerId;
-  const dealer = dealerWins
-    ? retainDealer(session)
-    : {
+  const movesDealer = preview.kind !== 'multi' && session.rules.trackDealer && session.dealerId !== null;
+  const dealer = !movesDealer
+    ? {
         dealerId: session.dealerId,
         dealerMark: session.dealerMark,
         roundWind: session.roundWind,
         seatWind: session.seatWind,
-      };
+      }
+    : preview.winnerId === session.dealerId
+      ? retainDealer(session)
+      : passDealer(session);
   return commitBoard(session, label, {
     players,
     seats: session.seats,

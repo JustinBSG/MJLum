@@ -35,8 +35,9 @@ describe('全銃 ordinary win', () => {
     assert.equal(player(next, '乙家').discards, 1);
     assert.equal(player(next, '丙家').selfDraws, 0);
     assert.equal(next.handCount, 1);
-    assert.equal(next.dealerId, session.dealerId);
-    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
   });
 
   it('does not score an unrecorded fan or a three-player 半銃 discard', () => {
@@ -68,7 +69,8 @@ describe('four-player 半銃', () => {
     assert.equal(formatAmount(balance(next, '甲家')), '-3.75');
     assert.equal(formatAmount(balance(next, '乙家')), '-3.75');
     assert.equal(balance(next, '甲家'), '-15/4');
-    assert.equal(next.dealerId, session.dealerId);
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
   });
 
   it('uses the same quarter for the dealer and the other non-discarder', () => {
@@ -83,7 +85,8 @@ describe('four-player 半銃', () => {
     assert.equal(balance(recorded, '丁家'), '-16');
     assert.equal(balance(recorded, '甲家'), '-8');
     assert.equal(balance(recorded, '丙家'), '-8');
-    assert.equal(recorded.dealerId, session.dealerId);
+    assert.equal(recorded.dealerId, idOf(recorded, '乙家'));
+    assert.equal(formatDealerBadge(recorded.dealerMark), '莊');
 
     const large = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
     const wide = four('51', large);
@@ -152,24 +155,29 @@ describe('自摸', () => {
   });
 
   it('uses the demonstrated three-player 3番4辣辣上 全銃 ×4/3 hands', () => {
-    let session = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
-    const dealer = session.dealerId;
+    let session = withDealer(startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']), '丙家');
     session = recordWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: idOf(session, '丙家') });
     assert.equal(balance(session, '甲家'), '3');
     assert.equal(balance(session, '乙家'), '0');
     assert.equal(balance(session, '丙家'), '-3');
+    assert.equal(session.dealerId, idOf(session, '甲家'));
+    assert.equal(formatWind(session.roundWind, session.seatWind), '東圈南風');
 
     session = recordWin(session, { winnerId: idOf(session, '丙家'), fan: 3, discarderId: null });
     assert.equal(balance(session, '甲家'), '1');
     assert.equal(balance(session, '乙家'), '-2');
     assert.equal(balance(session, '丙家'), '1');
+    assert.equal(session.dealerId, idOf(session, '乙家'));
+    assert.equal(formatDealerBadge(session.dealerMark), '莊');
+    assert.equal(formatWind(session.roundWind, session.seatWind), '東圈西風');
 
     session = recordWin(session, { winnerId: idOf(session, '乙家'), fan: 4, discarderId: null });
     assert.equal(balance(session, '甲家'), '-3');
     assert.equal(balance(session, '乙家'), '6');
     assert.equal(balance(session, '丙家'), '-3');
-    assert.equal(session.dealerId, dealer);
-    assert.equal(formatWind(session.roundWind, session.seatWind), '東圈東風');
+    assert.equal(session.dealerId, idOf(session, '乙家'));
+    assert.equal(formatDealerBadge(session.dealerMark), '連1');
+    assert.equal(formatWind(session.roundWind, session.seatWind), '東圈西風');
     assert.equal(session.handCount, 3);
   });
 

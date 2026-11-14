@@ -143,6 +143,27 @@ export function stepWind(roundWind: Wind, seatWind: Wind): { roundWind: Wind; se
 }
 
 /**
+ * A non-dealer win passes 莊 to the next seated player and advances 圈風 one step.
+ * The new dealer has a plain 莊.
+ */
+export function passDealer(session: Session): Pick<BoardState, 'dealerId' | 'dealerMark' | 'roundWind' | 'seatWind'> {
+  const winds = stepWind(session.roundWind, session.seatWind);
+  return {
+    dealerId: nextSeatedDealer(session),
+    dealerMark: { kind: 'plain' },
+    roundWind: winds.roundWind,
+    seatWind: winds.seatWind,
+  };
+}
+
+function nextSeatedDealer(session: Session): string | null {
+  const seated = session.seats.filter((seat) => seat.playerId);
+  const index = seated.findIndex((seat) => seat.playerId === session.dealerId);
+  if (index < 0) return session.dealerId;
+  return seated[(index + 1) % seated.length]?.playerId ?? session.dealerId;
+}
+
+/**
  * A dealer win keeps the same 莊 and raises 連N.
  * 圈風 stays on 東, 南, and 西. A win as 北 莊 moves to the next round's 東風.
  */
