@@ -1,7 +1,7 @@
 import { formatAmount, formatMultiplier } from '../rules/setup.ts';
 import { Score } from '../score/score.ts';
 import { commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
-import type { Session } from './types.ts';
+import type { DealerMark, Session, Wind } from './types.ts';
 
 export type WinInput = {
   winnerId: string;
@@ -91,6 +91,43 @@ export function recordWin(session: Session, input: WinInput): Session {
     handCount: session.handCount + 1,
     pool: session.pool,
   });
+}
+
+/**
+ * Confirms a 流局. Balances and the Jackpot pool stay as they are; a pool contribution is feature 8.
+ * 流局時過莊 on advances 莊 and 圈風. Off, they stay and the dealer badge becomes 冧N.
+ */
+export function recordDraw(session: Session): Session {
+  const tracked = session.rules.trackDealer && session.dealerId !== null;
+  const dealer = tracked && session.rules.passDealerOnDraw ? passDealer(session) : holdDraw(session);
+  return commitBoard(session, '流局', {
+    players: session.players,
+    seats: session.seats,
+    dealerId: dealer.dealerId,
+    dealerMark: dealer.dealerMark,
+    roundWind: dealer.roundWind,
+    seatWind: dealer.seatWind,
+    handCount: session.handCount + 1,
+    pool: session.pool,
+  });
+}
+
+function holdDraw(session: Session): { dealerId: string | null; dealerMark: DealerMark; roundWind: Wind; seatWind: Wind } {
+  if (!session.rules.trackDealer || session.dealerId === null) {
+    return {
+      dealerId: session.dealerId,
+      dealerMark: session.dealerMark,
+      roundWind: session.roundWind,
+      seatWind: session.seatWind,
+    };
+  }
+  const count = session.dealerMark.kind === 'draw' ? session.dealerMark.count + 1 : 1;
+  return {
+    dealerId: session.dealerId,
+    dealerMark: { kind: 'draw', count },
+    roundWind: session.roundWind,
+    seatWind: session.seatWind,
+  };
 }
 
 function fullDiscard(session: Session, input: WinInput, ordinary: string): WinPreview | null {

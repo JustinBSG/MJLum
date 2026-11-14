@@ -8,10 +8,12 @@ import {
   setFanRange,
   setMultiplier,
   setOrdinary,
+  setPassDealerOnDraw,
   setPaymentMode,
   setPlayerFormat,
+  setTrackDealer,
 } from '../rules/setup.ts';
-import { formatWinPreview, previewWin, recordWin } from './hand.ts';
+import { formatWinPreview, previewWin, recordDraw, recordWin } from './hand.ts';
 import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, undoLatest } from './session.ts';
 import type { Wind } from './types.ts';
 
@@ -303,6 +305,54 @@ describe('連莊', () => {
     assert.equal(next.dealerId, idOf(next, '丁家'));
     assert.equal(formatDealerBadge(next.dealerMark), '連1');
     assert.equal(formatWind(next.roundWind, next.seatWind), '南圈東風');
+  });
+});
+
+describe('流局', () => {
+  it('advances 莊 and 圈風 when 流局時過莊 is on and leaves the scores at 0', () => {
+    const session = four('custom');
+    const next = recordDraw(session);
+    assert.equal(balance(next, '甲家'), '0');
+    assert.equal(balance(next, '乙家'), '0');
+    assert.equal(balance(next, '丙家'), '0');
+    assert.equal(balance(next, '丁家'), '0');
+    assert.equal(next.pool, '0');
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
+    assert.equal(next.handCount, 1);
+    assert.equal(next.ledger.at(-1)?.label, '流局');
+    const restored = undoLatest(next);
+    assert.equal(restored.dealerId, idOf(restored, '甲家'));
+    assert.equal(formatWind(restored.roundWind, restored.seatWind), '東圈東風');
+    assert.equal(restored.handCount, 0);
+  });
+
+  it('keeps 莊 and 圈風 and raises 冧1 through 冧5 when 流局時過莊 is off', () => {
+    const rules = setPassDealerOnDraw(createCustomDraft(), false);
+    let session = withDealer(four('custom', rules), '丁家');
+    for (const mark of ['冧1', '冧2', '冧3', '冧4', '冧5']) {
+      session = recordDraw(session);
+      assert.equal(session.dealerId, idOf(session, '丁家'));
+      assert.equal(formatDealerBadge(session.dealerMark), mark);
+      assert.equal(formatWind(session.roundWind, session.seatWind), '東圈東風');
+      assert.equal(balance(session, '甲家'), '0');
+      assert.equal(balance(session, '丁家'), '0');
+    }
+  });
+
+  it('records a drawn hand without a dealer when tracking is off', () => {
+    const session = startSession({
+      rules: setTrackDealer(createCustomDraft(), false),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: null,
+      startedAt,
+    });
+    const next = recordDraw(session);
+    assert.equal(next.dealerId, null);
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(next.handCount, 1);
+    assert.equal(balance(next, '甲家'), '0');
   });
 });
 
