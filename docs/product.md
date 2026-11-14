@@ -1,8 +1,8 @@
-# 麻雀諳
+# 麻雀諗
 
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
-麻雀諳 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game.
+麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game.
 
 Product direction as of 14 November 2026:
 
