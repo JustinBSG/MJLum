@@ -22,14 +22,15 @@ export type WinPreview = {
 };
 
 /**
- * 全銃 discard, four-player 自摸, and the demonstrated three-player 全銃 ×4/3 自摸.
- * 半銃 discard splits, dealer advance, and an unrecorded fan amount are not calculated here.
+ * 全銃 discard, four-player 半銃 discard, four-player 自摸, and the demonstrated
+ * three-player 全銃 ×4/3 自摸. Dealer advance and an unrecorded fan amount are not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
   const ordinary = ordinaryAmount(session, input.fan);
   if (!ordinary) return null;
   if (!seatedPlayerIds(session).includes(input.winnerId)) return null;
   if (input.discarderId === null) return selfDraw(session, input, ordinary);
+  if (session.rules.paymentMode === 'half-discard') return halfDiscard(session, input, ordinary);
   return fullDiscard(session, input, ordinary);
 }
 
@@ -89,7 +90,35 @@ function fullDiscard(session: Session, input: WinInput, ordinary: string): WinPr
     total: ordinary,
     deltas: [
       { playerId: input.winnerId, delta: ordinary },
-      { playerId: discarderId, delta: Score.fromString(ordinary).multiply(Score.fromString('-1')).toExact() },
+      { playerId: discarderId, delta: negate(Score.fromString(ordinary)) },
+    ],
+  };
+}
+
+/** Four seated players. The winner receives F, the discarder pays F/2, and each other seated player pays F/4. */
+function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPreview | null {
+  if (session.rules.playerFormat !== 'four' || session.rules.paymentMode !== 'half-discard') return null;
+  const discarderId = input.discarderId;
+  if (!discarderId || discarderId === input.winnerId) return null;
+  const seated = seatedPlayerIds(session);
+  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
+  const others = seated.filter((id) => id !== input.winnerId && id !== discarderId);
+  if (others.length !== 2) return null;
+  const amount = Score.fromString(ordinary);
+  const half = amount.divide(Score.fromRational(2, 1));
+  const quarter = amount.divide(Score.fromRational(4, 1));
+  return {
+    kind: 'discard',
+    fan: input.fan,
+    winnerId: input.winnerId,
+    discarderId,
+    ordinary,
+    multiplier: null,
+    total: amount.toExact(),
+    deltas: [
+      { playerId: input.winnerId, delta: amount.toExact() },
+      { playerId: discarderId, delta: negate(half) },
+      ...others.map((playerId) => ({ playerId, delta: negate(quarter) })),
     ],
   };
 }
@@ -101,7 +130,7 @@ function selfDraw(session: Session, input: WinInput, ordinary: string): WinPrevi
   const multiplier = session.rules.multiplier;
   const total = Score.fromString(ordinary).multiply(Score.fromString(multiplier));
   const share = total.divide(Score.fromRational(payers, 1));
-  const paid = share.multiply(Score.fromString('-1')).toExact();
+  const paid = negate(share);
   return {
     kind: 'self-draw',
     fan: input.fan,
@@ -128,6 +157,10 @@ function selfDrawPayers(session: Session, opponents: number): number | null {
     return 2;
   }
   return null;
+}
+
+function negate(score: Score): string {
+  return score.multiply(Score.fromString('-1')).toExact();
 }
 
 function ordinaryAmount(session: Session, fan: number): string | null {

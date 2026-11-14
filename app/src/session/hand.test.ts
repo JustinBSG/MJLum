@@ -4,8 +4,10 @@ import { describe, it } from 'node:test';
 import {
   createCustomDraft,
   createPresetDraft,
+  formatAmount,
   setFanRange,
   setMultiplier,
+  setOrdinary,
   setPaymentMode,
   setPlayerFormat,
 } from '../rules/setup.ts';
@@ -36,14 +38,77 @@ describe('全銃 ordinary win', () => {
     assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
   });
 
-  it('does not score a 半銃 discard or a fan with no recorded amount', () => {
-    const half = four('custom', setPaymentMode(createCustomDraft(), 'half-discard'));
-    const winner = idOf(half, '丁家');
-    const discarder = idOf(half, '丙家');
-    assert.equal(previewWin(half, { winnerId: winner, fan: 3, discarderId: discarder }), null);
-
+  it('does not score an unrecorded fan or a three-player 半銃 discard', () => {
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
     assert.equal(previewWin(three, { winnerId: idOf(three, '甲家'), fan: 7, discarderId: idOf(three, '丙家') }), null);
+    const halfThree = startNamed(setPaymentMode(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), 'half-discard'), [
+      '甲家',
+      '乙家',
+      '丙家',
+    ]);
+    assert.equal(
+      previewWin(halfThree, { winnerId: idOf(halfThree, '甲家'), fan: 3, discarderId: idOf(halfThree, '丙家') }),
+      null,
+    );
+  });
+});
+
+describe('four-player 半銃', () => {
+  it('splits F into a half for the discarder and a quarter for each other seated player', () => {
+    const rules = setPaymentMode(setOrdinary(createCustomDraft(), 3, '15'), 'half-discard');
+    const session = four('custom', rules);
+    const preview = previewWin(session, { winnerId: idOf(session, '丁家'), fan: 3, discarderId: idOf(session, '丙家') });
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['食糊分數 15', '總分 15']);
+
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 3, discarderId: idOf(session, '丙家') });
+    assert.equal(formatAmount(balance(next, '丁家')), '15');
+    assert.equal(formatAmount(balance(next, '丙家')), '-7.5');
+    assert.equal(formatAmount(balance(next, '甲家')), '-3.75');
+    assert.equal(formatAmount(balance(next, '乙家')), '-3.75');
+    assert.equal(balance(next, '甲家'), '-15/4');
+    assert.equal(next.dealerId, session.dealerId);
+  });
+
+  it('uses the same quarter for the dealer and the other non-discarder', () => {
+    const rules = setPaymentMode(setOrdinary(createCustomDraft(), 4, '32'), 'half-discard');
+    const session = four('custom', rules);
+    const recorded = recordWin(session, {
+      winnerId: idOf(session, '乙家'),
+      fan: 4,
+      discarderId: idOf(session, '丁家'),
+    });
+    assert.equal(balance(recorded, '乙家'), '32');
+    assert.equal(balance(recorded, '丁家'), '-16');
+    assert.equal(balance(recorded, '甲家'), '-8');
+    assert.equal(balance(recorded, '丙家'), '-8');
+    assert.equal(recorded.dealerId, session.dealerId);
+
+    const large = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
+    const wide = four('51', large);
+    const eleven = recordWin(wide, { winnerId: idOf(wide, '乙家'), fan: 11, discarderId: idOf(wide, '丁家') });
+    assert.equal(balance(eleven, '乙家'), '4096');
+    assert.equal(balance(eleven, '丁家'), '-2048');
+    assert.equal(balance(eleven, '甲家'), '-1024');
+    assert.equal(balance(eleven, '丙家'), '-1024');
+  });
+
+  it('keeps a 12-fan 半銃 自摸 on the four-player self-draw split', () => {
+    const rules = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
+    const session = four('51', rules);
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 12, discarderId: null });
+    assert.equal(balance(next, '丁家'), '12288');
+    assert.equal(balance(next, '甲家'), '-4096');
+    assert.equal(balance(next, '乙家'), '-4096');
+    assert.equal(balance(next, '丙家'), '-4096');
+  });
+
+  it('does not charge a reserve', () => {
+    const rules = setPaymentMode(setOrdinary(createCustomDraft(), 3, '15'), 'half-discard');
+    const session = addReserve(four('custom', rules), '戊家');
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 3, discarderId: idOf(session, '丙家') });
+    assert.equal(balance(next, '戊家'), '0');
+    assert.equal(formatAmount(balance(next, '甲家')), '-3.75');
   });
 });
 
