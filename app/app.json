@@ -1,16 +1,20 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "麻雀諗",
+    "slug": "mjlum",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "scheme": "mjlum",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "zh-Hant-HK"
+      }
     },
     "android": {
+      "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -31,6 +35,13 @@
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["zh-Hant-HK"]
         }
       ]
     ],
