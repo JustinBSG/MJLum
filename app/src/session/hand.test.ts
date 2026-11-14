@@ -521,6 +521,72 @@ describe('出銃者包自摸', () => {
   });
 });
 
+describe('出銃者包輸', () => {
+  it('makes only the discarder pay the ordinary amount', () => {
+    const rules = setPaymentMode(setOrdinary(setFanRange(createPresetDraft('51-full'), 3, 13), 3, '15'), 'half-discard');
+    const session = withBalances(four('51', rules), {
+      甲家: '-15/4',
+      乙家: '-15/4',
+      丙家: '-207/2',
+      丁家: '111',
+    });
+    const input = {
+      winnerId: idOf(session, '丁家'),
+      fan: 4,
+      discarderId: idOf(session, '丙家'),
+      discarderPaysLoss: true,
+    };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.equal(preview.kind, 'discard');
+    assert.deepEqual(formatWinPreview(preview), ['食糊分數 32', '總分 32']);
+
+    const next = recordWin(session, input);
+    assert.equal(formatAmount(balance(next, '甲家')), '-3.75');
+    assert.equal(formatAmount(balance(next, '乙家')), '-3.75');
+    assert.equal(formatAmount(balance(next, '丙家')), '-135.5');
+    assert.equal(formatAmount(balance(next, '丁家')), '143');
+    assert.equal(balance(next, '丙家'), '-271/2');
+    assert.equal(player(next, '丁家').wins, 1);
+    assert.equal(player(next, '丁家').selfDraws, 0);
+    assert.equal(player(next, '丙家').discards, 1);
+    assert.equal(next.ledger.at(-1)?.label, '4番 食糊');
+  });
+
+  it('does not score both 包 toggles, a three-player 包輸, or a 包輸 一炮多響', () => {
+    const rules = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
+    const session = four('51', rules);
+    const both = {
+      winnerId: idOf(session, '丁家'),
+      fan: 4,
+      discarderId: idOf(session, '丙家'),
+      discarderPaysSelfDraw: true,
+      discarderPaysLoss: true,
+    };
+    assert.equal(previewWin(session, both), null);
+    assert.equal(
+      previewWin(session, {
+        winnerId: idOf(session, '丁家'),
+        fan: 4,
+        discarderId: idOf(session, '丙家'),
+        discarderPaysLoss: true,
+        also: [{ playerId: idOf(session, '乙家'), fan: 5 }],
+      }),
+      null,
+    );
+    const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
+    assert.equal(
+      previewWin(three, {
+        winnerId: idOf(three, '甲家'),
+        fan: 4,
+        discarderId: idOf(three, '丙家'),
+        discarderPaysLoss: true,
+      }),
+      null,
+    );
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');

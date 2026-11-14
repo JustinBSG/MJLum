@@ -16,6 +16,8 @@ export type WinInput = {
   falseWinAsSelfDraw?: boolean;
   /** 出銃者包自摸. The selected 出銃者 alone pays the self-draw total. */
   discarderPaysSelfDraw?: boolean;
+  /** 出銃者包輸. The selected 出銃者 alone pays the ordinary amount. Not combined with 包自摸. */
+  discarderPaysLoss?: boolean;
 };
 
 export type WinPreview = {
@@ -32,16 +34,17 @@ export type WinPreview = {
 
 /**
  * 全銃 discard, four-player 半銃 discard, four-player 自摸, the demonstrated
- * three-player 全銃 ×4/3 自摸, and a four-player 詐糊.
+ * three-player 全銃 ×4/3 自摸, a four-player 詐糊, and the two 出銃者包 toggles.
  * An unrecorded fan amount is not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
+  if (input.discarderPaysSelfDraw && input.discarderPaysLoss) return null;
   if (input.falseWin) {
-    if (input.discarderPaysSelfDraw) return null;
+    if (input.discarderPaysSelfDraw || input.discarderPaysLoss) return null;
     return falseWin(session, input);
   }
   if ((input.also?.length ?? 0) > 0) {
-    if (input.discarderPaysSelfDraw) return null;
+    if (input.discarderPaysSelfDraw || input.discarderPaysLoss) return null;
     return multiDiscard(session, input);
   }
   const ordinary = ordinaryAmount(session, input.fan);
@@ -49,6 +52,7 @@ export function previewWin(session: Session, input: WinInput): WinPreview | null
   if (!seatedPlayerIds(session).includes(input.winnerId)) return null;
   if (input.discarderId === null) return selfDraw(session, input, ordinary);
   if (input.discarderPaysSelfDraw) return discarderCoversSelfDraw(session, input, ordinary);
+  if (input.discarderPaysLoss) return discarderCoversLoss(session, input, ordinary);
   if (session.rules.paymentMode === 'half-discard') return halfDiscard(session, input, ordinary);
   return fullDiscard(session, input, ordinary);
 }
@@ -278,6 +282,33 @@ function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: st
     deltas: [
       { playerId: input.winnerId, delta: total.toExact() },
       { playerId: discarderId, delta: negate(total) },
+    ],
+  };
+}
+
+/**
+ * 出銃者包輸, with 包自摸 off. Four seated players. Only the 出銃者 pays the
+ * ordinary amount. The hand counts as an ordinary discard win. Three-player
+ * and 一炮多響 combinations were not recorded.
+ */
+function discarderCoversLoss(session: Session, input: WinInput, ordinary: string): WinPreview | null {
+  if (session.rules.playerFormat !== 'four') return null;
+  const discarderId = input.discarderId;
+  if (!discarderId || discarderId === input.winnerId) return null;
+  const seated = seatedPlayerIds(session);
+  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
+  return {
+    kind: 'discard',
+    fan: input.fan,
+    winnerId: input.winnerId,
+    winnerIds: [input.winnerId],
+    discarderId,
+    ordinary,
+    multiplier: null,
+    total: ordinary,
+    deltas: [
+      { playerId: input.winnerId, delta: ordinary },
+      { playerId: discarderId, delta: negate(Score.fromString(ordinary)) },
     ],
   };
 }
