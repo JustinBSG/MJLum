@@ -48,6 +48,10 @@ export default function SessionScreen() {
   const [winnerIds, setWinnerIds] = useState<string[]>([]);
   const [selectedWinnerId, setSelectedWinnerId] = useState<string | null>(null);
   const [fans, setFans] = useState<Record<string, string>>({});
+  const [falseWin, setFalseWin] = useState(false);
+  const [falseWinAsSelfDraw, setFalseWinAsSelfDraw] = useState(false);
+  const [discarderPaysSelfDraw, setDiscarderPaysSelfDraw] = useState(false);
+  const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -136,6 +140,10 @@ export default function SessionScreen() {
     setWinnerIds([]);
     setSelectedWinnerId(null);
     setFans({});
+    setFalseWin(false);
+    setFalseWinAsSelfDraw(false);
+    setDiscarderPaysSelfDraw(false);
+    setDiscarderPaysLoss(false);
     setPanel('win');
   }
 
@@ -149,6 +157,8 @@ export default function SessionScreen() {
       return;
     }
     setMulti(true);
+    setDiscarderPaysSelfDraw(false);
+    setDiscarderPaysLoss(false);
     if (payer === 'self-draw') setPayer(null);
     if (winnerId) {
       setWinnerIds([winnerId]);
@@ -172,8 +182,58 @@ export default function SessionScreen() {
     if (!winnerIds.includes(playerId)) setWinnerIds([...winnerIds, playerId]);
   }
 
+  function toggleFalseWin() {
+    if (!falseWin) {
+      if (multi && selectedWinnerId) {
+        setWinnerId(selectedWinnerId);
+        setFanText(fans[selectedWinnerId] ?? '');
+      }
+      setMulti(false);
+      setDiscarderPaysSelfDraw(false);
+      setDiscarderPaysLoss(false);
+    }
+    setFalseWin((current) => !current);
+  }
+
+  function toggleCoverSelfDraw() {
+    setDiscarderPaysSelfDraw((current) => {
+      if (!current) {
+        setMulti(false);
+        if (payer === 'self-draw') setPayer(null);
+      }
+      return !current;
+    });
+  }
+
+  function toggleCoverLoss() {
+    setDiscarderPaysLoss((current) => {
+      if (!current) {
+        setMulti(false);
+        if (payer === 'self-draw') setPayer(null);
+      }
+      return !current;
+    });
+  }
+
   async function confirmWin() {
-    if (!session || payer === null) return;
+    if (!session) return;
+    if (falseWin) {
+      if (!winnerId) return;
+      const fan = readFan(fanText);
+      if (fan === null) return;
+      const next = recordWin(session, {
+        winnerId,
+        fan,
+        discarderId: null,
+        falseWin: true,
+        falseWinAsSelfDraw,
+      });
+      if (next === session) return;
+      setPanel(null);
+      await persist(next);
+      return;
+    }
+    if (payer === null) return;
     if (multi) {
       if (!selectedWinnerId || payer === 'self-draw') return;
       const fan = readFan(fans[selectedWinnerId] ?? '');
@@ -197,6 +257,8 @@ export default function SessionScreen() {
       winnerId,
       fan,
       discarderId: payer === 'self-draw' ? null : payer,
+      discarderPaysSelfDraw,
+      discarderPaysLoss,
     });
     if (next === session) return;
     setPanel(null);
@@ -216,12 +278,16 @@ export default function SessionScreen() {
     : [];
   const alsoComplete = !multi || also.length === winnerIds.filter((id) => id !== selectedWinnerId).length;
   const winPreview =
-    session && previewWinnerId && previewFan !== null && payer !== null && alsoComplete
+    session && previewWinnerId && previewFan !== null && alsoComplete && (falseWin || payer !== null)
       ? previewWin(session, {
           winnerId: previewWinnerId,
           fan: previewFan,
-          discarderId: payer === 'self-draw' ? null : payer,
-          also,
+          discarderId: falseWin || payer === 'self-draw' || payer === null ? null : payer,
+          also: falseWin ? [] : also,
+          falseWin,
+          falseWinAsSelfDraw,
+          discarderPaysSelfDraw,
+          discarderPaysLoss,
         })
       : null;
 
@@ -308,37 +374,60 @@ export default function SessionScreen() {
                 );
               })}
               <TextInput
-                accessibilityLabel="番數"
+                accessibilityLabel={falseWin ? '詐糊番數' : '番數'}
                 accessibilityLanguage={APP_LOCALE}
                 keyboardType="number-pad"
                 onChangeText={(text) => {
-                  if (!multi) {
+                  if (!multi || falseWin) {
                     setFanText(text);
                     return;
                   }
                   if (!selectedWinnerId) return;
                   setFans((current) => ({ ...current, [selectedWinnerId]: text }));
                 }}
-                placeholder="番數"
+                placeholder={falseWin ? '詐糊番數' : '番數'}
                 placeholderTextColor={theme.textSecondary}
                 style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
-                value={multi ? (selectedWinnerId ? (fans[selectedWinnerId] ?? '') : '') : fanText}
+                value={multi && !falseWin ? (selectedWinnerId ? (fans[selectedWinnerId] ?? '') : '') : fanText}
               />
-              <Choice label={`一炮多響 ${multi ? '開' : '關'}`} onPress={toggleMulti} selected={multi} />
-              {multi ? null : <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />}
-              {session.seats.map((seat) => {
-                const player = session.players.find((item) => item.id === seat.playerId);
-                const blocked = multi ? winnerIds.includes(player?.id ?? '') : player?.id === winnerId;
-                if (!player || blocked) return null;
-                return (
+              <Choice label={`詐糊 ${falseWin ? '開' : '關'}`} onPress={toggleFalseWin} selected={falseWin} />
+              {falseWin ? (
+                <Choice
+                  label={`詐糊賠位自摸 ${falseWinAsSelfDraw ? '開' : '關'}`}
+                  onPress={() => setFalseWinAsSelfDraw((value) => !value)}
+                  selected={falseWinAsSelfDraw}
+                />
+              ) : (
+                <>
+                  <Choice label={`一炮多響 ${multi ? '開' : '關'}`} onPress={toggleMulti} selected={multi} />
                   <Choice
-                    key={`discard-${player.id}`}
-                    label={`出銃者 ${player.name}`}
-                    onPress={() => setPayer(player.id)}
-                    selected={payer === player.id}
+                    label={`出銃者包自摸 ${discarderPaysSelfDraw ? '開' : '關'}`}
+                    onPress={toggleCoverSelfDraw}
+                    selected={discarderPaysSelfDraw}
                   />
-                );
-              })}
+                  <Choice
+                    label={`出銃者包輸 ${discarderPaysLoss ? '開' : '關'}`}
+                    onPress={toggleCoverLoss}
+                    selected={discarderPaysLoss}
+                  />
+                  {multi || discarderPaysSelfDraw || discarderPaysLoss ? null : (
+                    <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />
+                  )}
+                  {session.seats.map((seat) => {
+                    const player = session.players.find((item) => item.id === seat.playerId);
+                    const blocked = multi ? winnerIds.includes(player?.id ?? '') : player?.id === winnerId;
+                    if (!player || blocked) return null;
+                    return (
+                      <Choice
+                        key={`discard-${player.id}`}
+                        label={`出銃者 ${player.name}`}
+                        onPress={() => setPayer(player.id)}
+                        selected={payer === player.id}
+                      />
+                    );
+                  })}
+                </>
+              )}
               {winPreview ? formatWinPreview(winPreview).map((line) => (
                 <ThemedText accessibilityLanguage={APP_LOCALE} key={line}>
                   {line}
