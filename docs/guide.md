@@ -28,6 +28,8 @@ The following points are decided:
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
+- The first release supports Hong Kong Mahjong only. Other regional categories, including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將, are omitted.
+- The first release includes statistics, titles, a radar chart, a dice utility, and fan-help. Formulas, award rules, radar weights, and help contents that were not established in the local reference remain unspecified.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
@@ -42,6 +44,8 @@ The following function areas are planned so the app can serve as a table scoreke
 - **Scoreboard / table view:** planned as the view that shows current scores, and as the content that can be sent to an external display.
 - **Session and scoring entry:** planned as the way players start or continue a game and record scoring events. Scoring and session behavior that was taken from the local reference is recorded below.
 - **Settlement:** planned as a user-requested view of who should pay whom to reconcile current net session balances, as taken from the local reference. Details are in the Settlement section.
+- **Statistics, titles, and radar chart:** included in the first release. Session-wide statistics, title badges, and a player radar chart follow the local reference where that behavior is established. Exact formulas and award rules remain unspecified.
+- **Dice utility and fan-help:** included in the first release. These are table utilities; their established behavior and remaining gaps are recorded below.
 - **Sharing of metadata or session data:** not supported. The app is a simple local tool and does not share results, history, player information, settlement, or other session information.
 - **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only.
 - **External display:** planned as a projector or larger-screen scoreboard on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported. The user starts and ends the connection with the same share-screen button in the app. The look of the external scoreboard is left to later AI design. Behavior when the connection drops is unspecified.
@@ -79,7 +83,7 @@ The app keeps all in-game records (all the things in the game) across sessions. 
 
 **Taken from the local reference:** during a session, the app keeps running net balances, a chronological hand/event ledger, and accumulated session statistics. The ledger can emphasize events, score changes, or a combined view, and can be shown in forward or reverse order.
 
-**Unspecified:** how past sessions are browsed, resumed, or reopened after a new session starts; whether an older history row can be edited or deleted; and exact statistic formulas if statistics are shown.
+**Unspecified:** how past sessions are browsed, resumed, or reopened after a new session starts; whether an older history row can be edited or deleted; and exact statistic formulas (statistics themselves are in the first release).
 
 ## UI/UX design process
 
@@ -106,28 +110,58 @@ Amount editing that is established is in **rule setup** (ordinary-win amounts in
 **Taken from the local reference:**
 
 - Rules can be chosen from Hong Kong presets or created as a named custom setup. A custom setup can be saved for reuse, or used once without saving. The demonstrated default custom name is 新玩法.
-- Visible Hong Kong preset families include 3番4, 二五雞, 五一, and 一二蚊, each in 半辣上 and 辣辣上 forms, plus a three-player 3番4 半辣上 variant. Their meaning is the visible start/cap amounts and score tables, not an extra invented formula. Different presets can share a starting amount but differ later in the table; the whole table should be inspected.
-- Other regional categories appear in the reference (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將), but their full scoring was not established.
+- Visible Hong Kong preset families include 3番4, 二五雞, 五一, and 一二蚊, each in 半辣上 and 辣辣上 forms, plus a three-player 3番4 半辣上 variant. Their meaning is the visible start and cap amounts and score tables, not an extra invented formula. Different presets can share a starting amount but differ later in the table; the whole table should be inspected. The visible summaries use 全銃. The list of presets may continue beyond what was captured. The table does not specify every intermediate fan amount for each preset.
 
-**Unspecified:** whether first-release 麻雀諗 includes only 香港麻雀 or also those other categories; saved-rule rename, delete, name-length, and duplicate-name behavior.
+Visible Hong Kong preset minimum and cap amounts:
+
+| Preset | Minimum shown | Amount at minimum | Cap shown | Amount at cap |
+|---|---:|---:|---:|---:|
+| 3番4 半辣上 | 3 fan | 4 | 8 fan | 32 |
+| 3番4 辣辣上 | 3 fan | 4 | 8 fan | 128 |
+| 二五雞 半辣上 | 3 fan | 8 | 8 fan | 64 |
+| 二五雞 辣辣上 | 3 fan | 8 | 8 fan | 256 |
+| 五一 半辣上 | 3 fan | 16 | 8 fan | 128 |
+| 五一 辣辣上 | 3 fan | 16 | 8 fan | 512 |
+| 一二蚊 半辣上 | 3 fan | 32 | 8 fan | 256 |
+| 一二蚊 辣辣上 | 3 fan | 32 | 8 fan | 1024 |
+| 3番4 半辣上（三人） | 3 fan | 3 | 8 fan | 24 |
+
+The first release of 麻雀諗 supports Hong Kong Mahjong only. Other regional categories appear in the reference (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) but are omitted from the first release.
+
+**Unspecified:** saved-rule rename, delete, name-length, and duplicate-name behavior.
 
 ### Player count and payment mode
 
 **Taken from the local reference:**
 
 - Player count is a format choice of four-player (四人麻雀) or three-player (三人麻雀), and is separate from how many people are on the session roster. Only four-player scoring was fully demonstrated.
-- Payment modes include 全銃 and 半銃. Under demonstrated 全銃, an ordinary discard win transfers only the configured ordinary-win amount from the discarder to the winner; the other seated players are unchanged for that hand.
+- Payment modes in the reference include 全銃 and 半銃. Under demonstrated 全銃, an ordinary discard win transfers only the configured ordinary-win amount from the discarder to the winner; the other seated players are unchanged for that hand.
 
-**Unspecified:** 半銃 payer split, rounding, and interaction with special cases; detailed three-player layout, score-table construction, and self-draw allocation.
+**Unspecified:** 半銃 payer split, rounding, and interaction with special cases; detailed three-player layout, score-table construction, and self-draw allocation; and whether first-release 麻雀諗 keeps 半銃 as a visible option.
 
 ### Fan range and the score table
 
 **Taken from the local reference:**
 
-- Fan range has a minimum winning threshold (起糊) and a cap (滿糊).
+- Fan range has a minimum winning threshold (起糊) and a cap (滿糊). A two-handle range control is used in the reference; the demonstrated custom setup keeps the minimum at 3 and changes the cap from 8 to 9 to 10. Those observations do not establish the complete allowed range.
 - Ordinary-win amounts (食糊分數) are entered per fan level in the rules.
-- Self-draw amounts (自摸分數) are derived in the demonstrated rules as ordinary amount × 1.50, and that figure is the winner’s **total** gain. In four-player self-draw, each of the three opponents pays one third of that total. Example: 512 × 1.50 = 768 total; 256 paid by each of the three opponents.
+- Self-draw amounts (自摸分數) are derived in the demonstrated rules as ordinary amount × 1.50, and that figure is the winner’s **total** gain. In four-player self-draw, each of the three opponents pays one third of that total.
 - Those table values belong to a given rules setup, not a single universal Hong Kong table.
+
+The main demonstrated custom table, with minimum 3 and cap 10:
+
+| Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
+|---:|---:|---:|
+| 3 | 4 | 6 |
+| 4 | 8 | 12 |
+| 5 | 16 | 24 |
+| 6 | 32 | 48 |
+| 7 | 64 | 96 |
+| 8 | 128 | 192 |
+| 9 | 256 | 384 |
+| 10 | 512 | 768 |
+
+Example of the self-draw derivation: 512 × 1.50 = 768 total; 256 paid by each of the three opponents.
 
 **Unspecified:** allowed min/max endpoints; what happens if a user tries to enter a fan below 起糊 or above 滿糊; whether the 1.50 multiplier can be edited; decimal handling, rounding, and three-player self-draw allocation.
 
@@ -135,7 +169,7 @@ Amount editing that is established is in **rule setup** (ordinary-win amounts in
 
 **Taken from the local reference:** Jackpot is an optional shared pool. When it is enabled, the rules specify how much each player contributes to the pool on a drawn hand. The demonstrated scoring sequence had Jackpot off.
 
-**Unspecified:** default on/off and default contribution amount; how the pool is displayed, awarded, withdrawn, or settled.
+**Unspecified:** default on/off and default contribution amount; how the pool is displayed, awarded, withdrawn, or settled; and whether first-release 麻雀諗 keeps Jackpot as a visible option.
 
 ### Dealer, wind, and session progress
 
@@ -172,20 +206,39 @@ Amount editing that is established is in **rule setup** (ordinary-win amounts in
 
 **Taken from the local reference:**
 
-- **Ordinary win from a discard:** select the winner, the fan value, and the discarder (出銃者); review the calculated hand score and total; confirm.
-- **Self-draw (自摸):** the same entry, with self-draw chosen instead of another player as the payer. The preview shows the fan amount, the self-draw multiplier, and the winner’s total gain.
-- **Multiple winners on one discard (一炮多響):** more than one player can win from the same discard, recorded together as one hand. Each additional winner has their own fan value; the same discarder pays. The demonstrated result matched each winner’s ordinary-win amount, with the discarder’s loss equal to the sum of those amounts.
-- **False-win (詐糊):** a false or invalid win option exists in the fan selector.
-- **Special payer option (出銃者包自摸):** a distinct liability/payment setting whose wording refers to the discarder covering a self-draw-related liability. It was off in the inspected examples.
+- **Ordinary win from a discard:** select the winner, the fan value, and the discarder (出銃者); review the calculated hand score and total; confirm. In the demonstrated custom table, a 5-fan ordinary win transfers 16 from the discarder only; the other seated players are unchanged for that hand. Demonstrated result: player c wins 5 fan from player b; b changes from −256 to −272; c changes from −240 to −224; a and d do not change for that hand.
+- **Self-draw (自摸):** the same entry, with self-draw chosen instead of another player as the payer. The preview shows the fan amount, the self-draw multiplier, and the winner’s total gain. Demonstrated 10-fan self-draw from an all-zero table: 512 × 1.50 = 768 total; after confirmation, a is +768 and b, c, and d each pay 256. A later seated-only example also showed a self-draw worth 24 total costing each of the three seated opponents 8; a player who had left the table did not pay.
+- **Multiple winners on one discard (一炮多響):** more than one player can win from the same discard, recorded together as one hand, with up to three winners in the demonstrated flow. Each additional winner has their own fan value; the same discarder pays. The demonstrated result matched each winner’s ordinary-win amount, with the discarder’s loss equal to the sum of those amounts:
+
+| Player | Before | After | Change |
+|---|---:|---:|---:|
+| a | 752 | 880 | +128 |
+| b | −272 | −660 | −388 |
+| c | −224 | −220 | +4 |
+| d | −256 | 0 | +256 |
+
+Total received 128 + 4 + 256 = 388, matching b’s loss. The increments correspond to the configured 8-fan, 3-fan, and 9-fan ordinary-win amounts.
+
+- **False-win (詐糊):** a false or invalid win option exists in the fan selector. Its outcome was not exercised.
+- **Special payer option (出銃者包自摸):** a distinct liability/payment setting whose wording refers to the discarder covering a self-draw-related liability. It was off in the inspected examples, and an enabled transaction was not demonstrated.
 - **Drawn hand (流局):** used when a hand ends without a winner and should still be recorded as session progress, after confirmation. In the demonstrated setup (流局時過莊 on, Jackpot off), draws advance dealer/wind indicators while balances remain unchanged.
 
 After confirmation, running totals, session progress, statistics, and the hand history update.
 
-**Unspecified:** 詐糊 penalty, who pays whom, and effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); and numeric validation.
+**Unspecified:** 詐糊 penalty, who pays whom, and effects on dealer progress or statistics; the exact calculation and eligible situations for 出銃者包自摸; whether first-release 麻雀諗 keeps 詐糊 and 出銃者包自摸 as visible options; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局.
 
 ### Undo
 
-**Taken from the local reference:** the latest entry can be undone, after confirmation, restoring the previous scores and the visible dealer/progress state. Undo restores a previous state; it is not an input for manually choosing a new balance. The practical correction is to undo and re-enter the correct result.
+**Taken from the local reference:** the latest entry can be undone (還原分數), after confirmation, restoring the previous scores and the visible dealer/progress state. Undo restores a previous state; it is not an input for manually choosing a new balance. The practical correction is to undo and re-enter the correct result.
+
+Demonstrated latest-entry undo, reversing a substitute’s self-draw of 24:
+
+| Player | Before undo | After undo |
+|---|---:|---:|
+| a | 872 | 880 |
+| b | −668 | −660 |
+| d | −8 | 0 |
+| e | 24 | 0 |
 
 **Unspecified:** undo depth, redo, and editing or deleting an arbitrary older history row.
 
@@ -193,14 +246,51 @@ After confirmation, running totals, session progress, statistics, and the hand h
 
 **Taken from the local reference:**
 
-- Settlement is a user-requested view of current **net** session balances, not an automatic end-of-hand, end-of-wind, or end-of-session trigger, and not a replay of each historical hand.
+- Settlement (找數) is a user-requested, on-demand view of current **net** session balances, not an automatic end-of-hand, end-of-wind, or end-of-session trigger, and not a replay of each historical hand.
 - It displays payment instructions as payer → recipient → amount, and must use the complete session roster, including a former player who still has a non-zero balance.
-- If no player has a positive balance, the empty state is that there is no positive-balance recipient yet. Opening settlement while everyone is at zero is normal.
+- If no player has a positive balance, the empty state is that there is no positive-balance recipient yet (未有玩家分數為正數). Opening settlement while everyone is at zero is normal.
 - Settlement calculates and displays payment instructions. It does not itself mark payments as paid, move money, or expose a currency-code setting in the reference.
 
-**Unspecified:** the exact method for choosing a particular set of transfers; how a Jackpot pool would appear in settlement; and whether a currency label is needed. Paid-tracking and payment execution are not established, and 麻雀諗 is a simple local tool, so these stay out unless later decided.
+Demonstrated balances from before the undo above, including an unseated player:
 
-How the final settlement is presented on an connected external display is left to later AI design, within the no-metadata-sharing rule (the external display is a local scoreboard, not a share of session data to another person or service).
+| Player | Net balance |
+|---|---:|
+| a | +872 |
+| b | −668 |
+| c, no longer seated | −220 |
+| d | −8 |
+| e | +24 |
+
+Demonstrated transfers:
+
+| Who pays | Who receives | Payment |
+|---|---|---:|
+| c | e | 24 |
+| c | a | 196 |
+| b | a | 668 |
+| d | a | 8 |
+
+This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a receives 196 + 668 + 8 = 872. Total paid equals total received: 896. The four current table balances alone would not reconcile.
+
+**Unspecified:** the exact method for choosing a particular set of transfers; how a Jackpot pool would appear in settlement; tie-breaking among equally valid transfer sets; and whether a currency label is needed. Paid-tracking and payment execution are not established, and 麻雀諗 is a simple local tool, so these stay out unless later decided.
+
+How the final settlement is presented on a connected external display is left to later AI design, within the no-metadata-sharing rule (the external display is a local scoreboard, not a share of session data to another person or service).
+
+## Statistics, titles, radar, dice, and fan-help
+
+These features are in the first release. Layout and visual design are left to later AI design. This section records established behavior, not a UI to copy.
+
+**Taken from the local reference:**
+
+- Statistics are session-wide. They include everyone on the roster, including a player who has left a seat and a reserve player added before taking a seat.
+- The overview counts recorded wins (食糊), self-draw wins (自摸), and occasions of dealing a winning discard (出銃). In the demonstrated totals, 自摸 is a subset of 食糊, not an extra category added on top of it.
+- Individual player details also show average fan, win rate, self-draw rate, deal-in rate, and average deal-in fan. Exact denominators, rounding, substitution treatment, and multiple-winner aggregation are not established.
+- Title badges summarize performance, including 自摸王, 出銃王, 食糊王, 大牌王, and 跑龍套. More than one player can hold the same title at once, so a title is not automatically exclusive. Exact award criteria and tie-breaking rules are unspecified.
+- A radar chart is a visual summary of a player across three labelled dimensions: 進攻, 牌力, and 防守. No numeric scale, weights, or formula was established.
+- A dice utility can be used at the table to roll dice. In the demonstration, a dice result does not automatically choose the dealer, record a hand, or change a balance. Any count-adjustment limits, randomness details, and extra input methods are unspecified.
+- Fan-help is an assistance entry associated with fan input. Its contents were not opened, so the help content itself is unspecified.
+
+**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, radar-chart weights, title-award and tie-break rules, dice count limits, and fan-help contents.
 
 ## Sharing
 
@@ -218,11 +308,11 @@ Settings follow the local reference. This is a behavior and options inventory, n
 |---|---|---|
 | 玩法名稱 | Name of this rules setup | Demonstrated default: 新玩法 |
 | 人數 | Game format: 四人麻雀 or 三人麻雀 | In the demonstrated custom-setup flow, four-player remained selected. Not independently labelled as a global product default. |
-| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. 半銃 is offered, but its calculation is unspecified. | In the demonstrated custom-setup flow, 全銃 remained selected. Not independently labelled as a global default. |
+| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. 半銃 is offered, but its calculation is unspecified. Whether first-release 麻雀諗 keeps 半銃 as a visible option is also unspecified. | In the demonstrated custom-setup flow, 全銃 remained selected. Not independently labelled as a global default. |
 | 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. In the custom-setup demonstration the cap is first seen at 8 and is then moved to 9 and 10; the minimum stays at 3. Allowed endpoints are unspecified. |
-| 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. |
+| 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section. |
 | 自摸分數 | Displayed self-draw total, derived from the ordinary amount | Displayed multiplier ×1.50 in verified examples. Whether the multiplier can be edited is unspecified. |
-| Jackpot 啟用 | Optional shared pool associated with drawn hands | Default not stated. |
+| Jackpot 啟用 | Optional shared pool associated with drawn hands. Whether first-release 麻雀諗 keeps this as a visible option is unspecified. | Default not stated. |
 | 流局時每位玩家須付彩池 | When Jackpot is on: numeric contribution each player owes the pool on a drawn hand | Default amount not stated. The field is hidden when Jackpot is off. Decimal and rounding rules are unspecified. |
 | 紀錄莊家及圈風 | Enable dealer and circle/wind progress tracking (does not change score-table amounts) | Default not stated. Enabled in the played reference session. |
 | 流局時過莊 | When dealer/wind tracking is on: whether the dealer passes on a drawn hand | Default not stated. Enabled in the demonstrated configuration. Off-state is unspecified. |
@@ -240,7 +330,7 @@ After configuration, the setup is confirmed. An edited-preset path may offer to 
 | History emphasis: events / scores / combined | What the ledger emphasizes | No default stated |
 | History order | Ledger order, forward or reverse | No default stated |
 
-**Unspecified:** any preference layer beyond the rule setup and the in-session display/dealer controls listed; whether 麻雀諗 should include a dice utility or fan-help content (both appear in the reference, but their full behavior was not established).
+**Unspecified:** any preference layer beyond the rule setup and the in-session display/dealer controls listed.
 
 ## External display
 
@@ -258,17 +348,15 @@ The following are still **unspecified**:
 - What happens if the external display disconnects during a session
 - Which other similar path, if any, ships in addition to AirPlay
 
-## Other reference behavior still open for 麻雀諗
-
-The local reference also includes session statistics, title badges, a player radar chart, and a dice utility. Exact formulas, award rules, and full utility behavior were not established. Whether 麻雀諗 includes these features is **unspecified**.
+The local reference does not demonstrate live external-display behavior. The share-screen toggle above remains the decided 麻雀諗 connection model.
 
 ## Unanswered questions
 
 These decisions are still open and should be specified before implementation is treated as complete:
 
 1. 半銃 calculation (payer split, rounding, and interaction with self-draw, 一炮多響, 出銃者包自摸, and three-player play).
-2. Three-player scoring details (layout, score table, self-draw allocation, and the three-player preset table).
-3. Whether first-release 麻雀諗 includes only 香港麻雀, or also the other categories whose detailed scoring was not established.
+2. Whether first-release 麻雀諗 keeps 半銃, 詐糊, 出銃者包自摸, and Jackpot as visible options.
+3. Three-player scoring details (layout, score table, self-draw allocation, and the three-player preset table).
 4. 詐糊 penalty, who pays whom, and effects on dealer progress and statistics.
 5. 出銃者包自摸 eligible situations and exact calculation.
 6. Jackpot award, balance, withdrawal, and settlement behavior, plus default on/off and default contribution.
@@ -281,9 +369,10 @@ These decisions are still open and should be specified before implementation is 
 13. Undo depth, redo, and editing or deleting an older history row.
 14. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
 15. On-state behavior of new-session reuse options (retain players and/or rules).
-16. Settlement transfer-choice algorithm, and whether a currency label is needed.
-17. Whether statistics, titles, a radar chart, a dice utility, and fan-help are in scope, and if so their exact formulas.
-18. What happens if the external display disconnects during a session.
-19. What technical approach will be used to build the iOS and Android apps?
+16. Settlement transfer-choice algorithm, tie-breaking among equally valid transfer sets, and whether a currency label is needed.
+17. Exact formulas, denominators, rounding, radar weights, and title-award / tie-break rules for statistics, titles, and the radar chart; dice count limits; and fan-help contents.
+18. Special abortive-hand types or reason codes beyond the demonstrated 流局.
+19. What happens if the external display disconnects during a session.
+20. What technical approach will be used to build the iOS and Android apps?
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this list.

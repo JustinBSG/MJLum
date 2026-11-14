@@ -16,6 +16,8 @@ Product direction as of 14 November 2026:
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
+- The first release supports Hong Kong Mahjong only. Other regional categories are omitted.
+- The first release includes statistics, titles, a radar chart, a dice utility, and fan-help. Formulas and award rules that were not established in the local reference remain unspecified.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. The share-screen control for an external display is a local display connection, not sharing of metadata.
