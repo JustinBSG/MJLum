@@ -7,7 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
-import { formatWinPreview, previewWin, recordWin } from '@/session/hand';
+import { formatWinPreview, previewWin, recordDraw, recordWin } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
   addReserve,
@@ -24,7 +24,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'swap' | 'dealer' | 'undo' | 'fresh' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -92,6 +92,12 @@ export default function SessionScreen() {
   async function confirmDealer() {
     if (!session || !dealerId) return;
     await persist(selectDealer(session, dealerId, resetConsecutive));
+    setPanel(null);
+  }
+
+  async function confirmDraw() {
+    if (!session) return;
+    await persist(recordDraw(session));
     setPanel(null);
   }
 
@@ -277,6 +283,7 @@ export default function SessionScreen() {
           {panel === null ? (
             <ThemedView style={styles.row}>
               <Choice label="食糊!" onPress={openWin} selected={false} />
+              <Choice label="流局" onPress={() => setPanel('draw')} selected={false} />
               <Choice label="換人" onPress={() => setPanel('swap')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
@@ -340,6 +347,16 @@ export default function SessionScreen() {
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmWin} selected={false} />
+              </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === 'draw' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>流局</ThemedText>
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice label="確定" onPress={confirmDraw} selected={false} />
               </ThemedView>
             </ThemedView>
           ) : null}
