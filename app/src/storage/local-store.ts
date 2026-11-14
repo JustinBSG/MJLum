@@ -19,15 +19,29 @@ import type { SQLiteDatabase } from 'expo-sqlite';
  */
 export const DATABASE_NAME = 'mjlum.db';
 
-export const LOCAL_STORE_VERSION = 1;
+export const LOCAL_STORE_VERSION = 2;
 
 export async function migrateLocalStore(db: SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-  const current = row?.user_version ?? 0;
+  let current = row?.user_version ?? 0;
   if (current >= LOCAL_STORE_VERSION) return;
 
-  if (current === 0) {
+  if (current < 1) {
     await db.execAsync(`PRAGMA journal_mode = WAL;`);
+    current = 1;
+  }
+
+  if (current < 2) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS saved_rule_setup (
+        id TEXT PRIMARY KEY NOT NULL,
+        document TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS active_rule_setup (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        document TEXT NOT NULL
+      );
+    `);
   }
 
   await db.execAsync(`PRAGMA user_version = ${LOCAL_STORE_VERSION}`);
