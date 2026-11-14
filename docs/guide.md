@@ -24,7 +24,8 @@ The following points are decided:
 - The UI/UX is distinct, and is not a copy of the existing iPhone app 麻將計數機.
 - All UI/UX should be designed by AI. AI should follow this guide to design the most user-friendly UI/UX, and should use https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. This is a design-process decision; this document does not include those designs.
 - The app supports showing the scoreboard on a larger screen through a projector or external display. This is required on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported, but AirPlay is a must.
-- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. The look of the external scoreboard is left to later AI design.
+- Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle.
+- The external display should show 現時賽果 only. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design.
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
@@ -51,14 +52,14 @@ A second release is for extra features: anything beyond that same-functionality 
 
 The following function areas are planned so the app can serve as a table scorekeeper. Screen names, information architecture, and how the user moves between them are **unspecified**. UI/UX for these areas is to be designed later by AI, following this guide and using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
 
-- **Scoreboard / table view:** planned as the view that shows current scores, and as the content that can be sent to an external display.
+- **Scoreboard / table view:** planned as the in-app view that shows current scores. Other pages are opened in the app to check; the external display shows 現時賽果 only.
 - **Session and scoring entry:** planned as the way players start or continue a game and record scoring events. Scoring and session behavior that was taken from the local reference is recorded below.
 - **Settlement:** planned as a user-requested view of who should pay whom to reconcile current net session balances, as taken from the local reference. Details are in the Settlement section.
 - **Statistics, titles, and radar chart:** included in the first release. Session-wide statistics, title badges, and a player radar chart follow the local reference where that behavior is established. Exact formulas and award rules remain unspecified.
 - **Dice utility and fan-help:** included in the first release. These are table utilities; their established behavior and remaining gaps are recorded below.
 - **Sharing of metadata or session data:** not supported. The app is a simple local tool and does not share results, history, player information, settlement, or other session information.
 - **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only.
-- **External display:** planned as a projector or larger-screen scoreboard on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported. The user starts and ends the connection with the same share-screen button in the app. The look of the external scoreboard is left to later AI design. Behavior when the connection drops is unspecified.
+- **External display:** planned as a projector or larger-screen display of 現時賽果 only, on all first-release platforms (iOS and Android). AirPlay is required. Another similar path is welcome if it is supported. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified.
 - **History:** the app keeps all in-game records across sessions, stored locally only. How the user browses, resumes, or deletes past sessions is unspecified, except that storage is local only and should be kept light.
 
 No wireframes, component list, or visual style are specified in this document on purpose.
@@ -69,7 +70,7 @@ Intended use, at a high level:
 
 1. People play Hong Kong Mahjong in person with physical tiles.
 2. One device at the table is used to keep the table's scores in 麻雀諗. The recorder enters who won, the fan value, and how the win happened; the app applies the chosen score table.
-3. Optionally, the scoreboard is shown on a larger screen through a projector or external display. The user starts and ends that connection with the share-screen button in the app. AirPlay is required for this; another similar path is welcome if it is supported.
+3. Optionally, 現時賽果 is shown on a larger screen through a projector or external display. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check. AirPlay is required for this; another similar path is welcome if it is supported.
 
 Detailed first-run, player-setup, and in-game screen steps are **unspecified** and are left to later AI UI/UX design, following this guide.
 
@@ -290,7 +291,7 @@ This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a r
 
 **Unspecified:** the exact method for choosing a particular set of transfers; how a Jackpot pool would appear in settlement; tie-breaking among equally valid transfer sets; and whether a currency label is needed. Paid-tracking and payment execution are not established, and 麻雀諗 is a simple local tool, so these stay out unless later decided.
 
-How the final settlement is presented on a connected external display is left to later AI design, within the no-metadata-sharing rule (the external display is a local scoreboard, not a share of session data to another person or service).
+Settlement is checked in the app, not on the external display. The external display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
 ## Statistics, titles, radar, dice, and fan-help
 
@@ -350,21 +351,23 @@ After configuration, the setup is confirmed. An edited-preset path may offer to 
 
 ## External display
 
-External-display support is a decided product requirement: the scoreboard can be shown on a larger screen through a projector or external display.
+External-display support is a decided product requirement: 現時賽果 can be shown on a larger screen through a projector or external display.
 
 The following are decided:
 
 - This is required on all first-release platforms (iOS and Android).
 - AirPlay is required. Another similar path is welcome if it is supported, but AirPlay is a must.
 - Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle.
-- The look of the external scoreboard is left to later AI design.
+- The external display should show 現時賽果 only. Any other page must be opened in the app to check.
+- The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display.
+- The look of that 現時賽果 display is left to later AI design.
 
 The following are still **unspecified**:
 
 - What happens if the external display disconnects during a session
 - Which other similar path, if any, ships in addition to AirPlay
 
-The local reference does not demonstrate live external-display behavior. The share-screen toggle above remains the decided 麻雀諗 connection model.
+The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above remain the decided 麻雀諗 display model.
 
 ## Unanswered questions
 
