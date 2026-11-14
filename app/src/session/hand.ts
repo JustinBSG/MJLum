@@ -10,10 +10,12 @@ export type WinInput = {
   discarderId: string | null;
   /** Further winners on the same discard. Present only for 一炮多響. */
   also?: { playerId: string; fan: number }[];
+  /** 詐糊. winnerId is the player who declared the false win. */
+  falseWin?: boolean;
 };
 
 export type WinPreview = {
-  kind: 'discard' | 'self-draw' | 'multi';
+  kind: 'discard' | 'self-draw' | 'multi' | 'false-win';
   fan: number;
   winnerId: string;
   winnerIds: string[];
@@ -25,10 +27,12 @@ export type WinPreview = {
 };
 
 /**
- * 全銃 discard, four-player 半銃 discard, four-player 自摸, and the demonstrated
- * three-player 全銃 ×4/3 自摸. Dealer advance and an unrecorded fan amount are not calculated here.
+ * 全銃 discard, four-player 半銃 discard, four-player 自摸, the demonstrated
+ * three-player 全銃 ×4/3 自摸, and a four-player 詐糊.
+ * An unrecorded fan amount is not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
+  if (input.falseWin) return falseWin(session, input);
   if ((input.also?.length ?? 0) > 0) return multiDiscard(session, input);
   const ordinary = ordinaryAmount(session, input.fan);
   if (!ordinary) return null;
@@ -39,6 +43,7 @@ export function previewWin(session: Session, input: WinInput): WinPreview | null
 }
 
 export function formatWinPreview(preview: WinPreview): string[] {
+  if (preview.kind === 'false-win') return formatFalseWin(preview);
   if (preview.kind === 'multi') {
     return [`${preview.fan}番分數 ${formatAmount(preview.ordinary)}`, `總分 ${formatAmount(preview.total)}`];
   }
@@ -59,8 +64,9 @@ export function recordWin(session: Session, input: WinInput): Session {
     const balance = delta
       ? Score.fromString(player.balance).add(Score.fromString(delta)).toExact()
       : player.balance;
-    const winner = preview.winnerIds.includes(player.id);
-    const discarder = preview.kind !== 'self-draw' && player.id === preview.discarderId;
+    const counting = preview.kind !== 'false-win';
+    const winner = counting && preview.winnerIds.includes(player.id);
+    const discarder = counting && preview.kind !== 'self-draw' && player.id === preview.discarderId;
     return {
       ...player,
       balance,
@@ -69,18 +75,15 @@ export function recordWin(session: Session, input: WinInput): Session {
       discards: player.discards + (discarder ? 1 : 0),
     };
   });
-  const label = preview.kind === 'multi' ? '一炮多響' : preview.kind === 'self-draw' ? `${preview.fan}番 自摸` : `${preview.fan}番 食糊`;
-  const movesDealer = preview.kind !== 'multi' && session.rules.trackDealer && session.dealerId !== null;
-  const dealer = !movesDealer
-    ? {
-        dealerId: session.dealerId,
-        dealerMark: session.dealerMark,
-        roundWind: session.roundWind,
-        seatWind: session.seatWind,
-      }
-    : preview.winnerId === session.dealerId
-      ? retainDealer(session)
-      : passDealer(session);
+  const label =
+    preview.kind === 'false-win'
+      ? `${preview.fan}番 詐糊`
+      : preview.kind === 'multi'
+        ? '一炮多響'
+        : preview.kind === 'self-draw'
+          ? `${preview.fan}番 自摸`
+          : `${preview.fan}番 食糊`;
+  const dealer = dealerAfter(session, preview);
   return commitBoard(session, label, {
     players,
     seats: session.seats,
@@ -128,6 +131,59 @@ function holdDraw(session: Session): { dealerId: string | null; dealerMark: Deal
     roundWind: session.roundWind,
     seatWind: session.seatWind,
   };
+}
+
+/**
+ * Four seated players. 詐糊賠位自摸 off: the false-win player pays the ordinary
+ * amount to each other seated player. A dealer 詐糊 passes 莊. A non-dealer
+ * 詐糊 does not move 莊; that progression was not recorded.
+ */
+function falseWin(session: Session, input: WinInput): WinPreview | null {
+  if ((input.also?.length ?? 0) > 0) return null;
+  if (session.rules.playerFormat !== 'four') return null;
+  const ordinary = ordinaryAmount(session, input.fan);
+  if (!ordinary) return null;
+  const seated = seatedPlayerIds(session);
+  if (seated.length !== 4 || !seated.includes(input.winnerId)) return null;
+  const opponents = seated.filter((id) => id !== input.winnerId);
+  if (opponents.length !== 3) return null;
+  const perPlayer = Score.fromString(ordinary);
+  const total = perPlayer.multiply(Score.fromRational(opponents.length, 1));
+  return {
+    kind: 'false-win',
+    fan: input.fan,
+    winnerId: input.winnerId,
+    winnerIds: [],
+    discarderId: null,
+    ordinary,
+    multiplier: null,
+    total: total.toExact(),
+    deltas: [
+      { playerId: input.winnerId, delta: negate(total) },
+      ...opponents.map((playerId) => ({ playerId, delta: perPlayer.toExact() })),
+    ],
+  };
+}
+
+function formatFalseWin(preview: WinPreview): string[] {
+  const loss = formatAmount(negate(Score.fromString(preview.ordinary)));
+  const total = formatAmount(negate(Score.fromString(preview.total)));
+  return [`${preview.fan}番分數 詐糊 ${loss} ×3`, `總分 ${total}`];
+}
+
+function dealerAfter(session: Session, preview: WinPreview) {
+  const unchanged = {
+    dealerId: session.dealerId,
+    dealerMark: session.dealerMark,
+    roundWind: session.roundWind,
+    seatWind: session.seatWind,
+  };
+  if (!session.rules.trackDealer || session.dealerId === null) return unchanged;
+  if (preview.kind === 'multi') return unchanged;
+  if (preview.kind === 'false-win') {
+    return preview.winnerId === session.dealerId ? passDealer(session) : unchanged;
+  }
+  return preview.winnerId === session.dealerId ? retainDealer(session) : passDealer(session);
 }
 
 function fullDiscard(session: Session, input: WinInput, ordinary: string): WinPreview | null {

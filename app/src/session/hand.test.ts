@@ -356,6 +356,62 @@ describe('流局', () => {
   });
 });
 
+describe('詐糊', () => {
+  it('pays the ordinary amount to each other seated player', () => {
+    const session = withBalances(wide51(), { 甲家: '116', 乙家: '488', 丙家: '-508', 丁家: '-96' });
+    const input = { winnerId: idOf(session, '丁家'), fan: 13, discarderId: null, falseWin: true };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['13番分數 詐糊 -16384 ×3', '總分 -49152']);
+
+    const next = recordWin(session, input);
+    assert.equal(balance(next, '甲家'), '16500');
+    assert.equal(balance(next, '乙家'), '16872');
+    assert.equal(balance(next, '丙家'), '15876');
+    assert.equal(balance(next, '丁家'), '-49248');
+    assert.equal(player(next, '丁家').wins, 0);
+    assert.equal(player(next, '丁家').selfDraws, 0);
+    assert.equal(player(next, '甲家').discards, 0);
+    assert.equal(next.handCount, session.handCount + 1);
+    assert.equal(next.ledger.at(-1)?.label, '13番 詐糊');
+    assert.equal(next.dealerId, session.dealerId);
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
+    const restored = undoLatest(next);
+    assert.equal(balance(restored, '丁家'), '-96');
+    assert.equal(restored.handCount, session.handCount);
+  });
+
+  it('still pays the full ordinary amount on a 半銃 table', () => {
+    const rules = setPaymentMode(wide51().rules, 'half-discard');
+    const session = four('51', rules);
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 4, discarderId: null, falseWin: true });
+    assert.equal(balance(next, '丁家'), '-96');
+    assert.equal(balance(next, '甲家'), '32');
+    assert.equal(balance(next, '乙家'), '32');
+    assert.equal(balance(next, '丙家'), '32');
+  });
+
+  it('passes 莊 when the dealer declares 詐糊', () => {
+    const session = withDealer(wide51(), '丁家');
+    const next = recordWin(session, { winnerId: idOf(session, '丁家'), fan: 13, discarderId: null, falseWin: true });
+    assert.equal(next.dealerId, idOf(next, '甲家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
+    assert.equal(balance(next, '丁家'), '-49152');
+    assert.equal(balance(next, '甲家'), '16384');
+  });
+
+  it('does not score a three-player 詐糊 or an unrecorded fan', () => {
+    const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
+    assert.equal(previewWin(three, { winnerId: idOf(three, '甲家'), fan: 4, discarderId: null, falseWin: true }), null);
+    const session = four('custom');
+    assert.equal(previewWin(session, { winnerId: idOf(session, '甲家'), fan: 13, discarderId: null, falseWin: true }), null);
+    const reserve = addReserve(wide51(), '戊家');
+    const next = recordWin(reserve, { winnerId: idOf(reserve, '丁家'), fan: 13, discarderId: null, falseWin: true });
+    assert.equal(balance(next, '戊家'), '0');
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');
@@ -372,6 +428,10 @@ describe('undo of a confirmed win', () => {
     assert.deepEqual(restored.ledger, []);
   });
 });
+
+function wide51() {
+  return four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
+}
 
 function withDealer(session: ReturnType<typeof startNamed>, name: string, roundWind: Wind = 'east', seatWind: Wind = 'east') {
   return commitBoard(session, '莊', {
