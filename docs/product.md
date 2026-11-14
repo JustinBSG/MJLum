@@ -4,7 +4,7 @@ The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum
 
 麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game.
 
-This file is the short product-direction summary as of 15 November 2026. Detailed scoring and session behaviour is in [`docs/guide.md`](guide.md). The feature inventory is in [`docs/features.md`](features.md). Demonstrated controls are in [`docs/controls.md`](controls.md). Handover flows are in [`docs/flows.md`](flows.md). How facts are labelled is explained in [`docs/README.md`](README.md). The recorded development approach is in [`docs/development.md`](development.md). Command-line setup for the later UI/UX skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
+This file is the short product-direction summary as of 15 November 2026. Detailed scoring and session behaviour is in [`docs/guide.md`](guide.md). The feature inventory is in [`docs/features.md`](features.md). Demonstrated controls are in [`docs/controls.md`](controls.md). Handover flows are in [`docs/flows.md`](flows.md). How facts are labelled is explained in [`docs/README.md`](README.md). The recorded development approach is in [`docs/development.md`](development.md). The build-order feature roadmap is in [`docs/roadmap.md`](roadmap.md). Command-line setup for the later UI/UX skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 
 ## Already-decided 麻雀諗 product rules
 

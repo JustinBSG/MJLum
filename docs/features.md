@@ -2,7 +2,7 @@
 
 This inventory is for the first release, unless a row says otherwise. Behaviour details and exact numbers are in [`docs/guide.md`](guide.md). Labels follow [`docs/README.md`](README.md).
 
-The first release develops the point-counter / table scorekeeper features: exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules that are not about external display / wireless TV. The second release is the wireless connection to a smart TV, together with the related external-display product rules. UI/UX for every feature is to be designed later; this list is functional, not a screen inventory. Ads are not a feature of 麻雀諗.
+The first release develops the point-counter / table scorekeeper features: exactly the same functionality as the local reference, plus the already-decided 麻雀諗 product rules that are not about external display / wireless TV. The second release is the wireless connection to a smart TV, together with the related external-display product rules. A build-order roadmap of this work is in [`docs/roadmap.md`](roadmap.md). UI/UX for every feature is to be designed later; this list is functional, not a screen inventory. Ads are not a feature of 麻雀諗.
 
 ## Product frame (麻雀諗 product decisions)
 
