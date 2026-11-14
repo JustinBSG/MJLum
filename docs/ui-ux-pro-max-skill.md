@@ -1,6 +1,6 @@
 # UI/UX Pro Max skill — command-line setup
 
-This page is a short command-line introduction a coder can follow to install the later UI/UX skill into a checkout of MJLum. **These documents do not install the skill in this repository.** They only explain how a coder would.
+This page is a short command-line introduction for the later UI/UX skill. On this `uat` branch the skill is already present (`.cursor/skills/`, and a generated [`design-system/default/MASTER.md`](../design-system/default/MASTER.md)). This page remains the setup reference; it does not tell a coder to run the installer or a design-system generator again now, or to design the UI now.
 
 Visual UI/UX for 麻雀諗 is still designed later, as stated in [`docs/product.md`](product.md). The assistant already named for that later work is [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Do not clone that GitHub repository into MJLum. The official installer is the npm package [`ui-ux-pro-max-cli`](https://www.npmjs.com/package/ui-ux-pro-max-cli) (command `uipro`). Do not use the older `uipro-cli` package; its latest release is stale.
 
@@ -59,7 +59,7 @@ Other official flags and commands, without inventing behaviour:
 
 The official README also documents optional GitHub authentication flags and environment variables (`--token`, `UI_PRO_MAX_GITHUB_TOKEN`, or `GITHUB_TOKEN`) if unauthenticated GitHub API rate limits are hit. This setup introduction does not require those flags.
 
-After the skill is installed in a checkout, product.md already says to use it later to assist UI/UX generation. This page does not tell you to run the design-system generator or to design the UI now.
+The skill is already present in this checkout. product.md already says to use it later to assist UI/UX generation. This page does not tell you to re-run the installer or a design-system generator now, or to design the UI now.
 
 ## Official sources
 

@@ -33,7 +33,7 @@ The following points are decided:
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
 - Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in the sections below. Behavior that was not found in the reference remains unspecified.
 
-Visual design, navigation, and the technical approach for building the iOS and Android apps are unspecified.
+Visual design and navigation remain unspecified and are left to later AI UI/UX design. Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md) and [`docs/product.md`](product.md).
 
 ## First release and second release
 
@@ -75,7 +75,7 @@ Detailed first-run, player-setup, and in-game screen layout are **unspecified** 
 
 First-release platforms are iOS and Android. Wireless connection to a smart TV is second-release work, not first-release fulfilment.
 
-The technical approach for building the iOS and Android apps is **unspecified**.
+Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md) and [`docs/product.md`](product.md).
 
 ## Language and locale
 
@@ -618,6 +618,10 @@ Resolved, 14 November 2026, and recorded in the sections above (kept here only a
 - Dice UI and 1–9 limits; 番數? full text; statistics fields including 平均番數 and rates (denominators still unspecified).
 - Settlement transfer-choice is not needed (麻雀諗 product decision).
 
+Resolved as already recorded in [`docs/development.md`](development.md) and [`docs/product.md`](product.md) (kept here only as a pointer, 15 November 2026):
+
+- The technical approach for building the iOS and Android apps is Expo plus libraries. Individual libraries remain suggestions unless those documents mark them required.
+
 Still open:
 
 1. 半銃 interaction with three-player play, and combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated.
@@ -636,6 +640,5 @@ Still open:
 14. Exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, the 平均番數 formula, and how 冧莊王 is awarded. (Title awards, the radar-chart mapping, dice min/max and purpose, and the 番數? text are now recorded.)
 15. Special abortive-hand types or reason codes beyond the demonstrated 流局.
 16. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
-17. What technical approach will be used to build the iOS and Android apps? Do not record a stack here until it is decided.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
