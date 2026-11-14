@@ -364,7 +364,9 @@ Demonstrated transfers:
 
 This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a receives 196 + 668 + 8 = 872. Total paid equals total received: 896. The four current table balances alone would not reconcile.
 
-**Unspecified:** the exact method for choosing a particular set of transfers; how a Jackpot pool would appear in settlement; tie-breaking among equally valid transfer sets; and whether a currency label is needed. Paid-tracking and payment execution are not established, and 麻雀諗 is a simple local tool, so these stay out unless later decided.
+The transfer list above is what the local reference demonstrated. It is not a 麻雀諗 requirement.
+
+**麻雀諗 product decision (14 November 2026):** settlement (找數) should show the session result — each player’s net balance, including anyone on the roster who still has a non-zero balance — and let the user finish the payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out. How a Jackpot pool would appear in this result view remains unspecified.
 
 Settlement is checked in the app, not on the external display. The external display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
@@ -377,10 +379,10 @@ These utilities are part of the same-functionality first release, not extra feat
 - Statistics are session-wide. They include everyone on the roster, including a player who has left a seat and a reserve player added before taking a seat.
 - The overview counts recorded wins (食糊), self-draw wins (自摸), and occasions of dealing a winning discard (出銃). In the demonstrated totals, 自摸 is a subset of 食糊, not an extra category added on top of it.
 - Individual player details also show average fan, win rate, self-draw rate, deal-in rate, and average deal-in fan. Exact denominators, rounding, substitution treatment, and multiple-winner aggregation are not established.
-- Title badges summarize performance. Demonstrated titles include 自摸王, 出銃王, 食糊王, 大牌王, 細牌王, and 陪跑員. More than one player can hold the same title at once, so a title is not automatically exclusive (in the demonstrated list, c and d both had 6 出銃 and both showed 出銃王). Exact award criteria and tie-breaking rules are unspecified.
-- A radar chart is a visual summary of a player across three labelled dimensions: 進攻, 牌力, and 防守. No numeric scale, weights, or formula was established.
+- Title badges summarize performance. Demonstrated titles include 自摸王, 出銃王, 食糊王, 大牌王, 細牌王, and 陪跑員. More than one player can hold the same title at once, so a title is not automatically exclusive (in the demonstrated list, c and d both had 6 出銃 and both showed 出銃王).
+- A radar chart is a visual summary of a player across three labelled dimensions: 進攻, 牌力, and 防守. No numeric scale, weights, or formula was established in the reference.
 - A dice utility can be used at the table to roll dice. In the demonstration, a dice result does not automatically choose the dealer, record a hand, or change a balance. Any count-adjustment limits, randomness details, and extra input methods are unspecified.
-- Fan-help is an assistance entry associated with fan input. Its contents were not opened, so the help content itself is unspecified.
+- Fan-help is opened from the 食糊 entry dialog by the circled ? beside 番數. A short popup was shown with the text 現時設定下 and 這裏只需輸入牌型番數. A separate page titled 番數說明 was not shown, and no further help content was opened.
 
 Demonstrated statistics list in one session:
 
@@ -393,7 +395,26 @@ Demonstrated statistics list in one session:
 
 The same session’s detail card for d showed 7食糊, 3自摸, 6出銃, 7平均番數, 37%食糊率, 43%自摸率, 32%出銃率, and 5平均出銃番數, plus a radar chart labelled 進攻, 牌力, and 防守. In that card, 43% 自摸率 matches 3/7. 37% 食糊率 and 32% 出銃率 are consistent with 7/19 and 6/19, but the card did not itself display the denominator, and an earlier session-info view in the same session had shown 總局數 8, so the denominators stay unspecified.
 
-**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, radar-chart weights, title-award and tie-break rules (including 細牌王 and 陪跑員), dice count limits, and fan-help contents.
+**麻雀諗 product decision (14 November 2026), derived from the meaning of each title, not established as reference fact.** Titles remain not automatically exclusive, as already demonstrated. Counts and 平均番數 are the session figures already shown in statistics; how 平均番數 is computed is still unspecified and is not invented here.
+
+- **食糊王:** every player whose 食糊 count equals the highest 食糊 count, provided that highest count is at least 1. If every 食糊 count is 0, no one receives 食糊王.
+- **自摸王:** every player whose 自摸 count equals the highest 自摸 count, provided that highest count is at least 1. If every 自摸 count is 0, no one receives 自摸王.
+- **出銃王:** every player whose 出銃 count equals the highest 出銃 count, provided that highest count is at least 1. If every 出銃 count is 0, no one receives 出銃王. Ties share the title, as in the demonstrated list where c and d both had 6 出銃 and both showed 出銃王.
+- **大牌王:** every player who has at least one 食糊 and whose 平均番數 is the highest among such players.
+- **細牌王:** every player who has at least one 食糊 and whose 平均番數 is the lowest among such players. The same player may hold both 大牌王 and 細牌王 when those averages are equal (for example only one player has a win, or all such averages are tied).
+- **陪跑員:** every player who holds none of 食糊王, 自摸王, 出銃王, or 大牌王. Holding 細牌王 does not prevent 陪跑員, as demonstrated when a held both. If every player holds at least one of those four titles, no one receives 陪跑員.
+
+The demonstrated title list is consistent with this rule. Other players’ 平均番數 were not shown, so that screen does not independently prove the 大牌王 / 細牌王 averages.
+
+**麻雀諗 product decision (14 November 2026), derived from the meaning of the three axes, not established as reference fact.** The radar is calculated from the already-displayed session rates. It does not invent rate denominators; those denominators remain unspecified, as recorded above. Each axis uses a 0–100 scale matching the percentage rates, with no extra weights:
+
+- **進攻** = 食糊率
+- **牌力** = 自摸率
+- **防守** = 100 − 出銃率
+
+Use the displayed rates as they are. If a rate is not yet available, that axis is 0.
+
+**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, the 平均番數 formula, dice count limits, and any fan-help content beyond the short popup recorded above.
 
 ## Sharing
 
@@ -474,8 +495,8 @@ These decisions are still open and should be specified before implementation is 
 13. Undo depth, redo, and editing or deleting an older history row.
 14. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
 15. On-state behavior of new-session reuse options (retain players and/or rules).
-16. Settlement transfer-choice algorithm, tie-breaking among equally valid transfer sets, and whether a currency label is needed.
-17. Exact formulas, denominators, rounding, radar weights, and title-award / tie-break rules for statistics, titles, and the radar chart; dice count limits; and fan-help contents.
+16. (Resolved, 14 November 2026.) Settlement transfer-choice, tie-breaking among transfer sets, and a currency label are not needed. Settlement shows the session result and the user finishes payment themselves, as recorded in the Settlement section.
+17. Exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, and the 平均番數 formula; dice count limits; and any fan-help content beyond the short 番數 popup recorded above. (Title awards and the radar-chart mapping are now recorded as 麻雀諗 product decisions.)
 18. Special abortive-hand types or reason codes beyond the demonstrated 流局.
 19. What happens if the external display disconnects during a session.
 20. What technical approach will be used to build the iOS and Android apps?
