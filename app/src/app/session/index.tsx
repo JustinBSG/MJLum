@@ -509,7 +509,7 @@ export default function SessionScreen() {
             </>
           ) : null}
           {session.rules.jackpotEnabled ? (
-            panel === null && seated.size === 4 ? (
+            panel === null && seated.size > 0 ? (
               <Choice label={`Jackpot ${formatBalance(session.pool)}`} onPress={openPool} selected={false} />
             ) : (
               <ThemedText accessibilityLanguage={APP_LOCALE}>{`Jackpot ${formatBalance(session.pool)}`}</ThemedText>
