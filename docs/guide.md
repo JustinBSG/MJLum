@@ -251,7 +251,7 @@ A saved custom setup can be deleted: the reference asks 確定刪除嗎?, and af
 
 The first release includes the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) as part of the same-functionality scope. Detailed scoring for those categories was not established in the reference, remains **unspecified**, and must not be invented.
 
-**Unspecified:** saved-rule rename, name-length, and duplicate-name behaviour; the unopened 一二蚊辣辣上 and 3番4 半辣上（三人） tables beyond their list-caption min/cap amounts; and the detailed scoring tables and payout rules for those other regional categories.
+**Opened 3–8 rows:** 一二蚊辣辣上 is 32, 64, 128, 256, 512, 1024, with self-draw 48, 96, 192, 384, 768, 1536. 3番4 半辣上（三人） is 3, 6, 9, 12, 18, 24. Fans outside 3–8 were not on those screens. The other regional categories still have no scoring table.
 
 ### Player count and payment mode
 
@@ -624,8 +624,8 @@ Resolved as already recorded in [`docs/development.md`](development.md) and [`do
 Still open:
 
 1. Combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated. Three-player 半銃 and a general 半銃 一炮多響 are decided.
-2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows, including the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24. The three-player 自摸 split uses the rules’ multiplier; the unopened preset’s default multiplier is still open.
-3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將); and the unopened 一二蚊辣辣上 table beyond its list-caption min/cap.
+2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows and the opened 3番4 半辣上（三人） 3–8 rows. The three-player 自摸 split uses the rules’ multiplier; that 半辣上 preset’s default multiplier is still open.
+3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將). 一二蚊辣辣上 and 3番4 半辣上（三人） now have their opened 3–8 rows; fans outside that range were not shown.
 4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
 5. Invalid-entry handling and numeric validation.
 6. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.

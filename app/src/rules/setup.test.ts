@@ -84,17 +84,26 @@ describe('Hong Kong presets', () => {
     assert.equal(selfDrawAmount(setup, 13), '2304');
   });
 
-  it('keeps only the list captions for the two unopened presets', () => {
+  it('uses the opened 3–8 rows for 一二蚊辣辣上 and 3番4半辣上（三人）', () => {
     const spicy = createPresetDraft('12-full');
-    assert.equal(row(spicy, 3)?.ordinary, '32');
-    assert.equal(row(spicy, 4)?.ordinary, null);
-    assert.equal(row(spicy, 8)?.ordinary, '1024');
+    assert.deepEqual(
+      [3, 4, 5, 6, 7, 8].map((fan) => row(spicy, fan)?.ordinary),
+      ['32', '64', '128', '256', '512', '1024'],
+    );
+    assert.deepEqual(
+      [3, 4, 5, 6, 7, 8].map((fan) => selfDrawAmount(spicy, fan)),
+      ['48', '96', '192', '384', '768', '1536'],
+    );
+    const extended = setFanRange(spicy, 3, 9);
+    assert.equal(row(extended, 9)?.ordinary, null);
 
     const three = createPresetDraft('3fan4-half-three');
     assert.equal(three.playerFormat, 'three');
-    assert.equal(row(three, 3)?.ordinary, '3');
-    assert.equal(row(three, 5)?.ordinary, null);
-    assert.equal(row(three, 8)?.ordinary, '24');
+    assert.deepEqual(
+      [3, 4, 5, 6, 7, 8].map((fan) => row(three, fan)?.ordinary),
+      ['3', '6', '9', '12', '18', '24'],
+    );
+    assert.equal(row(setFanRange(three, 3, 9), 9)?.ordinary, null);
   });
 
   it('uses the demonstrated three-player 3番4辣辣上 rows', () => {

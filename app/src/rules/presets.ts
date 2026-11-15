@@ -195,8 +195,15 @@ export const HONG_KONG_PRESETS: readonly HongKongPreset[] = [
     captionMinAmount: '32',
     captionMaxFan: 8,
     captionMaxAmount: '1024',
-    opened: false,
-    rows: { 3: '32', 8: '1024' },
+    opened: true,
+    rows: listedRows([
+      [3, '32'],
+      [4, '64'],
+      [5, '128'],
+      [6, '256'],
+      [7, '512'],
+      [8, '1024'],
+    ]),
   },
   {
     id: '3fan4-half-three',
@@ -208,8 +215,15 @@ export const HONG_KONG_PRESETS: readonly HongKongPreset[] = [
     captionMinAmount: '3',
     captionMaxFan: 8,
     captionMaxAmount: '24',
-    opened: false,
-    rows: { 3: '3', 8: '24' },
+    opened: true,
+    rows: listedRows([
+      [3, '3'],
+      [4, '6'],
+      [5, '9'],
+      [6, '12'],
+      [7, '18'],
+      [8, '24'],
+    ]),
   },
 ];
 

@@ -138,7 +138,7 @@ Demonstrated settlements:
 2. Then a 3番 自摸: board a +1, b −2, c +1, b 莊, 東圈西風 (winner’s total 4; each of the other two paid 2; 莊 passed).
 3. Then 4番 自摸, footer 6 × 1.33 = 8: board a −3, b +6, c −3, b 莊 with 連1, 東圈西風 (each of the two opponents paid 4; the self-draw total equals F × 4/3).
 
-The 3番4 半辣上（三人） preset remains unopened as 玩法設定; only the list caption 3 fan / 3 and 8 fan / 24 is recorded. Do not invent that table.
+The 3番4 半辣上（三人） preset shows 3–8番 as 3, 6, 9, 12, 18, 24. Fans outside that range were not on the screen.
 
 ## 14. Dealer, 連莊, and 過莊 (when 紀錄莊家及圈風 is on)
 
