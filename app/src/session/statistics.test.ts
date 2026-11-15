@@ -77,6 +77,24 @@ describe('titles', () => {
   });
 });
 
+
+describe('radar', () => {
+  it('sets 牌力 from 自摸率 and leaves 進攻 and 防守 at 0 while those rates are unspecified', () => {
+    const session = sessionWithCounts([
+      ['c', 3, 1, 0],
+      ['a', 1, 0, 1],
+      ['b', 2, 0, 0],
+      ['d', 1, 1, 4],
+    ]);
+    const rows = Object.fromEntries(
+      rosterStatistics(session).map((row) => [row.name, [row.attack, row.strength, row.defense]]),
+    );
+    assert.deepEqual(rows.c, ['0', '100/3', '0']);
+    assert.deepEqual(rows.d, ['0', '100', '0']);
+    assert.deepEqual(rows.a, ['0', '0', '0']);
+  });
+});
+
 function sessionWithCounts(entries: [string, number, number, number][]) {
   const session = startSession({
     rules: createCustomDraft(),

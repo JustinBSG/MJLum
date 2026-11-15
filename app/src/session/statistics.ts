@@ -13,6 +13,12 @@ export type PlayerStatistics = {
   /** Exact 0–100 自摸率. */
   selfDrawRate: string;
   titles: StatTitle[];
+  /** 進攻. 食糊率 is unspecified, so this axis is 0. */
+  attack: string;
+  /** 牌力 = 自摸率. */
+  strength: string;
+  /** 防守. 出銃率 is unspecified, so this axis is 0. */
+  defense: string;
 };
 
 export function rosterStatistics(session: Session): PlayerStatistics[] {
@@ -22,6 +28,7 @@ export function rosterStatistics(session: Session): PlayerStatistics[] {
   const discardCrown = maxCount(players, (player) => player.discards);
 
   return players.map((player) => {
+    const selfDrawRate = selfDrawRateOf(player);
     const titles: StatTitle[] = [];
     if (winCrown !== null && player.wins === winCrown) titles.push('食糊王');
     if (selfDrawCrown !== null && player.selfDraws === selfDrawCrown) titles.push('自摸王');
@@ -37,8 +44,11 @@ export function rosterStatistics(session: Session): PlayerStatistics[] {
       wins: player.wins,
       selfDraws: player.selfDraws,
       discards: player.discards,
-      selfDrawRate: selfDrawRateOf(player),
+      selfDrawRate,
       titles,
+      attack: '0',
+      strength: selfDrawRate,
+      defense: '0',
     };
   });
 }
