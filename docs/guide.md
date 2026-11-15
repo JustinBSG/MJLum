@@ -342,7 +342,7 @@ In an opened 五一辣辣上 rule setup, Jackpot 啟用 was off by default. Turn
 
 The first release includes Jackpot as a visible option.
 
-**Unspecified:** confirmed 平分Jackpot among a subset of 在位玩家; and how a Jackpot pool would appear in the 麻雀諗 找數 result view. These must not be invented.
+**麻雀諗 product decision:** 平分Jackpot can give the whole pool to one or more eligible players (seated, or someone who has already sat). A reserve who never sat is not listed. 找數 shows the pool remainder and marks a non-zero pool 尚未分配. It does not list transfers.
 
 ### Dealer, wind, and session progress
 
@@ -476,7 +476,7 @@ This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a r
 
 The transfer list above is what the local reference demonstrated. It is not a 麻雀諗 requirement.
 
-**麻雀諗 product decision (14 November 2026):** settlement (找數) should show the session result — each player’s net balance, including anyone on the roster who still has a non-zero balance — and let the user finish the payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out. How a Jackpot pool would appear in this result view remains unspecified.
+**麻雀諗 product decision:** settlement (找數) shows every roster player’s net, including a zero and anyone who has left a seat, plus the Jackpot remainder. A non-zero pool is marked 尚未分配. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
 
 Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
@@ -623,19 +623,17 @@ Resolved as already recorded in [`docs/development.md`](development.md) and [`do
 
 Still open:
 
-1. 半銃 interaction with three-player play, and combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated.
-2. Three-player tables and payouts other than the demonstrated 3番4辣辣上 全銃 ×1.33 rows and hands, including the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24.
+1. Combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated. Three-player 半銃 and a general 半銃 一炮多響 are decided.
+2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows, including the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24. The three-player 自摸 split uses the rules’ multiplier; the unopened preset’s default multiplier is still open.
 3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將); and the unopened 一二蚊辣辣上 table beyond its list-caption min/cap.
-4. Confirmed 平分Jackpot among a subset of 在位玩家; and how a Jackpot pool would appear in the 麻雀諗 找數 result view.
-5. What happens if a fan is typed below 起糊 or above 滿糊; and the exact 麻雀諗 progression for 番 above 13 (money must be calculated, but the sequence must not be invented).
-6. The complete dealer / 連莊 progression algorithm for every remaining edge case, including the exact 連莊 counting convention wherever it was not demonstrated. 重新開始計算圈風 on now sets 東圈東風.
-7. Saved-rules rename, name-length, and duplicate-name behaviour; mid-session rule edits. (Delete of a saved custom setup was demonstrated.)
-8. Invalid-entry handling and numeric validation.
-9. Roster limits, and editing or deleting an existing player.
-10. Undo depth, redo, and editing or deleting an older history row.
-11. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
-12. Special abortive-hand types or reason codes beyond the demonstrated 流局.
-13. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
-14. Separate money attribution for a substitute (“入原玩家帳”) while the playing statistics stay with the substitute. The recorded statistics follow the person who played.
+4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
+5. Mid-session rule edits. A saved name is trimmed, required, at most 40 characters, and a duplicate asks to overwrite or save under another name.
+6. Invalid-entry handling and numeric validation.
+7. Roster limits, and editing or deleting an existing player.
+8. Undo depth, redo, and editing or deleting an older history row.
+9. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
+10. Special abortive-hand types or reason codes beyond the demonstrated 流局.
+11. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+12. Separate money attribution for a substitute (“入原玩家帳”) while the playing statistics stay with the substitute. The recorded statistics follow the person who played.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
