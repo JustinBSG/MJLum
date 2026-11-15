@@ -14,12 +14,15 @@ import {
   ledgerLabels,
   ledgerLines,
   markPoolTransfer,
+  removePlayer,
+  renamePlayer,
   reopenSession,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
   startSession,
   substitute,
+  swapSeats,
   undoLatest,
 } from './session.ts';
 
@@ -178,6 +181,58 @@ describe('roster and dealer', () => {
     assert.equal(shown.progressDisplay, 'hand-count');
     assert.equal(shown.ledger.length, started.ledger.length);
     assert.equal(formatBalance(shown.players[0]?.balance ?? '0'), '0');
+  });
+});
+
+describe('roster edits', () => {
+  it('renames in place and leaves the earlier snapshot name', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const renamed = renamePlayer(started, started.players[0]?.id ?? '', '  甲甲  ');
+    assert.equal(renamed.players[0]?.id, started.players[0]?.id);
+    assert.equal(renamed.players[0]?.name, '甲甲');
+    assert.equal(renamed.ledger.at(-1)?.before.players[0]?.name, '甲家');
+    assert.equal(renamed.dealerId, started.dealerId);
+  });
+
+  it('removes only a reserve who never sat and has a zero balance', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const reserved = addReserve(started, '戊家');
+    const reserve = reserved.players.at(-1);
+    assert.ok(reserve);
+    const removed = removePlayer(reserved, reserve.id);
+    assert.equal(removed.players.some((player) => player.id === reserve.id), false);
+    assert.equal(removePlayer(started, started.players[0]?.id ?? ''), started);
+    const swapped = substitute(reserved, reserve.id, 0);
+    assert.equal(removePlayer(swapped, reserve.id), swapped);
+    const original = swapped.players.find((player) => player.name === '甲家');
+    assert.ok(original);
+    const returned = substitute(swapped, original.id, 0);
+    assert.equal(removePlayer(returned, reserve.id), returned);
+  });
+
+  it('swaps two seats without moving money, 莊, or 圈風', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const swapped = swapSeats(started, 0, 1);
+    assert.equal(swapped.seats[0]?.playerId, started.seats[1]?.playerId);
+    assert.equal(swapped.seats[1]?.playerId, started.seats[0]?.playerId);
+    assert.equal(swapped.dealerId, started.dealerId);
+    assert.equal(swapped.roundWind, started.roundWind);
+    assert.equal(swapped.players[0]?.balance, '0');
   });
 });
 
