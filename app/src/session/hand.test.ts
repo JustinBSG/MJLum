@@ -862,6 +862,20 @@ describe('normal-hand counts', () => {
   });
 });
 
+describe('入原玩家帳', () => {
+  it('posts the substitute’s money to the original player and keeps the win statistic', () => {
+    const started = addReserve(four('custom'), '戊家');
+    const reserveId = idOf(started, '戊家');
+    const seated = substitute(started, reserveId, 0, true);
+    const next = recordWin(seated, { winnerId: reserveId, fan: 3, discarderId: idOf(seated, '乙家') });
+    assert.equal(balance(next, '甲家'), '4');
+    assert.equal(balance(next, '戊家'), '0');
+    assert.equal(balance(next, '乙家'), '-4');
+    assert.equal(player(next, '戊家').wins, 1);
+    assert.equal(player(next, '甲家').wins, 0);
+  });
+});
+
 function wide51() {
   return four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
 }

@@ -25,23 +25,28 @@ import { clampDiceCount, MIN_DICE, rollDice, type DiceRoll } from '@/session/dic
 import { FAN_HELP_BODY, FAN_HELP_TITLE } from '@/session/fan-help';
 import {
   addReserve,
+  canRemovePlayer,
   formatBalance,
   formatDealerBadge,
   formatStartDate,
   formatWind,
   ledgerLines,
   markPoolTransfer,
+  nextDealerId,
+  removePlayer,
+  renamePlayer,
   reopenSession,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
   substitute,
+  swapSeats,
   undoLatest,
   type LedgerEmphasis,
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'roster' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -53,6 +58,11 @@ export default function SessionScreen() {
   const [reserveName, setReserveName] = useState('');
   const [incomingId, setIncomingId] = useState<string | null>(null);
   const [seatIndex, setSeatIndex] = useState<number | null>(null);
+  const [billToOriginal, setBillToOriginal] = useState(false);
+  const [rosterPlayerId, setRosterPlayerId] = useState<string | null>(null);
+  const [rosterName, setRosterName] = useState('');
+  const [swapA, setSwapA] = useState<number | null>(null);
+  const [swapB, setSwapB] = useState<number | null>(null);
   const [dealerId, setDealerId] = useState<string | null>(null);
   const [resetConsecutive, setResetConsecutive] = useState(true);
   const [restartWind, setRestartWind] = useState(false);
@@ -124,7 +134,7 @@ export default function SessionScreen() {
 
   async function confirmSwap() {
     if (!session || incomingId === null || seatIndex === null) return;
-    const next = substitute(session, incomingId, seatIndex);
+    const next = substitute(session, incomingId, seatIndex, billToOriginal);
     if (next === session) return;
     setIncomingId(null);
     setSeatIndex(null);
@@ -432,6 +442,7 @@ export default function SessionScreen() {
               <Choice label="食糊!" onPress={openWin} selected={false} />
               <Choice label="流局" onPress={() => setPanel('draw')} selected={false} />
               <Choice label="換人" onPress={() => setPanel('swap')} selected={false} />
+              <Choice label="玩家" onPress={() => setPanel('roster')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
               <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
@@ -724,6 +735,11 @@ export default function SessionScreen() {
                 value={reserveName}
               />
               <Choice label="加入" onPress={addNamedReserve} selected={false} />
+              <Choice
+                label={`入原玩家帳 ${billToOriginal ? '開' : '關'}`}
+                onPress={() => setBillToOriginal((value) => !value)}
+                selected={billToOriginal}
+              />
               {reserves.map((player) => (
                 <Choice
                   key={player.id}
@@ -746,6 +762,93 @@ export default function SessionScreen() {
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmSwap} selected={false} />
+              </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === 'roster' && session ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>玩家</ThemedText>
+              {session.players.map((player) => (
+                <Choice
+                  key={player.id}
+                  label={`${player.name}${canRemovePlayer(session, player.id) ? ' · 可移除' : ''}`}
+                  onPress={() => {
+                    setRosterPlayerId(player.id);
+                    setRosterName(player.name);
+                  }}
+                  selected={rosterPlayerId === player.id}
+                />
+              ))}
+              <TextInput
+                accessibilityLabel="玩家名稱"
+                accessibilityLanguage={APP_LOCALE}
+                onChangeText={setRosterName}
+                placeholder="玩家名稱"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={rosterName}
+              />
+              <ThemedView style={styles.row}>
+                <Choice
+                  label="改名"
+                  onPress={() => {
+                    if (!rosterPlayerId) return;
+                    const next = renamePlayer(session, rosterPlayerId, rosterName);
+                    if (next !== session) persist(next);
+                  }}
+                  selected={false}
+                />
+                <Choice
+                  label="移除"
+                  onPress={() => {
+                    if (!rosterPlayerId) return;
+                    const next = removePlayer(session, rosterPlayerId);
+                    if (next === session) return;
+                    setRosterPlayerId(null);
+                    persist(next);
+                  }}
+                  selected={false}
+                />
+              </ThemedView>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>換位</ThemedText>
+              {session.seats.map((seat) => {
+                const player = session.players.find((item) => item.id === seat.playerId);
+                return (
+                  <Choice
+                    key={seat.index}
+                    label={`${seat.index + 1} ${player?.name ?? ''}`}
+                    onPress={() => {
+                      if (swapA === null || (swapA !== null && swapB !== null)) {
+                        setSwapA(seat.index);
+                        setSwapB(null);
+                        return;
+                      }
+                      setSwapB(seat.index);
+                    }}
+                    selected={swapA === seat.index || swapB === seat.index}
+                  />
+                );
+              })}
+              {swapA !== null && swapB !== null ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>
+                  {`過莊會到 ${session.players.find((player) => player.id === nextDealerId(swapSeats(session, swapA, swapB)))?.name ?? ''}`}
+                </ThemedText>
+              ) : null}
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice
+                  label="換位"
+                  onPress={() => {
+                    if (swapA === null || swapB === null) return;
+                    const next = swapSeats(session, swapA, swapB);
+                    if (next === session) return;
+                    setSwapA(null);
+                    setSwapB(null);
+                    persist(next);
+                  }}
+                  selected={false}
+                />
               </ThemedView>
             </ThemedView>
           ) : null}

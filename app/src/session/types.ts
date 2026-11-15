@@ -32,6 +32,8 @@ export type Player = {
   dealerStreak: number;
   /** Longest automatic 留莊 streak. 冧莊王 needs at least 3. */
   bestDealerStreak: number;
+  /** When set, this person's table money is posted to that player. Statistics stay here. */
+  billToId?: string;
 };
 
 export type Seat = {

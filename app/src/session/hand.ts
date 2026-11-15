@@ -2,7 +2,7 @@ import { formatAmount, formatMultiplier } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
 import { commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
-import type { DealerMark, Session, Wind } from './types.ts';
+import type { DealerMark, Player, Session, Wind } from './types.ts';
 
 export type WinInput = {
   winnerId: string;
@@ -131,11 +131,23 @@ function jackpotLabel(preview: WinPreview): string {
   return preview.jackpot === undefined ? '' : ` + Jackpot ${formatAmount(preview.jackpot)}`;
 }
 
+function billTarget(players: Player[], playerId: string): string {
+  const player = players.find((item) => item.id === playerId);
+  if (player?.billToId && players.some((item) => item.id === player.billToId)) return player.billToId;
+  return playerId;
+}
+
+function addMoney(players: Player[], playerId: string, delta: Score): Player[] {
+  const target = billTarget(players, playerId);
+  return players.map((player) =>
+    player.id === target ? { ...player, balance: Score.fromString(player.balance).add(delta).toExact() } : player,
+  );
+}
+
 /** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 does not move 莊. */
 export function recordWin(session: Session, input: WinInput): Session {
   const preview = previewWin(session, input);
   if (!preview) return session;
-  const deltaById = new Map(preview.deltas.map((item) => [item.playerId, item.delta]));
   const counting = preview.kind !== 'false-win';
   const seated = new Set(seatedPlayerIds(session));
   const fanByWinner = new Map<string, number>();
@@ -145,16 +157,11 @@ export function recordWin(session: Session, input: WinInput): Session {
   }
   let lossFan = 0;
   for (const fan of fanByWinner.values()) lossFan += fan;
-  const players = session.players.map((player) => {
-    const delta = deltaById.get(player.id);
-    const balance = delta
-      ? Score.fromString(player.balance).add(Score.fromString(delta)).toExact()
-      : player.balance;
+  let players = session.players.map((player) => {
     const winner = counting && preview.winnerIds.includes(player.id);
     const discarder = counting && preview.kind !== 'self-draw' && player.id === preview.discarderId;
     return {
       ...player,
-      balance,
       wins: player.wins + (winner ? 1 : 0),
       selfDraws: player.selfDraws + (winner && preview.kind === 'self-draw' ? 1 : 0),
       discards: player.discards + (discarder ? 1 : 0),
@@ -163,6 +170,7 @@ export function recordWin(session: Session, input: WinInput): Session {
       discardFanSum: player.discardFanSum + (discarder ? lossFan : 0),
     };
   });
+  for (const item of preview.deltas) players = addMoney(players, item.playerId, Score.fromString(item.delta));
   const label =
     preview.kind === 'false-win'
       ? `${preview.fan}番 詐糊`
@@ -213,13 +221,13 @@ function drawContribution(session: Session): { players: Session['players']; pool
   if (!session.rules.jackpotEnabled) return { players: session.players, pool: session.pool };
   const amount = Score.fromString(session.rules.jackpotContribution);
   if (amount.equals(Score.fromString('0'))) return { players: session.players, pool: session.pool };
-  const seated = new Set(seatedPlayerIds(session));
+  const seated = seatedPlayerIds(session);
   let pool = Score.fromString(session.pool);
-  const players = session.players.map((player) => {
-    if (!seated.has(player.id)) return player;
+  let players = session.players;
+  for (const playerId of seated) {
     pool = pool.add(amount);
-    return { ...player, balance: Score.fromString(player.balance).subtract(amount).toExact() };
-  });
+    players = addMoney(players, playerId, Score.fromString('0').subtract(amount));
+  }
   return { players, pool: pool.toExact() };
 }
 
@@ -251,12 +259,8 @@ export function splitJackpot(session: Session, playerIds: string[]): Session {
   const recipients = [...new Set(playerIds)];
   if (recipients.length === 0 || recipients.some((id) => !eligible.has(id))) return session;
   const share = pool.divide(Score.fromRational(recipients.length, 1));
-  const chosen = new Set(recipients);
-  const players = session.players.map((player) =>
-    chosen.has(player.id)
-      ? { ...player, balance: Score.fromString(player.balance).add(share).toExact() }
-      : player,
-  );
+  let players = session.players;
+  for (const playerId of recipients) players = addMoney(players, playerId, share);
   return commitBoard(session, '平分Jackpot', {
     players,
     seats: session.seats,

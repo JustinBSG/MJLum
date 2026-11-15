@@ -58,6 +58,7 @@ function parsePlayer(value: unknown): Player {
     discardFanSum: countOrZero(value.discardFanSum, 'player.discardFanSum'),
     dealerStreak: countOrZero(value.dealerStreak, 'player.dealerStreak'),
     bestDealerStreak: countOrZero(value.bestDealerStreak, 'player.bestDealerStreak'),
+    ...(typeof value.billToId === 'string' ? { billToId: text(value.billToId, 'player.billToId') } : {}),
   };
 }
 

@@ -629,11 +629,10 @@ Still open:
 4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
 5. Mid-session rule edits. A saved name is trimmed, required, at most 40 characters, and a duplicate asks to overwrite or save under another name.
 6. Invalid-entry handling and numeric validation.
-7. Roster limits, and editing or deleting an existing player.
+7. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
 8. Undo depth, redo, and editing or deleting an older history row.
 9. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
 10. Special abortive-hand types or reason codes beyond the demonstrated 流局.
 11. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
-12. Separate money attribution for a substitute (“入原玩家帳”) while the playing statistics stay with the substitute. The recorded statistics follow the person who played.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.

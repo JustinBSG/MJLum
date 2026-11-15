@@ -171,16 +171,75 @@ export function addReserve(session: Session, name: string): Session {
  * Puts an unseated player into a seat.
  * The person who leaves keeps their balance. The incoming player does not take that result.
  */
-export function substitute(session: Session, playerId: string, seatIndex: number): Session {
+export function substitute(session: Session, playerId: string, seatIndex: number, billToOriginal = false): Session {
   const incoming = session.players.find((player) => player.id === playerId);
   const seat = session.seats.find((item) => item.index === seatIndex);
   if (!incoming || !seat?.playerId) return session;
   if (session.seats.some((item) => item.playerId === playerId)) return session;
   const leaving = session.players.find((player) => player.id === seat.playerId);
+  const players = session.players.map((player) => {
+    if (player.id !== playerId) return player;
+    if (billToOriginal && seat.playerId) return { ...player, billToId: seat.playerId };
+    const { billToId: _billToId, ...rest } = player;
+    return rest;
+  });
   return commitBoard(session, `${incoming.name} 換入 ${leaving?.name ?? ''}`.trim(), {
     ...boardOf(session),
+    players,
     seats: session.seats.map((item) => (item.index === seatIndex ? { ...item, playerId } : item)),
   });
+}
+
+export function renamePlayer(session: Session, playerId: string, name: string): Session {
+  const trimmed = name.trim();
+  const current = session.players.find((player) => player.id === playerId);
+  if (!current || trimmed === '' || [...trimmed].length > 40) return session;
+  if (session.players.some((player) => player.id !== playerId && player.name === trimmed)) return session;
+  if (current.name === trimmed) return session;
+  return commitBoard(session, `改名 ${trimmed}`, {
+    ...boardOf(session),
+    players: session.players.map((player) => (player.id === playerId ? { ...player, name: trimmed } : player)),
+  });
+}
+
+export function canRemovePlayer(session: Session, playerId: string): boolean {
+  const player = session.players.find((item) => item.id === playerId);
+  if (!player) return false;
+  if (session.seats.some((seat) => seat.playerId === playerId)) return false;
+  if (!Score.fromString(player.balance).equals(Score.fromString('0'))) return false;
+  if (player.hands || player.wins || player.selfDraws || player.discards) return false;
+  return !session.ledger.some((entry) => entry.before.seats.some((seat) => seat.playerId === playerId));
+}
+
+export function removePlayer(session: Session, playerId: string): Session {
+  if (!canRemovePlayer(session, playerId)) return session;
+  const name = session.players.find((player) => player.id === playerId)?.name ?? '';
+  return commitBoard(session, `移除 ${name}`, {
+    ...boardOf(session),
+    players: session.players.filter((player) => player.id !== playerId),
+  });
+}
+
+/** Swaps two occupied seats. Money, statistics, 莊, and 圈風 stay with the people. */
+export function swapSeats(session: Session, indexA: number, indexB: number): Session {
+  if (indexA === indexB) return session;
+  const seatA = session.seats.find((seat) => seat.index === indexA);
+  const seatB = session.seats.find((seat) => seat.index === indexB);
+  if (!seatA?.playerId || !seatB?.playerId) return session;
+  const nameA = session.players.find((player) => player.id === seatA.playerId)?.name ?? '';
+  const nameB = session.players.find((player) => player.id === seatB.playerId)?.name ?? '';
+  return commitBoard(session, `${nameA} 與 ${nameB} 換位`, {
+    ...boardOf(session),
+    seats: session.seats.map((seat) => {
+      if (seat.index === indexA) return { ...seat, playerId: seatB.playerId };
+      if (seat.index === indexB) return { ...seat, playerId: seatA.playerId };
+      return seat;
+    }),
+  });
+}
+
+export function nextDealerId(session: Session): string | null {
+  return nextSeatedDealer(session);
 }
 
 /**
