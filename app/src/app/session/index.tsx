@@ -24,12 +24,13 @@ import {
   formatDealerBadge,
   formatStartDate,
   formatWind,
-  ledgerLabels,
+  ledgerLines,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
   substitute,
   undoLatest,
+  type LedgerEmphasis,
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
@@ -50,6 +51,7 @@ export default function SessionScreen() {
   const [reusePlayers, setReusePlayers] = useState(false);
   const [reuseRules, setReuseRules] = useState(false);
   const [direction, setDirection] = useState<'forward' | 'reverse'>('forward');
+  const [emphasis, setEmphasis] = useState<LedgerEmphasis>('events');
   const [winnerId, setWinnerId] = useState<string | null>(null);
   const [fanText, setFanText] = useState('');
   const [payer, setPayer] = useState<Payer>(null);
@@ -698,12 +700,17 @@ export default function SessionScreen() {
           ) : null}
 
           <ThemedView style={styles.row}>
+            <Choice label="事件" onPress={() => setEmphasis('events')} selected={emphasis === 'events'} />
+            <Choice label="分數" onPress={() => setEmphasis('scores')} selected={emphasis === 'scores'} />
+            <Choice label="綜合" onPress={() => setEmphasis('combined')} selected={emphasis === 'combined'} />
+          </ThemedView>
+          <ThemedView style={styles.row}>
             <Choice label="順序" onPress={() => setDirection('forward')} selected={direction === 'forward'} />
             <Choice label="倒序" onPress={() => setDirection('reverse')} selected={direction === 'reverse'} />
           </ThemedView>
-          {ledgerLabels(session, direction).map((label, index) => (
-            <ThemedText accessibilityLanguage={APP_LOCALE} key={`${label}-${index}`}>
-              {label}
+          {ledgerLines(session, emphasis, direction).map((line) => (
+            <ThemedText accessibilityLanguage={APP_LOCALE} key={line.id}>
+              {line.text}
             </ThemedText>
           ))}
         </ScrollView>

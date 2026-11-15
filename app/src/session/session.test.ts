@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { createCustomDraft, setPlayerFormat, setTrackDealer } from '../rules/setup.ts';
+import { createCustomDraft, setPassDealerOnDraw, setPlayerFormat, setTrackDealer } from '../rules/setup.ts';
+import { recordDraw } from './hand.ts';
 import {
   addReserve,
   canStart,
@@ -10,6 +11,7 @@ import {
   formatDealerBadge,
   formatWind,
   ledgerLabels,
+  ledgerLines,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
@@ -117,6 +119,33 @@ describe('roster and dealer', () => {
     assert.deepEqual(opened.ledger, []);
     assert.equal(undoLatest(opened), opened);
     assert.deepEqual(ledgerLabels(changed, 'reverse'), ['一局', '記分']);
+  });
+
+  it('keeps a 過莊-off 流局 on 東圈1 with a 0 point row for each player', () => {
+    const rules = setPassDealerOnDraw(createCustomDraft(), false);
+    let session = startSession({
+      rules,
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 3,
+      startedAt,
+    });
+    session = recordDraw(session);
+    session = recordDraw(session);
+    const scores = ledgerLines(session, 'scores', 'forward').map((line) => line.text);
+    assert.deepEqual(scores, [
+      '東圈1',
+      '甲家 0',
+      '乙家 0',
+      '丙家 0',
+      '丁家 0',
+      '甲家 0',
+      '乙家 0',
+      '丙家 0',
+      '丁家 0',
+    ]);
+    assert.deepEqual(ledgerLines(session, 'events', 'forward').map((line) => line.text), ['流局', '流局']);
+    assert.equal(ledgerLines(session, 'combined', 'reverse')[0]?.text, '東圈1');
+    assert.equal(ledgerLines(session, 'combined', 'reverse')[1]?.text, '流局');
   });
 
   it('keeps a progress-display change off the score ledger', () => {

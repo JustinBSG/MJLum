@@ -1,5 +1,6 @@
 import { formatAmount } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
+import { Score } from '../score/score.ts';
 import type { BoardState, DealerMark, Player, ProgressDisplay, Session, Wind } from './types.ts';
 
 const AVATARS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '子', '丑', '寅', '卯'] as const;
@@ -199,9 +200,73 @@ export function formatStartDate(startedAt: string): string {
   return new Intl.DateTimeFormat('zh-Hant-HK', { dateStyle: 'long' }).format(new Date(startedAt));
 }
 
+export type LedgerEmphasis = 'events' | 'scores' | 'combined';
+
+export type LedgerLine = {
+  id: string;
+  text: string;
+};
+
+/**
+ * 詳細紀錄. 事件 lists hand labels. 分數 lists each player's point change,
+ * grouped by the wind after the hand: 東圈東風 is 東圈1. 綜合 lists both.
+ */
+export function ledgerLines(
+  session: Session,
+  emphasis: LedgerEmphasis,
+  direction: 'forward' | 'reverse',
+): LedgerLine[] {
+  const hands = session.ledger.map((entry, index) => ({
+    entry,
+    after: session.ledger[index + 1]?.before ?? boardOf(session),
+  }));
+  const ordered = direction === 'reverse' ? hands.slice().reverse() : hands;
+  const lines: LedgerLine[] = [];
+  let header: string | null = null;
+  for (const hand of ordered) {
+    if (emphasis !== 'events' && session.rules.trackDealer) {
+      const nextHeader = windSection(hand.after.roundWind, hand.after.seatWind);
+      if (nextHeader !== header) {
+        lines.push({ id: `${hand.entry.id}-wind`, text: nextHeader });
+        header = nextHeader;
+      }
+    }
+    if (emphasis !== 'scores') {
+      lines.push({ id: hand.entry.id, text: hand.entry.label });
+    }
+    if (emphasis !== 'events') {
+      for (const point of pointRows(hand.entry.before, hand.after)) {
+        lines.push({
+          id: `${hand.entry.id}-${point.playerId}`,
+          text: `${point.name} ${point.delta}`,
+        });
+      }
+    }
+  }
+  return lines;
+}
+
 export function ledgerLabels(session: Session, direction: 'forward' | 'reverse'): string[] {
-  const labels = session.ledger.map((entry) => entry.label);
-  return direction === 'reverse' ? labels.slice().reverse() : labels;
+  return ledgerLines(session, 'events', direction).map((line) => line.text);
+}
+
+/** 東圈東風 is 東圈1, 東圈南風 is 東圈2, 南圈東風 is 南圈1. */
+function windSection(roundWind: Wind, seatWind: Wind): string {
+  return `${WIND_LABEL[roundWind]}圈${WIND_ORDER.indexOf(seatWind) + 1}`;
+}
+
+function pointRows(before: BoardState, after: BoardState): { playerId: string; name: string; delta: string }[] {
+  const previous = new Map(before.players.map((player) => [player.id, player.balance]));
+  const seated = after.seats.flatMap((seat) => {
+    const player = after.players.find((item) => item.id === seat.playerId);
+    return player ? [player] : [];
+  });
+  const seatedIds = new Set(seated.map((player) => player.id));
+  return [...seated, ...after.players.filter((player) => !seatedIds.has(player.id))].map((player) => ({
+    playerId: player.id,
+    name: player.name,
+    delta: formatAmount(Score.fromString(player.balance).subtract(Score.fromString(previous.get(player.id) ?? '0')).toExact()),
+  }));
 }
 
 function createPlayer(name: string, index: number): Player {
