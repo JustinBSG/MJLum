@@ -7,7 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
-import { formatWinPreview, previewWin, recordDraw, recordWin } from '@/session/hand';
+import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
   addReserve,
@@ -24,7 +24,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -53,6 +53,7 @@ export default function SessionScreen() {
   const [discarderPaysSelfDraw, setDiscarderPaysSelfDraw] = useState(false);
   const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
   const [takeJackpot, setTakeJackpot] = useState(false);
+  const [splitAll, setSplitAll] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -74,6 +75,20 @@ export default function SessionScreen() {
   async function persist(next: Session) {
     setSession(next);
     await repo.saveOpen(next);
+  }
+
+  function openPool() {
+    setSplitAll(false);
+    setPanel('pool');
+  }
+
+  async function confirmSplit() {
+    if (!session || !splitAll) return;
+    const next = splitJackpot(session, seatedPlayerIds(session));
+    if (next === session) return;
+    setSplitAll(false);
+    setPanel(null);
+    await persist(next);
   }
 
   async function addNamedReserve() {
@@ -328,7 +343,11 @@ export default function SessionScreen() {
             </>
           ) : null}
           {session.rules.jackpotEnabled ? (
-            <ThemedText accessibilityLanguage={APP_LOCALE}>{`Jackpot ${formatBalance(session.pool)}`}</ThemedText>
+            panel === null && seated.size === 4 ? (
+              <Choice label={`Jackpot ${formatBalance(session.pool)}`} onPress={openPool} selected={false} />
+            ) : (
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`Jackpot ${formatBalance(session.pool)}`}</ThemedText>
+            )
           ) : null}
 
           {session.seats.map((seat) => {
@@ -449,6 +468,29 @@ export default function SessionScreen() {
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmWin} selected={false} />
+              </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === 'pool' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>請選擇</ThemedText>
+              <Choice label="平分Jackpot" onPress={() => setPanel('split')} selected={false} />
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+            </ThemedView>
+          ) : null}
+
+          {panel === 'split' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>平分給哪些玩家？</ThemedText>
+              <Choice
+                label={`在位玩家 ${splitAll ? '開' : '關'}`}
+                onPress={() => setSplitAll((value) => !value)}
+                selected={splitAll}
+              />
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice label="確定" onPress={confirmSplit} selected={false} />
               </ThemedView>
             </ThemedView>
           ) : null}
