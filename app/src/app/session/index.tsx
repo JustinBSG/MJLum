@@ -11,7 +11,7 @@ import { APP_LOCALE } from '@/locale';
 import { useRuleRepository } from '@/rules/repository';
 import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
 import { Score } from '@/score/score';
-import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from '@/session/hand';
+import { eligibleJackpotIds, formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
   formatSettlementBalance,
@@ -71,7 +71,7 @@ export default function SessionScreen() {
   const [discarderPaysSelfDraw, setDiscarderPaysSelfDraw] = useState(false);
   const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
   const [takeJackpot, setTakeJackpot] = useState(false);
-  const [splitAll, setSplitAll] = useState(false);
+  const [splitIds, setSplitIds] = useState<string[]>([]);
   const [diceCount, setDiceCount] = useState(MIN_DICE);
   const [diceRoll, setDiceRoll] = useState<DiceRoll | null>(null);
   const [fanHelp, setFanHelp] = useState(false);
@@ -99,15 +99,15 @@ export default function SessionScreen() {
   }
 
   function openPool() {
-    setSplitAll(false);
+    setSplitIds([]);
     setPanel('pool');
   }
 
   async function confirmSplit() {
-    if (!session || !splitAll) return;
-    const next = splitJackpot(session, seatedPlayerIds(session));
+    if (!session || splitIds.length === 0) return;
+    const next = splitJackpot(session, splitIds);
     if (next === session) return;
-    setSplitAll(false);
+    setSplitIds([]);
     setPanel(null);
     await persist(next);
   }
@@ -558,14 +558,23 @@ export default function SessionScreen() {
             </ThemedView>
           ) : null}
 
-          {panel === 'split' ? (
+          {panel === 'split' && session ? (
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>平分給哪些玩家？</ThemedText>
-              <Choice
-                label={`在位玩家 ${splitAll ? '開' : '關'}`}
-                onPress={() => setSplitAll((value) => !value)}
-                selected={splitAll}
-              />
+              {session.players
+                .filter((player) => eligibleJackpotIds(session).includes(player.id))
+                .map((player) => (
+                  <Choice
+                    key={player.id}
+                    label={player.name}
+                    onPress={() =>
+                      setSplitIds((current) =>
+                        current.includes(player.id) ? current.filter((id) => id !== player.id) : [...current, player.id],
+                      )
+                    }
+                    selected={splitIds.includes(player.id)}
+                  />
+                ))}
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmSplit} selected={false} />

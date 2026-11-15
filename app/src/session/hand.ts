@@ -223,19 +223,37 @@ function drawContribution(session: Session): { players: Session['players']; pool
   return { players, pool: pool.toExact() };
 }
 
+/** Seated players, plus anyone who has already sat. A reserve who never sat is left out. */
+export function eligibleJackpotIds(session: Session): string[] {
+  const seen = new Set<string>();
+  const ordered: string[] = [];
+  const consider = (id: string | null) => {
+    if (!id || seen.has(id) || !session.players.some((player) => player.id === id)) return;
+    seen.add(id);
+    ordered.push(id);
+  };
+  for (const id of seatedPlayerIds(session)) consider(id);
+  for (const entry of session.ledger) {
+    for (const seat of entry.before.seats) consider(seat.playerId);
+  }
+  return ordered;
+}
+
 /**
- * 平分Jackpot among every seated player. The demonstrated case is four players,
- * an equal share, and no change to 莊 or 圈風. A subset was not recorded.
+ * 平分Jackpot of the whole pool among one or more eligible players.
+ * Each share is pool/k. 莊 and 圈風 stay put.
  */
 export function splitJackpot(session: Session, playerIds: string[]): Session {
   if (!session.rules.jackpotEnabled) return session;
-  const seated = seatedPlayerIds(session);
-  if (seated.length !== 4 || playerIds.length !== seated.length) return session;
-  const recipients = new Set(playerIds);
-  if (recipients.size !== seated.length || seated.some((id) => !recipients.has(id))) return session;
-  const share = Score.fromString(session.pool).divide(Score.fromRational(seated.length, 1));
+  const pool = Score.fromString(session.pool);
+  if (pool.equals(Score.fromString('0'))) return session;
+  const eligible = new Set(eligibleJackpotIds(session));
+  const recipients = [...new Set(playerIds)];
+  if (recipients.length === 0 || recipients.some((id) => !eligible.has(id))) return session;
+  const share = pool.divide(Score.fromRational(recipients.length, 1));
+  const chosen = new Set(recipients);
   const players = session.players.map((player) =>
-    recipients.has(player.id)
+    chosen.has(player.id)
       ? { ...player, balance: Score.fromString(player.balance).add(share).toExact() }
       : player,
   );
