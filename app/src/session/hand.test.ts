@@ -287,6 +287,45 @@ describe('一炮多響', () => {
     assert.equal(balance(double, '丙家'), '-125');
     assert.equal(balance(double, '乙家'), '383');
   });
+
+  it('passes 莊 when a 一炮多響 leaves the dealer out of the winners', () => {
+    const session = withDealer(four('custom'), '甲家', 'south', 'west');
+    const primed = {
+      ...session,
+      players: session.players.map((item) => (item.name === '乙家' ? { ...item, dealerStreak: 4 } : item)),
+    };
+    const next = recordWin(primed, {
+      winnerId: idOf(primed, '丁家'),
+      fan: 3,
+      discarderId: idOf(primed, '丙家'),
+      also: [{ playerId: idOf(primed, '乙家'), fan: 4 }],
+    });
+    assert.equal(next.dealerId, idOf(next, '乙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '南圈北風');
+    assert.equal(player(next, '乙家').dealerStreak, 0);
+    assert.equal(player(next, '甲家').dealerStreak, 0);
+  });
+
+  it('keeps 莊 when the dealer wins a 一炮多響 even with a negative net', () => {
+    let rules = setPaymentMode(createCustomDraft(), 'half-discard');
+    rules = setOrdinary(setOrdinary(setOrdinary(rules, 3, '2048'), 4, '16'), 5, '128');
+    const session = withDealer(four('custom', rules), '甲家', 'south', 'north');
+    const next = recordWin(session, {
+      winnerId: idOf(session, '甲家'),
+      fan: 4,
+      discarderId: idOf(session, '丁家'),
+      also: [
+        { playerId: idOf(session, '乙家'), fan: 3 },
+        { playerId: idOf(session, '丙家'), fan: 5 },
+      ],
+    });
+    assert.equal(balance(next, '甲家'), '-528');
+    assert.equal(next.dealerId, idOf(next, '甲家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '連1');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '南圈北風');
+    assert.equal(player(next, '甲家').dealerStreak, 1);
+  });
 });
 
 describe('連莊', () => {

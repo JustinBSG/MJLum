@@ -648,7 +648,7 @@ Still open:
 1. Combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated. Three-player 半銃 and a general 半銃 一炮多響 are decided.
 2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows and the opened 3番4 半辣上（三人） 3–8 rows. That 半辣上 preset uses ×1.50. Switching to three players does not by itself change another setup to 4/3.
 3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將). 一二蚊辣辣上 and 3番4 半辣上（三人） now have their opened 3–8 rows; fans outside that range were not shown.
-4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
+4. The complete dealer / 連莊 progression algorithm for every remaining edge case. A 一炮多響 that includes the dealer keeps 莊, adds one 連莊, and leaves 圈風 unchanged, even when that winner’s net is negative. A 一炮多響 that leaves the dealer out passes 莊 to the next seat, sets the new 連莊數 to 0, and steps 圈風. 重新開始計算圈風 on now sets 東圈東風.
 5. Invalid-entry handling and numeric validation.
 6. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
 7. Editing a hand after the rules changed mid-session. Undo and redo cover the latest branch. An older win can be revised when every later row has a stored action.

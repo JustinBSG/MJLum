@@ -144,7 +144,7 @@ function addMoney(players: Player[], playerId: string, delta: Score): Player[] {
   );
 }
 
-/** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 does not move 莊. */
+/** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 keeps 莊 only when the dealer is one of the winners. */
 export function recordWin(session: Session, input: WinInput): Session {
   const ready = applyPendingRules(session);
   const preview = previewWin(ready, input);
@@ -292,7 +292,9 @@ function noteRetention(
     });
   }
   if (nextDealerId !== dealerId) {
-    return players.map((player) => (player.id === dealerId ? { ...player, dealerStreak: 0 } : player));
+    return players.map((player) =>
+      player.id === dealerId || player.id === nextDealerId ? { ...player, dealerStreak: 0 } : player,
+    );
   }
   return players;
 }
@@ -366,7 +368,16 @@ function dealerAfter(session: Session, preview: WinPreview) {
     seatWind: session.seatWind,
   };
   if (!session.rules.trackDealer || session.dealerId === null) return unchanged;
-  if (preview.kind === 'multi') return unchanged;
+  if (preview.kind === 'multi') {
+    if (!preview.winnerIds.includes(session.dealerId)) return passDealer(session);
+    const count = session.dealerMark.kind === 'consecutive' ? session.dealerMark.count + 1 : 1;
+    return {
+      dealerId: session.dealerId,
+      dealerMark: { kind: 'consecutive', count },
+      roundWind: session.roundWind,
+      seatWind: session.seatWind,
+    };
+  }
   if (preview.kind === 'false-win') {
     return preview.winnerId === session.dealerId ? passDealer(session) : unchanged;
   }
