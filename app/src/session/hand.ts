@@ -18,6 +18,8 @@ export type WinInput = {
   discarderPaysSelfDraw?: boolean;
   /** 出銃者包輸. The selected 出銃者 alone pays the ordinary amount. Not combined with 包自摸. */
   discarderPaysLoss?: boolean;
+  /** 贏取Jackpot. The current pool is added to the single winner and then emptied. */
+  takeJackpot?: boolean;
 };
 
 export type WinPreview = {
@@ -29,6 +31,8 @@ export type WinPreview = {
   ordinary: string;
   multiplier: string | null;
   total: string;
+  /** Pool added to the winner. Present only when 贏取Jackpot applies. The pool is then emptied. */
+  jackpot?: string;
   deltas: { playerId: string; delta: string }[];
 };
 
@@ -38,6 +42,10 @@ export type WinPreview = {
  * An unrecorded fan amount is not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
+  return awardJackpot(session, input, previewHand(session, input));
+}
+
+function previewHand(session: Session, input: WinInput): WinPreview | null {
   if (input.discarderPaysSelfDraw && input.discarderPaysLoss) return null;
   if (input.falseWin) {
     if (input.discarderPaysSelfDraw || input.discarderPaysLoss) return null;
@@ -57,16 +65,45 @@ export function previewWin(session: Session, input: WinInput): WinPreview | null
   return fullDiscard(session, input, ordinary);
 }
 
+/**
+ * 贏取Jackpot adds the current pool to one winner. The other players do not pay it.
+ * A 詐糊 or 一炮多響 award was not recorded.
+ */
+function awardJackpot(session: Session, input: WinInput, preview: WinPreview | null): WinPreview | null {
+  if (!preview || !input.takeJackpot || !session.rules.jackpotEnabled) return preview;
+  if (preview.kind === 'false-win' || preview.kind === 'multi' || preview.winnerIds.length !== 1) return null;
+  const winnerId = preview.winnerIds[0];
+  if (!winnerId) return null;
+  const pool = session.pool;
+  return {
+    ...preview,
+    jackpot: pool,
+    total: Score.fromString(preview.total).add(Score.fromString(pool)).toExact(),
+    deltas: preview.deltas.map((item) =>
+      item.playerId === winnerId
+        ? { ...item, delta: Score.fromString(item.delta).add(Score.fromString(pool)).toExact() }
+        : item,
+    ),
+  };
+}
+
 export function formatWinPreview(preview: WinPreview): string[] {
   if (preview.kind === 'false-win') return formatFalseWin(preview);
   if (preview.kind === 'multi') {
     return [`${preview.fan}番分數 ${formatAmount(preview.ordinary)}`, `總分 ${formatAmount(preview.total)}`];
   }
   if (preview.kind === 'discard') {
-    return [`食糊分數 ${formatAmount(preview.ordinary)}`, `總分 ${formatAmount(preview.total)}`];
+    return [`食糊分數 ${formatAmount(preview.ordinary)}${jackpotLabel(preview)}`, `總分 ${formatAmount(preview.total)}`];
   }
   const multiplier = preview.multiplier ?? preview.ordinary;
-  return [`${formatAmount(preview.ordinary)} × ${formatMultiplier(multiplier)}`, `總分 ${formatAmount(preview.total)}`];
+  return [
+    `${formatAmount(preview.ordinary)} × ${formatMultiplier(multiplier)}${jackpotLabel(preview)}`,
+    `總分 ${formatAmount(preview.total)}`,
+  ];
+}
+
+function jackpotLabel(preview: WinPreview): string {
+  return preview.jackpot === undefined ? '' : ` + Jackpot ${formatAmount(preview.jackpot)}`;
 }
 
 /** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 does not move 莊. */
@@ -107,7 +144,7 @@ export function recordWin(session: Session, input: WinInput): Session {
     roundWind: dealer.roundWind,
     seatWind: dealer.seatWind,
     handCount: session.handCount + 1,
-    pool: session.pool,
+    pool: preview.jackpot === undefined ? session.pool : '0',
   });
 }
 

@@ -673,6 +673,55 @@ describe('Jackpot 流局', () => {
   });
 });
 
+describe('贏取Jackpot', () => {
+  it('adds the pool to a 13-fan 自摸 and leaves that amount out of the opponents’ payments', () => {
+    const rules = setJackpotEnabled(setFanRange(createPresetDraft('51-full'), 3, 13), true);
+    const session = withPool(four('51', rules), '80');
+    const input = { winnerId: idOf(session, '丁家'), fan: 13, discarderId: null, takeJackpot: true };
+    const preview = previewWin(session, input);
+    assert.ok(preview);
+    assert.deepEqual(formatWinPreview(preview), ['16384 × 1.50 + Jackpot 80', '總分 24656']);
+    assert.equal(preview.deltas.find((item) => item.playerId === idOf(session, '甲家'))?.delta, '-8192');
+
+    const next = recordWin(session, input);
+    assert.equal(balance(next, '丁家'), '24656');
+    assert.equal(balance(next, '甲家'), '-8192');
+    assert.equal(balance(next, '乙家'), '-8192');
+    assert.equal(balance(next, '丙家'), '-8192');
+    assert.equal(next.pool, '0');
+    assert.equal(player(next, '丁家').selfDraws, 1);
+    const restored = undoLatest(next);
+    assert.equal(restored.pool, '80');
+    assert.equal(balance(restored, '丁家'), '0');
+  });
+
+  it('does not award a 詐糊 or a 一炮多響', () => {
+    const rules = setJackpotEnabled(setFanRange(createPresetDraft('51-full'), 3, 13), true);
+    const session = withPool(four('51', rules), '80');
+    assert.equal(
+      previewWin(session, {
+        winnerId: idOf(session, '丁家'),
+        fan: 13,
+        discarderId: null,
+        falseWin: true,
+        takeJackpot: true,
+      }),
+      null,
+    );
+    assert.equal(
+      previewWin(session, {
+        winnerId: idOf(session, '丁家'),
+        fan: 5,
+        discarderId: idOf(session, '丙家'),
+        also: [{ playerId: idOf(session, '乙家'), fan: 4 }],
+        takeJackpot: true,
+      }),
+      null,
+    );
+    assert.equal(session.pool, '80');
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');
@@ -692,6 +741,19 @@ describe('undo of a confirmed win', () => {
 
 function wide51() {
   return four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
+}
+
+function withPool(session: ReturnType<typeof startNamed>, pool: string) {
+  return commitBoard(session, '彩池', {
+    players: session.players,
+    seats: session.seats,
+    dealerId: session.dealerId,
+    dealerMark: session.dealerMark,
+    roundWind: session.roundWind,
+    seatWind: session.seatWind,
+    handCount: session.handCount,
+    pool,
+  });
 }
 
 function withDealer(session: ReturnType<typeof startNamed>, name: string, roundWind: Wind = 'east', seatWind: Wind = 'east') {
