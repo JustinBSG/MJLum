@@ -30,6 +30,7 @@ import {
   formatStartDate,
   formatWind,
   ledgerLines,
+  markPoolTransfer,
   reopenSession,
   seatedPlayerIds,
   selectDealer,
@@ -149,35 +150,34 @@ export default function SessionScreen() {
     setPanel(null);
   }
 
-  async function confirmFresh() {
+  async function confirmFresh(carry = false) {
     if (!session) return;
-    if (!Score.fromString(session.pool).equals(Score.fromString('0'))) {
+    const poolLeft = !Score.fromString(session.pool).equals(Score.fromString('0'));
+    if (poolLeft && !carry) {
       setFreshNotice('彩池尚未分配。請先分配、明確轉入新局，或取消以繼續舊局。');
       return;
     }
     setFreshNotice(null);
+    const source = carry ? markPoolTransfer(session) : session;
+    const carried = carry ? session.pool : '0';
     if (reusePlayers && reuseRules) {
-      const next = reopenSession(session, new Date().toISOString());
+      const next = reopenSession(source, new Date().toISOString(), carried);
+      const { outboundPool: _pool, ...archived } = source;
+      await repo.saveOpen(archived);
       await repo.archiveOpen();
       await repo.saveOpen(next);
       setSession(next);
       setPanel(null);
       return;
     }
-    if (reusePlayers) {
-      stageRoster(session);
-      await repo.archiveOpen();
-      setSession(null);
-      setPanel(null);
-      router.replace('/rules' as Href);
-      return;
-    }
-    clearRoster();
-    if (reuseRules) await rulesRepo.setActive(session.rules);
+    if (reusePlayers) stageRoster(session);
+    else clearRoster();
+    if (!reusePlayers && reuseRules) await rulesRepo.setActive(session.rules);
+    await repo.saveOpen(source);
     await repo.archiveOpen();
     setSession(null);
     setPanel(null);
-    router.replace((reuseRules ? '/session/seat' : '/rules') as Href);
+    router.replace((reusePlayers ? '/rules' : reuseRules ? '/session/seat' : '/rules') as Href);
   }
 
   function openDealer() {
@@ -796,6 +796,28 @@ export default function SessionScreen() {
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>新牌局</ThemedText>
               {freshNotice ? <ThemedText accessibilityLanguage={APP_LOCALE}>{freshNotice}</ThemedText> : null}
+              {freshNotice ? (
+                <ThemedView style={styles.row}>
+                  <Choice
+                    label="分配"
+                    onPress={() => {
+                      setFreshNotice(null);
+                      setSplitIds([]);
+                      setPanel('split');
+                    }}
+                    selected={false}
+                  />
+                  <Choice label="轉入新局" onPress={() => confirmFresh(true)} selected={false} />
+                  <Choice
+                    label="繼續舊局"
+                    onPress={() => {
+                      setFreshNotice(null);
+                      setPanel(null);
+                    }}
+                    selected={false}
+                  />
+                </ThemedView>
+              ) : null}
               <Choice
                 label={`沿用現有玩家 ${reusePlayers ? '開' : '關'}`}
                 onPress={() => setReusePlayers((value) => !value)}
@@ -808,7 +830,7 @@ export default function SessionScreen() {
               />
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
-                <Choice label="確定" onPress={confirmFresh} selected={false} />
+                <Choice label="確定" onPress={() => confirmFresh(false)} selected={false} />
               </ThemedView>
             </ThemedView>
           ) : null}

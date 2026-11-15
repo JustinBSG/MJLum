@@ -11,7 +11,7 @@ import { useRuleRepository } from '@/rules/repository';
 import type { RuleSetup } from '@/rules/types';
 import { clearRoster, peekRoster, type StagedRoster } from '@/session/pending-roster';
 import { useSessionRepository } from '@/session/repository';
-import { canStart, namedPlayer, seatCount, sessionFromRoster, startSession } from '@/session/session';
+import { canStart, claimOutbound, namedPlayer, seatCount, sessionFromRoster, startSession } from '@/session/session';
 
 export default function SeatScreen() {
   const theme = useTheme();
@@ -77,8 +77,7 @@ export default function SeatScreen() {
         startedAt,
       });
       clearRoster();
-      await sessions.saveOpen(session);
-      router.replace('/session' as Href);
+      await openClaimed(session);
       return;
     }
     if (roster) {
@@ -96,8 +95,7 @@ export default function SeatScreen() {
         startedAt,
       });
       clearRoster();
-      await sessions.saveOpen(session);
-      router.replace('/session' as Href);
+      await openClaimed(session);
       return;
     }
     if (!canStart(rules, names, dealerIndex)) return;
@@ -107,7 +105,13 @@ export default function SeatScreen() {
       dealerIndex: rules.trackDealer ? dealerIndex : null,
       startedAt,
     });
-    await sessions.saveOpen(session);
+    await openClaimed(session);
+  }
+
+  async function openClaimed(session: ReturnType<typeof startSession>) {
+    const claimed = claimOutbound(session, await sessions.listArchived());
+    await sessions.saveOpen(claimed.session);
+    if (claimed.archive) await sessions.saveArchived(claimed.archive);
     router.replace('/session' as Href);
   }
 

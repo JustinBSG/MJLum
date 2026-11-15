@@ -17,6 +17,7 @@ export function parseSession(source: string): Session {
     startedAt: text(raw.startedAt, 'startedAt'),
     progressDisplay: progress(raw.progressDisplay),
     ledger: arrayOf(raw.ledger, 'ledger').map(parseEntry),
+    ...(typeof raw.outboundPool === 'string' ? { outboundPool: exact(raw.outboundPool, 'outboundPool') } : {}),
   };
 }
 

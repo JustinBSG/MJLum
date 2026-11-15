@@ -63,4 +63,6 @@ export type Session = BoardState & {
   startedAt: string;
   progressDisplay: ProgressDisplay;
   ledger: LedgerEntry[];
+  /** Pool moved out of this session and waiting for the next one to claim it. */
+  outboundPool?: string;
 };

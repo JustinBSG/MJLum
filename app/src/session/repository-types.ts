@@ -6,4 +6,5 @@ export type SessionRepository = {
   clearOpen(): Promise<void>;
   archiveOpen(): Promise<void>;
   listArchived(): Promise<Session[]>;
+  saveArchived(session: Session): Promise<void>;
 };

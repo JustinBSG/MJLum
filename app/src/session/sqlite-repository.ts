@@ -38,5 +38,13 @@ export function createSqliteSessionRepository(db: SQLiteDatabase): SessionReposi
       );
       return rows.map((row) => parseSession(row.document));
     },
+    async saveArchived(session: Session) {
+      await db.runAsync(
+        `INSERT INTO archived_session (id, document) VALUES (?, ?)
+         ON CONFLICT(id) DO UPDATE SET document = excluded.document`,
+        session.id,
+        serializeSession(session),
+      );
+    },
   };
 }
