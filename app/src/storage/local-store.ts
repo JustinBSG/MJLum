@@ -19,7 +19,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
  */
 export const DATABASE_NAME = 'mjlum.db';
 
-export const LOCAL_STORE_VERSION = 3;
+export const LOCAL_STORE_VERSION = 4;
 
 export async function migrateLocalStore(db: SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
@@ -48,6 +48,15 @@ export async function migrateLocalStore(db: SQLiteDatabase): Promise<void> {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS open_session (
         id INTEGER PRIMARY KEY CHECK (id = 1),
+        document TEXT NOT NULL
+      );
+    `);
+  }
+
+  if (current < 4) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS archived_session (
+        id TEXT PRIMARY KEY NOT NULL,
         document TEXT NOT NULL
       );
     `);
