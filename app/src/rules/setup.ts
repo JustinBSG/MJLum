@@ -16,7 +16,7 @@ export function createPresetDraft(presetId: string): RuleSetup {
     paymentMode: FULL_DISCARD,
     minFan: preset.minFan,
     maxFan: preset.maxFan,
-    multiplier: DEFAULT_SELF_DRAW_MULTIPLIER,
+    multiplier: preset.multiplier ?? DEFAULT_SELF_DRAW_MULTIPLIER,
     multiplierEdited: false,
     jackpotEnabled: false,
     jackpotContribution: '0',
@@ -75,6 +75,8 @@ export function setPaymentMode(setup: RuleSetup, paymentMode: PaymentMode): Rule
 
 export function setPlayerFormat(setup: RuleSetup, playerFormat: PlayerFormat): RuleSetup {
   const next: RuleSetup = { ...setup, playerFormat };
+  // Only the demonstrated 3番4辣辣上 three-player form uses 4/3.
+  // Another preset, including 3番4半辣上（三人） at 3/2, keeps its own multiplier.
   if (setup.presetId === '3fan4-full') {
     next.rows = [];
     if (!setup.multiplierEdited) {

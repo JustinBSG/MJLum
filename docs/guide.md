@@ -134,7 +134,29 @@ Visible Hong Kong preset minimum and cap amounts:
 | 一二蚊 辣辣上 | 3 fan | 32 | 8 fan | 1024 |
 | 3番4 半辣上（三人） | 3 fan | 3 | 8 fan | 24 |
 
-Opened Hong Kong preset tables are recorded below. **一二蚊辣辣上** and **3番4 半辣上（三人）** were listed but not opened as 玩法設定; only the list-caption minimum and cap amounts in the table above are recorded for those two. Do not invent their missing rows.
+Opened Hong Kong preset tables are recorded below. Fans outside a shown range stay empty.
+
+**一二蚊辣辣上**, opened for 3–8. Self-draw totals are ×1.50. Fans above 8 were not on that screen.
+
+| Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
+|---:|---:|---:|
+| 3 | 32 | 48 |
+| 4 | 64 | 96 |
+| 5 | 128 | 192 |
+| 6 | 256 | 384 |
+| 7 | 512 | 768 |
+| 8 | 1024 | 1536 |
+
+**3番4 半辣上（三人）**, opened for 3–8 at ×1.50. The self-draw total is 1.5S, split across the two opponents. Fans outside 3–8 were not on that screen. This preset does not use the 3番4辣辣上 three-player ×1.33.
+
+| Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
+|---:|---:|---:|
+| 3 | 3 | 4.5 |
+| 4 | 6 | 9 |
+| 5 | 9 | 13.5 |
+| 6 | 12 | 18 |
+| 7 | 18 | 27 |
+| 8 | 24 | 36 |
 
 Two 辣辣上 tables were recorded first, for the range then on screen.
 
@@ -298,7 +320,7 @@ Demonstrated three-player settlements:
 - Then a 3番 自摸 (total 4; each of the other two paid 2): a +1, b −2, c +1, b 莊, 東圈西風.
 - Then 4番 自摸, footer 6 × 1.33 = 8 (self-draw total equals F × 4/3; each of the two opponents paid 4): a −3, b +6, c −3, b 莊 with 連1, 東圈西風.
 
-**Unspecified:** 半銃 interaction with three-player play; three-player tables and payouts other than the demonstrated 3番4辣辣上 全銃 ×1.33 rows and hands; and the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24. These must not be invented. 半銃 interaction with 出銃者包自摸 and 出銃者包輸 was not demonstrated as a combined case; the 包 options themselves have confirmed four-player settlements in the Score entry section.
+**Unspecified:** 半銃 combined with 出銃者包自摸 or 出銃者包輸. Three-player 半銃, the 3番4辣辣上 全銃 ×1.33 rows, and the 3番4 半辣上（三人） 3–8 rows at ×1.50 are decided. Switching to three players does not by itself change another setup to 4/3.
 
 ### Fan range and the score table
 
@@ -624,7 +646,7 @@ Resolved as already recorded in [`docs/development.md`](development.md) and [`do
 Still open:
 
 1. Combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated. Three-player 半銃 and a general 半銃 一炮多響 are decided.
-2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows and the opened 3番4 半辣上（三人） 3–8 rows. The three-player 自摸 split uses the rules’ multiplier; that 半辣上 preset’s default multiplier is still open.
+2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows and the opened 3番4 半辣上（三人） 3–8 rows. That 半辣上 preset uses ×1.50. Switching to three players does not by itself change another setup to 4/3.
 3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將). 一二蚊辣辣上 and 3番4 半辣上（三人） now have their opened 3–8 rows; fans outside that range were not shown.
 4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
 5. Invalid-entry handling and numeric validation.
