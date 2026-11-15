@@ -141,7 +141,7 @@ export default function SessionScreen() {
 
   async function confirmFresh() {
     if (reusePlayers || reuseRules) return;
-    await repo.clearOpen();
+    await repo.archiveOpen();
     setSession(null);
     setPanel(null);
     router.replace('/rules' as Href);
