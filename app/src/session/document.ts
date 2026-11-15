@@ -1,6 +1,18 @@
 import { parseRuleSetup } from '../rules/document.ts';
 import { Score } from '../score/score.ts';
-import type { BoardState, DealerMark, LedgerEntry, Player, ProgressDisplay, Seat, Session, Wind } from './types.ts';
+import type {
+  BoardState,
+  DealerMark,
+  LedgerEntry,
+  Player,
+  ProgressDisplay,
+  RedoEntry,
+  Seat,
+  Session,
+  SessionAction,
+  SessionStatus,
+  Wind,
+} from './types.ts';
 
 export function serializeSession(session: Session): string {
   return JSON.stringify(session);
@@ -16,8 +28,11 @@ export function parseSession(source: string): Session {
     rules: parseRuleSetup(JSON.stringify(raw.rules)),
     ...(isRecord(raw.pendingRules) ? { pendingRules: parseRuleSetup(JSON.stringify(raw.pendingRules)) } : {}),
     startedAt: text(raw.startedAt, 'startedAt'),
+    ...(typeof raw.title === 'string' ? { title: raw.title } : {}),
+    status: status(raw.status),
     progressDisplay: progress(raw.progressDisplay),
     ledger: arrayOf(raw.ledger, 'ledger').map(parseEntry),
+    redo: Array.isArray(raw.redo) ? raw.redo.map(parseRedo) : [],
     ...(typeof raw.outboundPool === 'string' ? { outboundPool: exact(raw.outboundPool, 'outboundPool') } : {}),
   };
 }
@@ -37,10 +52,54 @@ function parseBoard(raw: Record<string, unknown>): BoardState {
 
 function parseEntry(value: unknown): LedgerEntry {
   if (!isRecord(value)) fail('ledger entry');
+  const action = parseAction(value.action);
   return {
     id: text(value.id, 'entry.id'),
     label: text(value.label, 'entry.label'),
     before: parseBoard(record(value.before, 'entry.before')),
+    ...(action ? { action } : {}),
+  };
+}
+
+function parseRedo(value: unknown): RedoEntry {
+  const entry = parseEntry(value);
+  if (!isRecord(value)) fail('redo');
+  return { ...entry, after: parseBoard(record(value.after, 'redo.after')) };
+}
+
+function status(value: unknown): SessionStatus {
+  if (value === 'playing' || value === 'paused' || value === 'completed' || value === 'void') return value;
+  if (value === undefined) return 'playing';
+  return fail('status');
+}
+
+function parseAction(value: unknown): SessionAction | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return undefined;
+  if (value.type === 'draw') return { type: 'draw' };
+  if (value.type === 'rules' && typeof value.name === 'string') return { type: 'rules', name: value.name };
+  if (value.type !== 'win' || !isRecord(value.input)) return undefined;
+  const input = value.input;
+  return {
+    type: 'win',
+    input: {
+      winnerId: text(input.winnerId, 'action.winnerId'),
+      fan: whole(input.fan, 'action.fan'),
+      discarderId: input.discarderId === null ? null : text(input.discarderId, 'action.discarderId'),
+      ...(Array.isArray(input.also)
+        ? {
+            also: input.also.map((item) => {
+              if (!isRecord(item)) fail('action.also');
+              return { playerId: text(item.playerId, 'action.also.playerId'), fan: whole(item.fan, 'action.also.fan') };
+            }),
+          }
+        : {}),
+      ...(input.falseWin === true ? { falseWin: true } : {}),
+      ...(input.falseWinAsSelfDraw === true ? { falseWinAsSelfDraw: true } : {}),
+      ...(input.discarderPaysSelfDraw === true ? { discarderPaysSelfDraw: true } : {}),
+      ...(input.discarderPaysLoss === true ? { discarderPaysLoss: true } : {}),
+      ...(input.takeJackpot === true ? { takeJackpot: true } : {}),
+    },
   };
 }
 

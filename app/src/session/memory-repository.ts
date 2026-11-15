@@ -32,6 +32,10 @@ export function createMemorySessionRepository(open: Session | null = null): Sess
       if (index === -1) archived.push(stored);
       else archived[index] = stored;
     },
+    async deleteArchived(id: string) {
+      const index = archived.findIndex((item) => item.id === id);
+      if (index >= 0) archived.splice(index, 1);
+    },
   };
 }
 

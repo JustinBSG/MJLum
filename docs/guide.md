@@ -629,8 +629,8 @@ Still open:
 4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
 5. Invalid-entry handling and numeric validation.
 6. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
-7. Undo depth, redo, and editing or deleting an older history row.
-8. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
+7. Editing a hand after the rules changed mid-session. Undo and redo cover the latest branch. An older win can be revised when every later row has a stored action.
+8. Past sessions can be opened read-only, resumed, paused, completed, voided, or permanently deleted. A voided session stays in the list and is marked 作廢.
 9. Special abortive-hand types or reason codes beyond the demonstrated 流局.
 10. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 

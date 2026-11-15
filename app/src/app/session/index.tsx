@@ -12,6 +12,7 @@ import { useRuleRepository } from '@/rules/repository';
 import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
 import { Score } from '@/score/score';
 import { eligibleJackpotIds, formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from '@/session/hand';
+import { reviseEntry } from '@/session/history';
 import { useSessionRepository } from '@/session/repository';
 import {
   formatSettlementBalance,
@@ -36,17 +37,24 @@ import {
   removePlayer,
   renamePlayer,
   reopenSession,
+  resumeSession,
   seatedPlayerIds,
   selectDealer,
+  sessionStatusLabel,
   setProgressDisplay,
+  setSessionTitle,
   substitute,
   swapSeats,
+  completeSession,
+  pauseSession,
+  redoLatest,
   undoLatest,
+  voidSession,
   type LedgerEmphasis,
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'roster' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'roster' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | 'life' | 'revise' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -87,6 +95,10 @@ export default function SessionScreen() {
   const [diceCount, setDiceCount] = useState(MIN_DICE);
   const [diceRoll, setDiceRoll] = useState<DiceRoll | null>(null);
   const [fanHelp, setFanHelp] = useState(false);
+  const [lifeError, setLifeError] = useState<string | null>(null);
+  const [sessionTitle, setSessionTitleText] = useState('');
+  const [reviseId, setReviseId] = useState<string | null>(null);
+  const [reviseFan, setReviseFan] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -158,6 +170,30 @@ export default function SessionScreen() {
     if (!session) return;
     await persist(undoLatest(session));
     setPanel(null);
+  }
+
+  async function confirmRedo() {
+    if (!session) return;
+    await persist(redoLatest(session));
+  }
+
+  async function confirmRevise() {
+    if (!session || !reviseId) return;
+    const entry = session.ledger.find((item) => item.id === reviseId);
+    if (!entry?.action || entry.action.type !== 'win') {
+      setLifeError(entry ? `未能重算「${entry.label}」` : '找不到這筆記錄');
+      return;
+    }
+    const fan = readFan(reviseFan);
+    if (fan === null) return;
+    const revised = reviseEntry(session, reviseId, { type: 'win', input: { ...entry.action.input, fan } });
+    if ('error' in revised) {
+      setLifeError(revised.error);
+      return;
+    }
+    setLifeError(null);
+    setPanel(null);
+    await persist(revised.session);
   }
 
   async function confirmFresh(carry = false) {
@@ -389,6 +425,8 @@ export default function SessionScreen() {
           ) : null}
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`開始日期 ${formatStartDate(session.startedAt)}`}</ThemedText>
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`總局數 ${session.handCount}`}</ThemedText>
+          <ThemedText accessibilityLanguage={APP_LOCALE}>{sessionStatusLabel(session.status)}</ThemedText>
+          {session.title ? <ThemedText accessibilityLanguage={APP_LOCALE}>{session.title}</ThemedText> : null}
           {session.rules.trackDealer ? (
             <>
               <ThemedText accessibilityLanguage={APP_LOCALE}>
@@ -440,7 +478,7 @@ export default function SessionScreen() {
             </ThemedText>
           ))}
 
-          {panel === null ? (
+          {panel === null && session.status === 'playing' ? (
             <ThemedView style={styles.row}>
               <Choice label="食糊!" onPress={openWin} selected={false} />
               <Choice label="流局" onPress={() => setPanel('draw')} selected={false} />
@@ -448,10 +486,18 @@ export default function SessionScreen() {
               <Choice label="玩家" onPress={() => setPanel('roster')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
-              <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
-              <Choice label="統計數據" onPress={() => setPanel('stats')} selected={false} />
+              {session.redo.length > 0 ? <Choice label="重做" onPress={confirmRedo} selected={false} /> : null}
+              <Choice label="修改記錄" onPress={() => setPanel('revise')} selected={false} />
+              <Choice label="牌局" onPress={() => { setLifeError(null); setSessionTitleText(session.title ?? ''); setPanel('life'); }} selected={false} />
               <Choice label="擲骰" onPress={openDice} selected={false} />
               <Choice label="新牌局" onPress={openFresh} selected={false} />
+            </ThemedView>
+          ) : null}
+          {panel === null ? (
+            <ThemedView style={styles.row}>
+              <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
+              <Choice label="統計數據" onPress={() => setPanel('stats')} selected={false} />
+              <Choice label="牌局紀錄" onPress={() => router.push('/history' as Href)} selected={false} />
             </ThemedView>
           ) : null}
 
@@ -885,6 +931,91 @@ export default function SessionScreen() {
               <ThemedView style={styles.row}>
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmDealer} selected={false} />
+              </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === null && session.status === 'paused' ? (
+            <Choice label="繼續牌局" onPress={() => persist(resumeSession(session))} selected={false} />
+          ) : null}
+
+          {panel === 'life' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>牌局</ThemedText>
+              {lifeError ? <ThemedText accessibilityLanguage={APP_LOCALE}>{lifeError}</ThemedText> : null}
+              <TextInput
+                accessibilityLabel="牌局名稱"
+                accessibilityLanguage={APP_LOCALE}
+                onChangeText={setSessionTitleText}
+                placeholder="牌局名稱"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={sessionTitle}
+              />
+              <Choice
+                label="儲存名稱"
+                onPress={() => persist(setSessionTitle(session, sessionTitle))}
+                selected={false}
+              />
+              <Choice label="暫停" onPress={() => persist(pauseSession(session)).then(() => setPanel(null))} selected={false} />
+              <Choice
+                label="完成"
+                onPress={async () => {
+                  const next = completeSession(session);
+                  if (next === session) {
+                    setLifeError('彩池尚未分配');
+                    return;
+                  }
+                  await repo.saveOpen(next);
+                  await repo.archiveOpen();
+                  setSession(null);
+                  router.replace('/history' as Href);
+                }}
+                selected={false}
+              />
+              <Choice
+                label="作廢"
+                onPress={async () => {
+                  await repo.saveOpen(voidSession(session));
+                  await repo.archiveOpen();
+                  setSession(null);
+                  router.replace('/history' as Href);
+                }}
+                selected={false}
+              />
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+            </ThemedView>
+          ) : null}
+
+          {panel === 'revise' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>修改記錄</ThemedText>
+              {lifeError ? <ThemedText accessibilityLanguage={APP_LOCALE}>{lifeError}</ThemedText> : null}
+              {session.ledger.map((entry) => (
+                <Choice
+                  key={entry.id}
+                  label={entry.label}
+                  onPress={() => {
+                    setReviseId(entry.id);
+                    setReviseFan(entry.action?.type === 'win' ? String(entry.action.input.fan) : '');
+                    setLifeError(null);
+                  }}
+                  selected={reviseId === entry.id}
+                />
+              ))}
+              <TextInput
+                accessibilityLabel="番數"
+                accessibilityLanguage={APP_LOCALE}
+                keyboardType="number-pad"
+                onChangeText={setReviseFan}
+                placeholder="番數"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={reviseFan}
+              />
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice label="確定" onPress={confirmRevise} selected={false} />
               </ThemedView>
             </ThemedView>
           ) : null}
