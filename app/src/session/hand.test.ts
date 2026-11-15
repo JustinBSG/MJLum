@@ -783,6 +783,50 @@ describe('undo of a confirmed win', () => {
   });
 });
 
+describe('normal-hand counts', () => {
+  it('adds one hand, one 出銃, and each winner’s own fan', () => {
+    const session = four('custom');
+    const next = recordWin(session, {
+      winnerId: idOf(session, '乙家'),
+      fan: 3,
+      discarderId: idOf(session, '甲家'),
+      also: [{ playerId: idOf(session, '丙家'), fan: 8 }],
+    });
+    assert.equal(player(next, '甲家').discards, 1);
+    assert.equal(player(next, '甲家').discardFanSum, 11);
+    assert.equal(player(next, '乙家').fanSum, 3);
+    assert.equal(player(next, '丙家').fanSum, 8);
+    assert.equal(player(next, '丁家').hands, 1);
+    assert.equal(player(next, '丁家').wins, 0);
+    assert.equal(player(next, '甲家').bestDealerStreak, 0);
+  });
+
+  it('does not count 詐糊 toward H, and a non-dealer 詐糊 continues 留莊', () => {
+    const session = four('custom');
+    const next = recordWin(session, {
+      winnerId: idOf(session, '丁家'),
+      fan: 5,
+      discarderId: null,
+      falseWin: true,
+    });
+    assert.equal(player(next, '甲家').hands, 0);
+    assert.equal(player(next, '丁家').wins, 0);
+    assert.equal(player(next, '甲家').dealerStreak, 1);
+    assert.equal(player(next, '甲家').bestDealerStreak, 1);
+  });
+
+  it('counts a 流局 with 過莊 off as 留莊', () => {
+    const rules = setPassDealerOnDraw(createCustomDraft(), false);
+    let session = withDealer(four('custom', rules), '丁家');
+    session = recordDraw(session);
+    session = recordDraw(session);
+    session = recordDraw(session);
+    assert.equal(player(session, '丁家').hands, 3);
+    assert.equal(player(session, '丁家').bestDealerStreak, 3);
+    assert.equal(player(session, '甲家').bestDealerStreak, 0);
+  });
+});
+
 function wide51() {
   return four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
 }

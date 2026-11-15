@@ -86,14 +86,35 @@ describe('roster and dealer', () => {
     });
     const dealerId = marked.dealerId;
     assert.ok(dealerId);
-    const reset = selectDealer(marked, dealerId, true);
+    const reset = selectDealer(marked, dealerId, true, false);
     assert.equal(formatDealerBadge(reset.dealerMark), '莊');
     assert.equal(formatWind(reset.roundWind, reset.seatWind), '南圈北風');
 
     const draw = commitBoard(reset, '冧', { ...reset, dealerMark: { kind: 'draw', count: 1 } });
-    const stillDraw = selectDealer(draw, dealerId, true);
+    const stillDraw = selectDealer(draw, dealerId, true, false);
     assert.equal(formatDealerBadge(stillDraw.dealerMark), '冧1');
     assert.equal(formatDealerBadge({ kind: 'consecutive', count: 1 }), '連1');
+  });
+
+  it('sets 東圈東風 when 重新開始計算圈風 is on, and leaves it when off', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const marked = commitBoard(started, '圈風', {
+      ...started,
+      roundWind: 'south',
+      seatWind: 'west',
+    });
+    const dealerId = marked.dealerId;
+    assert.ok(dealerId);
+    const kept = selectDealer(marked, dealerId, false, false);
+    assert.equal(kept, marked);
+    const restarted = selectDealer(marked, dealerId, false, true);
+    assert.equal(formatWind(restarted.roundWind, restarted.seatWind), '東圈東風');
+    assert.equal(undoLatest(restarted).roundWind, 'south');
   });
 
   it('undoes only the latest entry and restores the previous board', () => {

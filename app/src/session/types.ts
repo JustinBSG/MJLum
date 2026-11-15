@@ -16,10 +16,22 @@ export type Player = {
   avatar: string;
   /** Exact net balance. It stays with this person after they leave a seat. */
   balance: string;
-  /** Session counters. Rate formulas are feature 10 and are not calculated here. */
+  /** W. Valid 食糊, including 自摸. A 詐糊 does not count. */
   wins: number;
+  /** Z. Valid 自摸, including 出銃者包自摸. */
   selfDraws: number;
+  /** D. Valid 出銃 events. One 一炮多響 is one event. */
   discards: number;
+  /** H. Completed normal hands while seated, including a normal 流局. */
+  hands: number;
+  /** F. Sum of scoring fans on this player's valid wins. */
+  fanSum: number;
+  /** L. Sum of every winner's scoring fan on this player's 出銃 events. */
+  discardFanSum: number;
+  /** Current automatic 留莊 streak. A manual 莊家設定 does not raise it. */
+  dealerStreak: number;
+  /** Longest automatic 留莊 streak. 冧莊王 needs at least 3. */
+  bestDealerStreak: number;
 };
 
 export type Seat = {

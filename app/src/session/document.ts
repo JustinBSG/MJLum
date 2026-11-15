@@ -52,6 +52,11 @@ function parsePlayer(value: unknown): Player {
     wins: whole(value.wins, 'player.wins'),
     selfDraws: whole(value.selfDraws, 'player.selfDraws'),
     discards: whole(value.discards, 'player.discards'),
+    hands: countOrZero(value.hands, 'player.hands'),
+    fanSum: countOrZero(value.fanSum, 'player.fanSum'),
+    discardFanSum: countOrZero(value.discardFanSum, 'player.discardFanSum'),
+    dealerStreak: countOrZero(value.dealerStreak, 'player.dealerStreak'),
+    bestDealerStreak: countOrZero(value.bestDealerStreak, 'player.bestDealerStreak'),
   };
 }
 
@@ -93,6 +98,11 @@ function text(value: unknown, label: string): string {
 function whole(value: unknown, label: string): number {
   if (typeof value !== 'number' || !Number.isInteger(value)) fail(label);
   return value;
+}
+
+function countOrZero(value: unknown, label: string): number {
+  if (value === undefined) return 0;
+  return whole(value, label);
 }
 
 function arrayOf(value: unknown, label: string): unknown[] {
