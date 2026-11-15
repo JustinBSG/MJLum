@@ -7,8 +7,7 @@ import FractionJs from 'fraction.js';
  * denominator. A JavaScript number that is not a safe integer is rejected,
  * including a previously rounded quotient such as 32 / 3.
  *
- * Display rounding of non-terminating amounts is unspecified and is not
- * implemented here. toExact() is the reduced rational, not a screen format.
+ * toExact() is the reduced rational. Screen rounding lives in formatDisplay.
  */
 
 const SCORE_STRING = /^[+-]?(?:\d+|\d+\.\d+|\d+\/[1-9]\d*)$/;

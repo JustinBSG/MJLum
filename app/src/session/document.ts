@@ -58,6 +58,7 @@ function parseEntry(value: unknown): LedgerEntry {
     label: text(value.label, 'entry.label'),
     before: parseBoard(record(value.before, 'entry.before')),
     ...(action ? { action } : {}),
+    ...(isRecord(value.rules) ? { rules: parseRuleSetup(JSON.stringify(value.rules)) } : {}),
   };
 }
 
@@ -77,7 +78,47 @@ function parseAction(value: unknown): SessionAction | undefined {
   if (value === undefined) return undefined;
   if (!isRecord(value)) return undefined;
   if (value.type === 'draw') return { type: 'draw' };
-  if (value.type === 'rules' && typeof value.name === 'string') return { type: 'rules', name: value.name };
+  if (value.type === 'rules' && typeof value.name === 'string') {
+    return {
+      type: 'rules',
+      name: value.name,
+      ...(isRecord(value.setup) ? { setup: parseRuleSetup(JSON.stringify(value.setup)) } : {}),
+    };
+  }
+  if (value.type === 'adjust' && typeof value.note === 'string') {
+    return {
+      type: 'adjust',
+      playerId: text(value.playerId, 'action.playerId'),
+      delta: exact(value.delta, 'action.delta'),
+      note: value.note,
+    };
+  }
+  if (value.type === 'substitute') {
+    return {
+      type: 'substitute',
+      playerId: text(value.playerId, 'action.playerId'),
+      seatIndex: whole(value.seatIndex, 'action.seatIndex'),
+      billToOriginal: value.billToOriginal === true,
+    };
+  }
+  if (value.type === 'swap') {
+    return {
+      type: 'swap',
+      indexA: whole(value.indexA, 'action.indexA'),
+      indexB: whole(value.indexB, 'action.indexB'),
+    };
+  }
+  if (value.type === 'dealer') {
+    return {
+      type: 'dealer',
+      playerId: text(value.playerId, 'action.playerId'),
+      resetConsecutive: value.resetConsecutive === true,
+      restartWind: value.restartWind === true,
+    };
+  }
+  if (value.type === 'jackpot' && Array.isArray(value.playerIds)) {
+    return { type: 'jackpot', playerIds: value.playerIds.map((id) => text(id, 'action.playerId')) };
+  }
   if (value.type !== 'win' || !isRecord(value.input)) return undefined;
   const input = value.input;
   return {
@@ -99,6 +140,7 @@ function parseAction(value: unknown): SessionAction | undefined {
       ...(input.discarderPaysSelfDraw === true ? { discarderPaysSelfDraw: true } : {}),
       ...(input.discarderPaysLoss === true ? { discarderPaysLoss: true } : {}),
       ...(input.takeJackpot === true ? { takeJackpot: true } : {}),
+      ...(input.limitHand === true ? { limitHand: true } : {}),
     },
   };
 }

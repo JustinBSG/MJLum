@@ -11,6 +11,7 @@ import { useRuleRepository } from '@/rules/repository';
 import type { RuleSetup } from '@/rules/types';
 import { clearRoster, peekRoster, type StagedRoster } from '@/session/pending-roster';
 import { useSessionRepository } from '@/session/repository';
+import { missingHighFans } from '@/rules/setup';
 import { canStart, claimOutbound, namedPlayer, seatCount, sessionFromRoster, startSession } from '@/session/session';
 
 export default function SeatScreen() {
@@ -130,6 +131,9 @@ export default function SeatScreen() {
       {rules ? (
         <ScrollView contentContainerStyle={styles.content}>
           <ThemedText accessibilityLanguage={APP_LOCALE}>{rules.name}</ThemedText>
+          {missingHighFans(rules).length > 0 ? (
+            <ThemedText accessibilityLanguage={APP_LOCALE}>{`請先填 ${missingHighFans(rules).join('、')} 番嘅食糊分數`}</ThemedText>
+          ) : null}
           {roster && !matching ? (
             <ThemedText accessibilityLanguage={APP_LOCALE}>請選出今局入座嘅人。未入座者留作後備。</ThemedText>
           ) : null}

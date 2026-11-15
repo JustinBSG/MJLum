@@ -196,6 +196,30 @@ describe('自摸', () => {
     assert.equal(balance(next, '乙家'), '-9/4');
   });
 
+  it('scores 例牌 at 滿糊 without adding another multiplier', () => {
+    const session = four('custom');
+    const next = recordWin(session, {
+      winnerId: idOf(session, '乙家'),
+      fan: 3,
+      discarderId: null,
+      limitHand: true,
+    });
+    assert.equal(balance(next, '乙家'), '192');
+    assert.equal(player(next, '乙家').fanSum, 8);
+    assert.equal(player(next, '乙家').wins, 1);
+    assert.equal(next.ledger.at(-1)?.label, '8番 例牌 自摸');
+    assert.equal(
+      previewWin(session, {
+        winnerId: idOf(session, '乙家'),
+        fan: 3,
+        discarderId: null,
+        limitHand: true,
+        falseWin: true,
+      }),
+      null,
+    );
+  });
+
   it('splits a three-player 自摸 by the rules multiplier', () => {
     const session = startNamed(setPlayerFormat(createCustomDraft(), 'three'), ['甲家', '乙家', '丙家']);
     const preview = previewWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null });
@@ -504,9 +528,23 @@ describe('詐糊', () => {
     assert.equal(balance(next, '甲家'), '16384');
   });
 
-  it('does not score a three-player 詐糊 or an empty fan above 13', () => {
+  it('pays a three-player 詐糊 from the selected fan and leaves an empty fan above 13', () => {
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
-    assert.equal(previewWin(three, { winnerId: idOf(three, '甲家'), fan: 4, discarderId: null, falseWin: true }), null);
+    const off = recordWin(three, { winnerId: idOf(three, '甲家'), fan: 4, discarderId: null, falseWin: true });
+    assert.equal(balance(off, '甲家'), '-12');
+    assert.equal(balance(off, '乙家'), '6');
+    assert.equal(balance(off, '丙家'), '6');
+    assert.equal(player(off, '甲家').wins, 0);
+    const half = startNamed(createPresetDraft('3fan4-half-three'), ['甲家', '乙家', '丙家']);
+    const on = previewWin(half, {
+      winnerId: idOf(half, '甲家'),
+      fan: 8,
+      discarderId: null,
+      falseWin: true,
+      falseWinAsSelfDraw: true,
+    });
+    assert.equal(on?.deltas.find((item) => item.playerId === idOf(half, '乙家'))?.delta, '36');
+    assert.equal(on?.deltas.find((item) => item.playerId === idOf(half, '甲家'))?.delta, '-72');
     const started = four('custom');
     const session = { ...started, rules: setFanRange(started.rules, 3, 14) };
     assert.equal(previewWin(session, { winnerId: idOf(session, '甲家'), fan: 14, discarderId: null, falseWin: true }), null);
@@ -551,17 +589,27 @@ describe('出銃者包自摸', () => {
     assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
   });
 
-  it('does not score a three-player 包自摸 or a 包自摸 一炮多響', () => {
+  it('makes one three-player payer cover 包自摸 and still rejects a 包自摸 一炮多響', () => {
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
-    assert.equal(
-      previewWin(three, {
-        winnerId: idOf(three, '甲家'),
-        fan: 4,
-        discarderId: idOf(three, '丙家'),
-        discarderPaysSelfDraw: true,
-      }),
-      null,
-    );
+    const covered = recordWin(three, {
+      winnerId: idOf(three, '甲家'),
+      fan: 5,
+      discarderId: idOf(three, '丙家'),
+      discarderPaysSelfDraw: true,
+    });
+    assert.equal(balance(covered, '甲家'), '16');
+    assert.equal(balance(covered, '丙家'), '-16');
+    assert.equal(balance(covered, '乙家'), '0');
+    assert.equal(player(covered, '甲家').selfDraws, 1);
+    assert.equal(player(covered, '丙家').discards, 0);
+    const half = startNamed(createPresetDraft('3fan4-half-three'), ['甲家', '乙家', '丙家']);
+    const spicy = previewWin(half, {
+      winnerId: idOf(half, '甲家'),
+      fan: 8,
+      discarderId: idOf(half, '乙家'),
+      discarderPaysSelfDraw: true,
+    });
+    assert.equal(spicy?.total, '36');
     const session = four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
     assert.equal(
       previewWin(session, {
@@ -608,7 +656,7 @@ describe('出銃者包輸', () => {
     assert.equal(next.ledger.at(-1)?.label, '4番 食糊');
   });
 
-  it('does not score both 包 toggles, a three-player 包輸, or a 包輸 一炮多響', () => {
+  it('does not score both 包 toggles or a 包輸 一炮多響, and one three-player payer covers 包輸', () => {
     const rules = setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 13), 'half-discard');
     const session = four('51', rules);
     const both = {
@@ -630,15 +678,16 @@ describe('出銃者包輸', () => {
       null,
     );
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
-    assert.equal(
-      previewWin(three, {
-        winnerId: idOf(three, '甲家'),
-        fan: 4,
-        discarderId: idOf(three, '丙家'),
-        discarderPaysLoss: true,
-      }),
-      null,
-    );
+    const covered = recordWin(three, {
+      winnerId: idOf(three, '甲家'),
+      fan: 4,
+      discarderId: idOf(three, '丙家'),
+      discarderPaysLoss: true,
+    });
+    assert.equal(balance(covered, '甲家'), '6');
+    assert.equal(balance(covered, '丙家'), '-6');
+    assert.equal(balance(covered, '乙家'), '0');
+    assert.equal(player(covered, '丙家').discards, 1);
   });
 });
 

@@ -6,6 +6,7 @@ import {
   createCustomDraft,
   createPresetDraft,
   formatAmount,
+  formatDisplay,
   formatMultiplier,
   missingHighFans,
   prepareRuleName,
@@ -94,8 +95,15 @@ describe('Hong Kong presets', () => {
       [3, 4, 5, 6, 7, 8].map((fan) => selfDrawAmount(spicy, fan)),
       ['48', '96', '192', '384', '768', '1536'],
     );
-    const extended = setFanRange(spicy, 3, 9);
-    assert.equal(row(extended, 9)?.ordinary, null);
+    const raisedSpicy = setFanRange(spicy, 3, 13);
+    assert.deepEqual(
+      [9, 10, 13].map((fan) => row(raisedSpicy, fan)?.ordinary),
+      ['2048', '4096', '32768'],
+    );
+    const typed = setFanRange(setOrdinary(spicy, 8, '1'), 3, 9);
+    assert.equal(row(typed, 8)?.ordinary, '1');
+    assert.equal(row(typed, 9)?.ordinary, '2048');
+    assert.equal(row(setFanRange(raisedSpicy, 3, 14), 14)?.ordinary, null);
 
     const three = createPresetDraft('3fan4-half-three');
     assert.equal(three.playerFormat, 'three');
@@ -103,7 +111,12 @@ describe('Hong Kong presets', () => {
       [3, 4, 5, 6, 7, 8].map((fan) => row(three, fan)?.ordinary),
       ['3', '6', '9', '12', '18', '24'],
     );
-    assert.equal(row(setFanRange(three, 3, 9), 9)?.ordinary, null);
+    const raisedThree = setFanRange(three, 3, 13);
+    assert.deepEqual(
+      [9, 10, 11, 12, 13].map((fan) => row(raisedThree, fan)?.ordinary),
+      ['36', '48', '72', '96', '144'],
+    );
+    assert.equal(formatAmount(selfDrawAmount(raisedThree, 9)), '54');
     assert.equal(formatMultiplier(three.multiplier), '1.50');
     assert.equal(formatAmount(selfDrawAmount(three, 3)), '4.5');
     assert.equal(formatAmount(selfDrawAmount(three, 5)), '13.5');
@@ -147,6 +160,13 @@ describe('custom 新玩法', () => {
     assert.equal(row(through14, 14)?.ordinary, null);
     assert.equal(selfDrawAmount(through14, 14), null);
     assert.deepEqual(missingHighFans(through14), [14]);
+    assert.equal(formatDisplay('-32/3'), '≈-10.67');
+    assert.equal(formatDisplay('-2133/200'), '-10.67');
+    assert.equal(formatDisplay('200/3'), '≈66.67');
+    assert.equal(formatDisplay('9/2'), '4.5');
+    assert.equal(formatAmount('-32/3'), '-32/3');
+    const chicken = setFanRange(createPresetDraft('25-full'), 3, 10);
+    assert.deepEqual(missingHighFans(chicken), [9, 10]);
     assert.deepEqual(missingHighFans(through13), []);
     assert.deepEqual(prepareRuleName('  新玩法  '), { name: '新玩法' });
     assert.deepEqual(prepareRuleName('   '), { error: '請填寫玩法名稱' });

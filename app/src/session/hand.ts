@@ -21,10 +21,13 @@ export type WinInput = {
   discarderPaysLoss?: boolean;
   /** 贏取Jackpot. The current pool is added to the single winner and then emptied. */
   takeJackpot?: boolean;
+  /** 例牌. Score this hand at 滿糊. Do not combine it with 詐糊 or 一炮多響. */
+  limitHand?: boolean;
 };
 
 export type WinPreview = {
   kind: 'discard' | 'self-draw' | 'multi' | 'false-win';
+  limitHand?: boolean;
   fan: number;
   winnerId: string;
   winnerIds: string[];
@@ -64,6 +67,14 @@ export function scoringFan(rules: RuleSetup, fan: number): number {
 
 function previewHand(session: Session, input: WinInput): WinPreview | null {
   if (input.discarderPaysSelfDraw && input.discarderPaysLoss) return null;
+  if (input.limitHand && (input.falseWin || (input.also?.length ?? 0) > 0)) return null;
+  const source = input.limitHand ? { ...input, fan: session.rules.maxFan } : input;
+  const preview = scoreHand(session, source);
+  if (!preview || !input.limitHand) return preview;
+  return { ...preview, limitHand: true };
+}
+
+function scoreHand(session: Session, input: WinInput): WinPreview | null {
   if (input.falseWin) {
     if (input.discarderPaysSelfDraw || input.discarderPaysLoss) return null;
     return falseWin(session, input);
@@ -153,7 +164,7 @@ export function recordWin(session: Session, input: WinInput): Session {
   const seated = new Set(seatedPlayerIds(ready));
   const fanByWinner = new Map<string, number>();
   if (counting) {
-    fanByWinner.set(input.winnerId, scoringFan(ready.rules, input.fan));
+    fanByWinner.set(input.winnerId, preview.limitHand ? preview.fan : scoringFan(ready.rules, input.fan));
     for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, scoringFan(ready.rules, extra.fan));
   }
   let lossFan = 0;
@@ -172,14 +183,15 @@ export function recordWin(session: Session, input: WinInput): Session {
     };
   });
   for (const item of preview.deltas) players = addMoney(players, item.playerId, Score.fromString(item.delta));
+  const limit = preview.limitHand ? '例牌 ' : '';
   const label =
     preview.kind === 'false-win'
       ? `${preview.fan}番 詐糊`
       : preview.kind === 'multi'
         ? '一炮多響'
         : preview.kind === 'self-draw'
-          ? `${preview.fan}番 自摸`
-          : `${preview.fan}番 食糊`;
+          ? `${preview.fan}番 ${limit}自摸`
+          : `${preview.fan}番 ${limit}食糊`;
   const dealer = dealerAfter(ready, preview);
   return commitBoard(ready, label, {
     players: noteRetention(players, ready, dealer.dealerId, retainsDealer(ready, preview)),
@@ -261,7 +273,7 @@ export function splitJackpot(session: Session, playerIds: string[]): Session {
     seatWind: session.seatWind,
     handCount: session.handCount,
     pool: '0',
-  });
+  }, { type: 'jackpot', playerIds: recipients });
 }
 
 /** A 詐糊 does not count. A non-dealer 詐糊 still continues the dealer's 留莊. */
@@ -325,13 +337,14 @@ function holdDraw(session: Session): { dealerId: string | null; dealerMark: Deal
  */
 function falseWin(session: Session, input: WinInput): WinPreview | null {
   if ((input.also?.length ?? 0) > 0) return null;
-  if (session.rules.playerFormat !== 'four') return null;
+  const seatLimit = seatLimitOf(session);
+  if (seatLimit === 0) return null;
   const ordinary = ordinaryAmount(session, input.fan);
   if (!ordinary) return null;
   const seated = seatedPlayerIds(session);
-  if (seated.length !== 4 || !seated.includes(input.winnerId)) return null;
+  if (seated.length !== seatLimit || !seated.includes(input.winnerId)) return null;
   const opponents = seated.filter((id) => id !== input.winnerId);
-  if (opponents.length !== 3) return null;
+  if (opponents.length !== seatLimit - 1) return null;
   const multiplier = input.falseWinAsSelfDraw ? session.rules.multiplier : null;
   const perPlayer = multiplier ? Score.fromString(ordinary).multiply(Score.fromString(multiplier)) : Score.fromString(ordinary);
   const total = perPlayer.multiply(Score.fromRational(opponents.length, 1));
@@ -354,10 +367,11 @@ function falseWin(session: Session, input: WinInput): WinPreview | null {
 function formatFalseWin(preview: WinPreview): string[] {
   const loss = formatAmount(negate(Score.fromString(preview.ordinary)));
   const total = formatAmount(negate(Score.fromString(preview.total)));
+  const opponents = Math.max(preview.deltas.length - 1, 1);
   if (preview.multiplier) {
-    return [`${loss} × ${formatMultiplier(preview.multiplier)} × 3`, `總分 ${total}`];
+    return [`${loss} × ${formatMultiplier(preview.multiplier)} × ${opponents}`, `總分 ${total}`];
   }
-  return [`${preview.fan}番分數 詐糊 ${loss} ×3`, `總分 ${total}`];
+  return [`${preview.fan}番分數 詐糊 ${loss} ×${opponents}`, `總分 ${total}`];
 }
 
 function dealerAfter(session: Session, preview: WinPreview) {
@@ -443,13 +457,11 @@ function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPr
  * The hand counts as 自摸. Three-player and 一炮多響 combinations were not recorded.
  */
 function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: string): WinPreview | null {
-  if (session.rules.playerFormat !== 'four') return null;
+  const seatLimit = seatLimitOf(session);
   const discarderId = input.discarderId;
-  if (!discarderId || discarderId === input.winnerId) return null;
+  if (!discarderId || discarderId === input.winnerId || seatLimit === 0) return null;
   const seated = seatedPlayerIds(session);
-  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
-  const opponents = seated.filter((id) => id !== input.winnerId);
-  if (selfDrawPayers(session, opponents.length) === null) return null;
+  if (seated.length !== seatLimit || !seated.includes(discarderId) || !seated.includes(input.winnerId)) return null;
   const multiplier = session.rules.multiplier;
   const total = Score.fromString(ordinary).multiply(Score.fromString(multiplier));
   return {
@@ -474,11 +486,11 @@ function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: st
  * and 一炮多響 combinations were not recorded.
  */
 function discarderCoversLoss(session: Session, input: WinInput, ordinary: string): WinPreview | null {
-  if (session.rules.playerFormat !== 'four') return null;
+  const seatLimit = seatLimitOf(session);
   const discarderId = input.discarderId;
-  if (!discarderId || discarderId === input.winnerId) return null;
+  if (!discarderId || discarderId === input.winnerId || seatLimit === 0) return null;
   const seated = seatedPlayerIds(session);
-  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
+  if (seated.length !== seatLimit || !seated.includes(discarderId) || !seated.includes(input.winnerId)) return null;
   return {
     kind: 'discard',
     fan: input.fan,
@@ -517,6 +529,12 @@ function selfDraw(session: Session, input: WinInput, ordinary: string): WinPrevi
       ...opponents.map((playerId) => ({ playerId, delta: paid })),
     ],
   };
+}
+
+function seatLimitOf(session: Session): number {
+  if (session.rules.playerFormat === 'three') return 3;
+  if (session.rules.playerFormat === 'four') return 4;
+  return 0;
 }
 
 function selfDrawPayers(session: Session, opponents: number): number | null {

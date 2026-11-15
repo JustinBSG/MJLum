@@ -66,10 +66,17 @@ export type SessionAction =
         discarderPaysSelfDraw?: boolean;
         discarderPaysLoss?: boolean;
         takeJackpot?: boolean;
+        /** Score the hand at 滿糊. The marker does not add another multiplier. */
+        limitHand?: boolean;
       };
     }
   | { type: 'draw' }
-  | { type: 'rules'; name: string };
+  | { type: 'rules'; name: string; setup?: RuleSetup }
+  | { type: 'adjust'; playerId: string; delta: string; note: string }
+  | { type: 'substitute'; playerId: string; seatIndex: number; billToOriginal: boolean }
+  | { type: 'swap'; indexA: number; indexB: number }
+  | { type: 'dealer'; playerId: string; resetConsecutive: boolean; restartWind: boolean }
+  | { type: 'jackpot'; playerIds: string[] };
 
 export type LedgerEntry = {
   id: string;
@@ -77,6 +84,8 @@ export type LedgerEntry = {
   before: BoardState;
   /** Present on hands recorded after this field existed. Older rows cannot be recomputed. */
   action?: SessionAction;
+  /** Rules in force when this row was confirmed. Absent on rows saved before this field. */
+  rules?: RuleSetup;
 };
 
 export type RedoEntry = LedgerEntry & { after: BoardState };

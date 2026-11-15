@@ -2,13 +2,8 @@ import { Score } from '../score/score.ts';
 
 import type { HongKongPreset, RuleFamily } from '@/rules/types';
 
-export const RULE_FAMILIES: readonly RuleFamily[] = [
-  { id: 'hong-kong', label: '香港', recorded: true },
-  { id: 'taiwan', label: '台灣麻將', recorded: false },
-  { id: 'japanese', label: '日本麻雀', recorded: false },
-  { id: 'pak-kong', label: '碰槓牌（跑馬仔）', recorded: false },
-  { id: 'hk-taiwan', label: '港式台灣麻將', recorded: false },
-];
+/** This release scores Hong Kong only. Other families wait until after the second release. */
+export const RULE_FAMILIES: readonly RuleFamily[] = [{ id: 'hong-kong', label: '香港', recorded: true }];
 
 const DEFAULT_MULTIPLIER = '3/2';
 

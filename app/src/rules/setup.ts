@@ -64,9 +64,19 @@ export function prepareRuleName(name: string): { name: string } | { error: strin
   return { name: trimmed };
 }
 
-/** Fans above 13 have no generated amount. Each of those cells must be typed before save or start. */
+/**
+ * Empty cells past the generated range. 14番 and above are never generated.
+ * A hole inside a recorded table, such as an unshown fan, does not block the session.
+ */
 export function missingHighFans(setup: RuleSetup): number[] {
-  return setup.rows.filter((row) => row.fan > 13 && !row.ordinary).map((row) => row.fan);
+  const ceiling = amountCeiling(setup);
+  return setup.rows.filter((row) => row.fan > ceiling && !row.ordinary).map((row) => row.fan);
+}
+
+function amountCeiling(setup: RuleSetup): number {
+  if (setup.presetId === '12-full' || setup.presetId === '3fan4-half-three' || setup.customDoubling) return 13;
+  if (setup.presetId) return hongKongPreset(setup.presetId).maxFan;
+  return 13;
 }
 
 export function setPaymentMode(setup: RuleSetup, paymentMode: PaymentMode): RuleSetup {
@@ -138,11 +148,50 @@ export function selfDrawAmount(setup: RuleSetup, fan: number): string | null {
   return Score.fromString(row.ordinary).multiply(Score.fromString(setup.multiplier)).toExact();
 }
 
+/** One opponent's share of the self-draw total. Three-player tables have two payers. */
+export function selfDrawShare(setup: RuleSetup, fan: number): string | null {
+  const total = selfDrawAmount(setup, fan);
+  if (!total) return null;
+  const payers = setup.playerFormat === 'three' ? 2 : 3;
+  return Score.fromString(total).divide(Score.fromRational(payers, 1)).toExact();
+}
+
+/** Exact text for an amount being edited or inspected. A non-terminating value stays a fraction. */
 export function formatAmount(exact: string | null): string {
   if (exact === null) return '未有紀錄';
   const score = Score.fromString(exact);
   if (!isTerminating(score.denominator)) return score.toExact();
   return decimal(score.numerator, score.denominator);
+}
+
+/**
+ * Main-screen money. Terminating values drop trailing zeros.
+ * Any other value is rounded half away from zero to two decimal places and marked ≈.
+ * The rounded text is never written back into the ledger.
+ */
+export function formatDisplay(exact: string | null): string {
+  if (exact === null) return '未有紀錄';
+  const score = Score.fromString(exact);
+  if (isTerminating(score.denominator)) {
+    const text = decimal(score.numerator, score.denominator);
+    const places = text.split('.')[1]?.length ?? 0;
+    if (places <= 2) return text;
+  }
+  const rounded = roundPlaces(score, 2);
+  const text = decimal(rounded.numerator, rounded.denominator);
+  return isTerminating(score.denominator) ? text : `≈${text}`;
+}
+
+function roundPlaces(score: Score, places: number): Score {
+  const scale = 10n ** BigInt(places);
+  const negative = score.compare(Score.fromString('0')) < 0;
+  const absNum = score.numerator < 0n ? -score.numerator : score.numerator;
+  const scaledNum = absNum * scale;
+  const whole = scaledNum / score.denominator;
+  const remainder = scaledNum % score.denominator;
+  const digits = whole + (remainder * 2n >= score.denominator ? 1n : 0n);
+  const signed = negative && digits !== 0n ? -digits : digits;
+  return Score.fromRational(signed, scale);
 }
 
 /**
@@ -173,9 +222,11 @@ function ordinaryFor(setup: RuleSetup, fan: number): string | null {
     const preset = hongKongPreset(setup.presetId);
     if (setup.playerFormat === 'three' && preset.threePlayer) {
       const table = preset.threePlayer.rows;
-      return Object.prototype.hasOwnProperty.call(table, fan) ? (table[fan] ?? null) : null;
+      if (Object.prototype.hasOwnProperty.call(table, fan)) return table[fan] ?? null;
+    } else if (Object.prototype.hasOwnProperty.call(preset.rows, fan)) {
+      return preset.rows[fan];
     }
-    return Object.prototype.hasOwnProperty.call(preset.rows, fan) ? preset.rows[fan] : null;
+    return extendedPresetAmount(preset.id, fan);
   }
 
   if (setup.customDoubling && fan >= setup.customDoubling.fan && fan <= 13) {
@@ -183,6 +234,17 @@ function ordinaryFor(setup: RuleSetup, fan: number): string | null {
   }
 
   return setup.rows.find((row) => row.fan === fan)?.ordinary ?? null;
+}
+
+/** 9–13番 only, from the opened 3–8 amounts. A typed cell is never replaced by this. */
+function extendedPresetAmount(presetId: string, fan: number): string | null {
+  if (fan < 9 || fan > 13) return null;
+  if (presetId === '12-full') return doubledAmount('32', fan - 3);
+  if (presetId === '3fan4-half-three') {
+    if (fan % 2 === 0) return doubledAmount('6', (fan - 4) / 2);
+    return doubledAmount('9', (fan - 5) / 2);
+  }
+  return null;
 }
 
 function doubledAmount(start: string, steps: number): string {

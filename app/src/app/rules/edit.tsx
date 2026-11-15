@@ -17,6 +17,7 @@ import {
   formatAmount,
   formatMultiplier,
   selfDrawAmount,
+  selfDrawShare,
   setFanRange,
   setJackpotContribution,
   setJackpotEnabled,
@@ -321,7 +322,12 @@ export default function EditRuleSetupScreen() {
                 placeholderTextColor={theme.textSecondary}
                 style={[styles.cell, { color: theme.text, borderColor: theme.textSecondary }]}
               />
-              <ThemedText>{formatAmount(selfDrawAmount(setup, row.fan))}</ThemedText>
+              <ThemedView>
+                <ThemedText>{formatAmount(selfDrawAmount(setup, row.fan))}</ThemedText>
+                {setup.playerFormat === 'three' && selfDrawShare(setup, row.fan) ? (
+                  <ThemedText type="small">{`每人 ${formatAmount(selfDrawShare(setup, row.fan))}`}</ThemedText>
+                ) : null}
+              </ThemedView>
             </ThemedView>
           ))}
 

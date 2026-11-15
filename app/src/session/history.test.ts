@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { createCustomDraft } from '../rules/setup.ts';
+import { createCustomDraft, setOrdinary } from '../rules/setup.ts';
 import { recordWin } from './hand.ts';
 import { reviseEntry } from './history.ts';
-import { commitBoard, redoLatest, startSession, undoLatest } from './session.ts';
+import { adjustScore, commitBoard, redoLatest, stageRules, startSession, undoLatest } from './session.ts';
 
 const startedAt = '2026-11-15T02:00:00.000Z';
 
@@ -62,6 +62,51 @@ describe('history', () => {
       type: 'win',
       input: { ...entry.action.input, fan: 4 },
     });
-    assert.deepEqual(blocked, { error: '未能重算「改名 甲甲」' });
+    assert.deepEqual(blocked, { error: '「改名 甲甲」沒有可重算的動作，所以不能修改更早的食糊' });
+  });
+
+  it('rescores an earlier hand with the rules from that hand', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const first = recordWin(started, {
+      winnerId: started.players[0]?.id ?? '',
+      fan: 3,
+      discarderId: started.players[1]?.id ?? '',
+    });
+    const changed = stageRules(first, setOrdinary(setOrdinary(first.rules, 3, '10'), 4, '100'));
+    const second = recordWin(changed, {
+      winnerId: changed.players[2]?.id ?? '',
+      fan: 3,
+      discarderId: changed.players[0]?.id ?? '',
+    });
+    const entry = second.ledger[0];
+    assert.ok(entry?.action?.type === 'win');
+    const revised = reviseEntry(second, entry.id, {
+      type: 'win',
+      input: { ...entry.action.input, fan: 4 },
+    });
+    assert.ok('session' in revised);
+    assert.equal(revised.session.players[0]?.balance, '-2');
+    assert.equal(revised.session.players[1]?.balance, '-8');
+    assert.equal(revised.session.players[2]?.balance, '10');
+  });
+
+  it('posts a manual adjustment without counting a win', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const next = adjustScore(started, started.players[0]?.id ?? '', '-4', '相沖');
+    assert.equal(next.players[0]?.balance, '-4');
+    assert.equal(next.players[0]?.wins, 0);
+    assert.equal(next.dealerId, started.dealerId);
+    assert.equal(next.pool, '0');
+    assert.equal(next.ledger.at(-1)?.label, '調分 相沖');
   });
 });

@@ -1,4 +1,4 @@
-import { formatAmount, missingHighFans } from '../rules/setup.ts';
+import { formatAmount, formatDisplay, missingHighFans } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
 import type { BoardState, DealerMark, Player, ProgressDisplay, Session, SessionAction, Wind } from './types.ts';
@@ -66,9 +66,12 @@ export function stageRules(session: Session, rules: RuleSetup): Session {
 export function applyPendingRules(session: Session): Session {
   if (!session.pendingRules) return session;
   const rules = session.pendingRules;
-  const noted = commitBoard(session, `玩法 ${rules.name}`, boardOf(session), { type: 'rules', name: rules.name });
-  const { pendingRules: _pending, ...rest } = noted;
-  return { ...rest, rules };
+  const { pendingRules: _pending, ...rest } = session;
+  return commitBoard({ ...rest, rules }, `玩法 ${rules.name}`, boardOf(session), {
+    type: 'rules',
+    name: rules.name,
+    setup: rules,
+  });
 }
 
 /** A new session that keeps the same people, seats, and rules, with scores and records cleared. */
@@ -202,11 +205,16 @@ export function substitute(session: Session, playerId: string, seatIndex: number
     const { billToId: _billToId, ...rest } = player;
     return rest;
   });
-  return commitBoard(session, `${incoming.name} 換入 ${leaving?.name ?? ''}`.trim(), {
-    ...boardOf(session),
-    players,
-    seats: session.seats.map((item) => (item.index === seatIndex ? { ...item, playerId } : item)),
-  });
+  return commitBoard(
+    session,
+    `${incoming.name} 換入 ${leaving?.name ?? ''}`.trim(),
+    {
+      ...boardOf(session),
+      players,
+      seats: session.seats.map((item) => (item.index === seatIndex ? { ...item, playerId } : item)),
+    },
+    { type: 'substitute', playerId, seatIndex, billToOriginal },
+  );
 }
 
 export function renamePlayer(session: Session, playerId: string, name: string): Session {
@@ -247,14 +255,19 @@ export function swapSeats(session: Session, indexA: number, indexB: number): Ses
   if (!seatA?.playerId || !seatB?.playerId) return session;
   const nameA = session.players.find((player) => player.id === seatA.playerId)?.name ?? '';
   const nameB = session.players.find((player) => player.id === seatB.playerId)?.name ?? '';
-  return commitBoard(session, `${nameA} 與 ${nameB} 換位`, {
-    ...boardOf(session),
-    seats: session.seats.map((seat) => {
-      if (seat.index === indexA) return { ...seat, playerId: seatB.playerId };
-      if (seat.index === indexB) return { ...seat, playerId: seatA.playerId };
-      return seat;
-    }),
-  });
+  return commitBoard(
+    session,
+    `${nameA} 與 ${nameB} 換位`,
+    {
+      ...boardOf(session),
+      seats: session.seats.map((seat) => {
+        if (seat.index === indexA) return { ...seat, playerId: seatB.playerId };
+        if (seat.index === indexB) return { ...seat, playerId: seatA.playerId };
+        return seat;
+      }),
+    },
+    { type: 'swap', indexA, indexB },
+  );
 }
 
 export function nextDealerId(session: Session): string | null {
@@ -299,14 +312,41 @@ export function selectDealer(
     players.every((player, index) => player.dealerStreak === session.players[index]?.dealerStreak);
   if (unchanged) return session;
   const name = session.players.find((player) => player.id === playerId)?.name ?? '';
-  return commitBoard(session, `莊家 ${name}`, {
-    ...boardOf(session),
-    players,
-    dealerId: playerId,
-    dealerMark,
-    roundWind,
-    seatWind,
-  });
+  return commitBoard(
+    session,
+    `莊家 ${name}`,
+    {
+      ...boardOf(session),
+      players,
+      dealerId: playerId,
+      dealerMark,
+      roundWind,
+      seatWind,
+    },
+    { type: 'dealer', playerId, resetConsecutive, restartWind },
+  );
+}
+
+/** Changes one balance only. It does not alter 食糊, 莊, 圈風, or the pool. */
+export function adjustScore(session: Session, playerId: string, delta: string, note: string): Session {
+  const trimmed = note.trim();
+  const player = session.players.find((item) => item.id === playerId);
+  if (!player || trimmed === '') return session;
+  const amount = Score.fromString(delta);
+  if (amount.equals(Score.fromString('0'))) return session;
+  return commitBoard(
+    session,
+    `調分 ${trimmed}`,
+    {
+      ...boardOf(session),
+      players: session.players.map((item) =>
+        item.id === playerId
+          ? { ...item, balance: Score.fromString(item.balance).add(amount).toExact() }
+          : item,
+      ),
+    },
+    { type: 'adjust', playerId, delta: amount.toExact(), note: trimmed },
+  );
 }
 
 export function setProgressDisplay(session: Session, progressDisplay: ProgressDisplay): Session {
@@ -321,7 +361,13 @@ export function commitBoard(session: Session, label: string, next: BoardState, a
     redo: [],
     ledger: [
       ...session.ledger,
-      { id: createId('entry'), label, before: boardOf(session), ...(action ? { action } : {}) },
+      {
+        id: createId('entry'),
+        label,
+        before: boardOf(session),
+        rules: session.rules,
+        ...(action ? { action } : {}),
+      },
     ],
   };
 }
@@ -453,7 +499,7 @@ export function formatDealerBadge(mark: DealerMark): string {
 }
 
 export function formatBalance(exact: string): string {
-  return formatAmount(exact);
+  return formatDisplay(exact);
 }
 
 export function formatStartDate(startedAt: string): string {

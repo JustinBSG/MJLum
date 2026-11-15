@@ -26,6 +26,7 @@ import { clampDiceCount, MIN_DICE, rollDice, type DiceRoll } from '@/session/dic
 import { FAN_HELP_BODY, FAN_HELP_TITLE } from '@/session/fan-help';
 import {
   addReserve,
+  adjustScore,
   canRemovePlayer,
   formatBalance,
   formatDealerBadge,
@@ -54,7 +55,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'roster' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | 'life' | 'revise' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'roster' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | 'life' | 'revise' | 'adjust' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -99,6 +100,11 @@ export default function SessionScreen() {
   const [sessionTitle, setSessionTitleText] = useState('');
   const [reviseId, setReviseId] = useState<string | null>(null);
   const [reviseFan, setReviseFan] = useState('');
+  const [limitHand, setLimitHand] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [adjustPlayerId, setAdjustPlayerId] = useState<string | null>(null);
+  const [adjustText, setAdjustText] = useState('');
+  const [adjustNote, setAdjustNote] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -259,6 +265,7 @@ export default function SessionScreen() {
     setDiscarderPaysSelfDraw(false);
     setDiscarderPaysLoss(false);
     setTakeJackpot(false);
+    setLimitHand(false);
     setPanel('win');
   }
 
@@ -272,6 +279,7 @@ export default function SessionScreen() {
       return;
     }
     setMulti(true);
+    setLimitHand(false);
     setDiscarderPaysSelfDraw(false);
     setDiscarderPaysLoss(false);
     setTakeJackpot(false);
@@ -308,13 +316,25 @@ export default function SessionScreen() {
       setDiscarderPaysSelfDraw(false);
       setDiscarderPaysLoss(false);
       setTakeJackpot(false);
+      setLimitHand(false);
     }
     setFalseWin((current) => !current);
+  }
+
+  function toggleLimitHand() {
+    setLimitHand((current) => {
+      if (!current) {
+        setFalseWin(false);
+        setMulti(false);
+      }
+      return !current;
+    });
   }
 
   function toggleCoverSelfDraw() {
     setDiscarderPaysSelfDraw((current) => {
       if (!current) {
+        setDiscarderPaysLoss(false);
         setMulti(false);
         if (payer === 'self-draw') setPayer(null);
       }
@@ -325,11 +345,29 @@ export default function SessionScreen() {
   function toggleCoverLoss() {
     setDiscarderPaysLoss((current) => {
       if (!current) {
+        setDiscarderPaysSelfDraw(false);
         setMulti(false);
         if (payer === 'self-draw') setPayer(null);
       }
       return !current;
     });
+  }
+
+  async function confirmAdjust() {
+    if (!session || !adjustPlayerId) return;
+    const note = adjustNote.trim();
+    if (note === '') return;
+    let next;
+    try {
+      next = adjustScore(session, adjustPlayerId, adjustText, note);
+    } catch {
+      return;
+    }
+    if (next === session) return;
+    setAdjustText('');
+    setAdjustNote('');
+    setPanel(null);
+    await persist(next);
   }
 
   async function confirmWin() {
@@ -368,7 +406,7 @@ export default function SessionScreen() {
       return;
     }
     if (!winnerId || payer === null) return;
-    const fan = readFan(fanText);
+    const fan = limitHand ? session.rules.maxFan : readFan(fanText);
     if (fan === null) return;
     const next = recordWin(session, {
       winnerId,
@@ -377,6 +415,7 @@ export default function SessionScreen() {
       discarderPaysSelfDraw,
       discarderPaysLoss,
       takeJackpot: session.rules.jackpotEnabled && takeJackpot,
+      limitHand,
     });
     if (next === session) return;
     setPanel(null);
@@ -386,7 +425,13 @@ export default function SessionScreen() {
   const seated = session ? new Set(seatedPlayerIds(session)) : new Set<string>();
   const reserves = session?.players.filter((player) => !seated.has(player.id)) ?? [];
   const previewWinnerId = multi ? selectedWinnerId : winnerId;
-  const previewFan = multi ? (selectedWinnerId ? readFan(fans[selectedWinnerId] ?? '') : null) : readFan(fanText);
+  const previewFan = limitHand
+    ? session?.rules.maxFan ?? null
+    : multi
+      ? selectedWinnerId
+        ? readFan(fans[selectedWinnerId] ?? '')
+        : null
+      : readFan(fanText);
   const also = multi
     ? winnerIds.flatMap((id) => {
         if (id === selectedWinnerId) return [];
@@ -407,6 +452,7 @@ export default function SessionScreen() {
           discarderPaysSelfDraw,
           discarderPaysLoss,
           takeJackpot: session.rules.jackpotEnabled && !falseWin && !multi && takeJackpot,
+          limitHand,
         })
       : null;
 
@@ -463,9 +509,14 @@ export default function SessionScreen() {
             const dealer = session.rules.trackDealer && player.id === session.dealerId;
             return (
               <ThemedView key={seat.index} style={styles.player}>
-                <ThemedText accessibilityLanguage={APP_LOCALE}>
-                  {`${player.avatar} ${player.name} ${formatBalance(player.balance)}`}
-                </ThemedText>
+                <Pressable accessibilityRole="button" onPress={() => setDetailId(detailId === player.id ? null : player.id)}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`${player.avatar} ${player.name} ${formatBalance(player.balance)}`}
+                  </ThemedText>
+                </Pressable>
+                {detailId === player.id ? (
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{`精確 ${formatAmount(player.balance)}`}</ThemedText>
+                ) : null}
                 {dealer ? (
                   <ThemedText accessibilityLanguage={APP_LOCALE}>{formatDealerBadge(session.dealerMark)}</ThemedText>
                 ) : null}
@@ -482,6 +533,7 @@ export default function SessionScreen() {
             <ThemedView style={styles.row}>
               <Choice label="食糊!" onPress={openWin} selected={false} />
               <Choice label="流局" onPress={() => setPanel('draw')} selected={false} />
+              <Choice label="調分" onPress={() => setPanel('adjust')} selected={false} />
               <Choice label="換人" onPress={() => setPanel('swap')} selected={false} />
               <Choice label="玩家" onPress={() => setPanel('roster')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
@@ -534,9 +586,9 @@ export default function SessionScreen() {
                   <ThemedText accessibilityLanguage={APP_LOCALE}>{FAN_HELP_BODY}</ThemedText>
                 </ThemedView>
               ) : null}
+              {limitHand ? null : (
               <TextInput
                 accessibilityLabel={falseWin ? '詐糊番數' : '番數'}
-                accessibilityLanguage={APP_LOCALE}
                 keyboardType="number-pad"
                 onChangeText={(text) => {
                   if (!multi || falseWin) {
@@ -549,9 +601,15 @@ export default function SessionScreen() {
                 placeholder={falseWin ? '詐糊番數' : '番數'}
                 placeholderTextColor={theme.textSecondary}
                 style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                accessibilityLanguage={APP_LOCALE}
                 value={multi && !falseWin ? (selectedWinnerId ? (fans[selectedWinnerId] ?? '') : '') : fanText}
               />
+              )}
               <Choice label={`詐糊 ${falseWin ? '開' : '關'}`} onPress={toggleFalseWin} selected={falseWin} />
+              <Choice label={`例牌 ${limitHand ? '開' : '關'}`} onPress={toggleLimitHand} selected={limitHand} />
+              {limitHand ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>{`按滿糊 ${session.rules.maxFan} 番`}</ThemedText>
+              ) : null}
               {falseWin ? (
                 <Choice
                   label={`詐糊賠位自摸 ${falseWinAsSelfDraw ? '開' : '關'}`}
@@ -598,6 +656,15 @@ export default function SessionScreen() {
               )}
               {session && winRefusal(session.rules, [previewFan ?? NaN, ...also.map((item) => item.fan)]) ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>番數不足</ThemedText>
+              ) : null}
+              {discarderPaysSelfDraw && discarderPaysLoss ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>包自摸同包輸不能同時開</ThemedText>
+              ) : null}
+              {(discarderPaysSelfDraw || discarderPaysLoss) && multi ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>一炮多響未支援包自摸或包輸</ThemedText>
+              ) : null}
+              {limitHand && (falseWin || multi) ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>例牌未支援詐糊或一炮多響</ThemedText>
               ) : null}
               {winPreview ? formatWinPreview(winPreview).map((line) => (
                 <ThemedText accessibilityLanguage={APP_LOCALE} key={line}>
@@ -690,6 +757,43 @@ export default function SessionScreen() {
             </ThemedView>
           ) : null}
 
+          {panel === 'adjust' && session ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>調分</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>只改這個人的分數，不改食糊、莊家或彩池。</ThemedText>
+              {session.players.map((player) => (
+                <Choice
+                  key={player.id}
+                  label={player.name}
+                  onPress={() => setAdjustPlayerId(player.id)}
+                  selected={adjustPlayerId === player.id}
+                />
+              ))}
+              <TextInput
+                accessibilityLabel="調分金額"
+                accessibilityLanguage={APP_LOCALE}
+                onChangeText={setAdjustText}
+                placeholder="金額，例如 -4 或 3/2"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={adjustText}
+              />
+              <TextInput
+                accessibilityLabel="調分原因"
+                accessibilityLanguage={APP_LOCALE}
+                onChangeText={setAdjustNote}
+                placeholder="原因"
+                placeholderTextColor={theme.textSecondary}
+                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                value={adjustNote}
+              />
+              <ThemedView style={styles.row}>
+                <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+                <Choice label="確定" onPress={confirmAdjust} selected={false} />
+              </ThemedView>
+            </ThemedView>
+          ) : null}
+
           {panel === 'settle' ? (
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>找數</ThemedText>
@@ -697,11 +801,19 @@ export default function SessionScreen() {
                 <ThemedText accessibilityLanguage={APP_LOCALE}>未有玩家分數為正數</ThemedText>
               )}
               {settlementRows(session).map((row) => (
-                <ThemedText accessibilityLanguage={APP_LOCALE} key={row.playerId}>
-                  {`${row.name} ${formatSettlementBalance(row.balance)}`}
-                </ThemedText>
+                <ThemedView key={row.playerId}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`${row.name} ${formatSettlementBalance(row.balance)}`}
+                  </ThemedText>
+                  {formatBalance(row.balance).startsWith('≈') ? (
+                    <ThemedText accessibilityLanguage={APP_LOCALE}>{`精確 ${formatAmount(row.balance)}`}</ThemedText>
+                  ) : null}
+                </ThemedView>
               ))}
-              <ThemedText accessibilityLanguage={APP_LOCALE}>{`彩池 ${formatAmount(session.pool)}`}</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`彩池 ${formatBalance(session.pool)}`}</ThemedText>
+              {formatBalance(session.pool).startsWith('≈') ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>{`精確 ${formatAmount(session.pool)}`}</ThemedText>
+              ) : null}
               {poolUnallocated(session) ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>尚未分配</ThemedText>
               ) : null}

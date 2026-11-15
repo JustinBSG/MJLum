@@ -18,7 +18,7 @@ export default function RuleFamilyScreen() {
       <ThemedText accessibilityLanguage={APP_LOCALE} type="subtitle">
         {family?.label ?? '玩法'}
       </ThemedText>
-      <ThemedText>詳細計法未有紀錄</ThemedText>
+      <ThemedText>今次版本只有香港麻雀。其他玩法在第二版之後先做。</ThemedText>
     </ThemedView>
   );
 }
