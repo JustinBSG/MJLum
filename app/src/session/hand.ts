@@ -112,22 +112,38 @@ export function recordWin(session: Session, input: WinInput): Session {
 }
 
 /**
- * Confirms a 流局. Balances and the Jackpot pool stay as they are; a pool contribution is feature 8.
- * 流局時過莊 on advances 莊 and 圈風. Off, they stay and the dealer badge becomes 冧N.
+ * Confirms a 流局. 流局時過莊 on advances 莊 and 圈風. Off, they stay and the dealer badge becomes 冧N.
+ * When Jackpot is on, each seated player pays 流局時每位玩家須付彩池 into the pool.
  */
 export function recordDraw(session: Session): Session {
   const tracked = session.rules.trackDealer && session.dealerId !== null;
   const dealer = tracked && session.rules.passDealerOnDraw ? passDealer(session) : holdDraw(session);
+  const contribution = drawContribution(session);
   return commitBoard(session, '流局', {
-    players: session.players,
+    players: contribution.players,
     seats: session.seats,
     dealerId: dealer.dealerId,
     dealerMark: dealer.dealerMark,
     roundWind: dealer.roundWind,
     seatWind: dealer.seatWind,
     handCount: session.handCount + 1,
-    pool: session.pool,
+    pool: contribution.pool,
   });
+}
+
+/** Each seated player pays the configured contribution. A player who has left the table does not. */
+function drawContribution(session: Session): { players: Session['players']; pool: string } {
+  if (!session.rules.jackpotEnabled) return { players: session.players, pool: session.pool };
+  const amount = Score.fromString(session.rules.jackpotContribution);
+  if (amount.equals(Score.fromString('0'))) return { players: session.players, pool: session.pool };
+  const seated = new Set(seatedPlayerIds(session));
+  let pool = Score.fromString(session.pool);
+  const players = session.players.map((player) => {
+    if (!seated.has(player.id)) return player;
+    pool = pool.add(amount);
+    return { ...player, balance: Score.fromString(player.balance).subtract(amount).toExact() };
+  });
+  return { players, pool: pool.toExact() };
 }
 
 function holdDraw(session: Session): { dealerId: string | null; dealerMark: DealerMark; roundWind: Wind; seatWind: Wind } {

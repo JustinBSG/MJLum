@@ -8,6 +8,8 @@ import {
   setFanRange,
   setMultiplier,
   setOrdinary,
+  setJackpotContribution,
+  setJackpotEnabled,
   setPassDealerOnDraw,
   setPaymentMode,
   setPlayerFormat,
@@ -584,6 +586,90 @@ describe('出銃者包輸', () => {
       }),
       null,
     );
+  });
+});
+
+describe('Jackpot 流局', () => {
+  it('takes 10 from each seated player and stacks a second 流局 to 80', () => {
+    const rules = setJackpotContribution(setJackpotEnabled(createCustomDraft(), true), '10');
+    const seated = startSession({
+      rules,
+      names: ['丙家', '甲家', '乙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const session = withDealer(
+      withBalances(seated, { 甲家: '98289/4', 乙家: '98289/4', 丙家: '48881/2', 丁家: '-73585' }),
+      '丙家',
+      'east',
+      'south',
+    );
+    const next = recordDraw(session);
+    assert.equal(formatAmount(balance(next, '甲家')), '24562.25');
+    assert.equal(formatAmount(balance(next, '乙家')), '24562.25');
+    assert.equal(formatAmount(balance(next, '丙家')), '24430.5');
+    assert.equal(balance(next, '丁家'), '-73595');
+    assert.equal(next.pool, '40');
+    assert.equal(next.dealerId, idOf(next, '甲家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈西風');
+    assert.equal(next.ledger.at(-1)?.label, '流局');
+
+    const second = recordDraw(next);
+    assert.equal(formatAmount(balance(second, '甲家')), '24552.25');
+    assert.equal(formatAmount(balance(second, '乙家')), '24552.25');
+    assert.equal(formatAmount(balance(second, '丙家')), '24420.5');
+    assert.equal(balance(second, '丁家'), '-73605');
+    assert.equal(second.pool, '80');
+    assert.equal(second.dealerId, idOf(second, '乙家'));
+    assert.equal(formatWind(second.roundWind, second.seatWind), '東圈北風');
+    const restored = undoLatest(second);
+    assert.equal(restored.pool, '40');
+    assert.equal(balance(restored, '丁家'), '-73595');
+  });
+
+  it('stacks three 流局 from 東圈東風 until the pool is 120', () => {
+    const rules = setJackpotContribution(setJackpotEnabled(createCustomDraft(), true), '10');
+    let session = startSession({
+      rules,
+      names: ['丁家', '甲家', '丙家', '乙家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    session = recordDraw(session);
+    session = recordDraw(session);
+    session = recordDraw(session);
+    assert.equal(balance(session, '甲家'), '-30');
+    assert.equal(balance(session, '乙家'), '-30');
+    assert.equal(balance(session, '丙家'), '-30');
+    assert.equal(balance(session, '丁家'), '-30');
+    assert.equal(session.pool, '120');
+    assert.equal(session.dealerId, idOf(session, '乙家'));
+    assert.equal(formatWind(session.roundWind, session.seatWind), '東圈北風');
+  });
+
+  it('does not charge a reserve and leaves a zero contribution unchanged', () => {
+    const rules = setJackpotContribution(setJackpotEnabled(createCustomDraft(), true), '10');
+    const next = recordDraw(addReserve(four('custom', rules), '戊家'));
+    assert.equal(balance(next, '戊家'), '0');
+    assert.equal(balance(next, '甲家'), '-10');
+    assert.equal(next.pool, '40');
+
+    const zero = recordDraw(four('custom', setJackpotEnabled(createCustomDraft(), true)));
+    assert.equal(balance(zero, '甲家'), '0');
+    assert.equal(zero.pool, '0');
+  });
+
+  it('still raises 冧 when 流局時過莊 is off', () => {
+    const rules = setJackpotContribution(setJackpotEnabled(setPassDealerOnDraw(createCustomDraft(), false), true), '10');
+    const session = withDealer(four('custom', rules), '丁家');
+    const next = recordDraw(session);
+    assert.equal(session.dealerId, idOf(session, '丁家'));
+    assert.equal(next.dealerId, idOf(next, '丁家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '冧1');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '東圈東風');
+    assert.equal(balance(next, '丁家'), '-10');
+    assert.equal(next.pool, '40');
   });
 });
 
