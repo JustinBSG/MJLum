@@ -657,6 +657,9 @@ export default function SessionScreen() {
               {session && winRefusal(session.rules, [previewFan ?? NaN, ...also.map((item) => item.fan)]) ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>番數不足</ThemedText>
               ) : null}
+              {session.rules.paymentMode === 'half-discard' && (discarderPaysSelfDraw || discarderPaysLoss) ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>本手包付，半銃分攤不適用</ThemedText>
+              ) : null}
               {discarderPaysSelfDraw && discarderPaysLoss ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>包自摸同包輸不能同時開</ThemedText>
               ) : null}

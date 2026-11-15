@@ -318,7 +318,7 @@ Demonstrated three-player settlements:
 - Then a 3番 自摸 (total 4; each of the other two paid 2): a +1, b −2, c +1, b 莊, 東圈西風.
 - Then 4番 自摸, footer 6 × 1.33 = 8 (self-draw total equals F × 4/3; each of the two opponents paid 4): a −3, b +6, c −3, b 莊 with 連1, 東圈西風.
 
-**麻雀諗 product decision (16 November 2026).** Three-player 詐糊, 包自摸, and 包輸 use that setup’s own S and m. Three players are not forced to 4/3. 詐糊 with 賠位自摸 off: the offender pays 2S and each of the other two receives S. With 賠位自摸 on, those amounts are mS. 包自摸 pays mS from one named player and counts as 自摸. 包輸 pays S from one named player and counts as that player’s 出銃. The third player pays 0. 出銃者包自摸 and 出銃者包輸 cannot be on together, and neither combines with 一炮多響. Switching 二五雞, 五一, 一二蚊, or another four-player preset to three players keeps that preset’s S and m; a self-draw total is split across the two opponents. Only 3番4辣辣上 replaces the table and uses 4/3. 半銃 combined with either 包 toggle is still refused.
+**麻雀諗 product decision (16 November 2026).** Three-player 詐糊, 包自摸, and 包輸 use that setup’s own S and m. Three players are not forced to 4/3. 詐糊 with 賠位自摸 off: the offender pays 2S and each of the other two receives S. With 賠位自摸 on, those amounts are mS. 包自摸 pays mS from one named player and counts as 自摸. 包輸 pays S from one named player and counts as that player’s 出銃. The third player pays 0. 出銃者包自摸 and 出銃者包輸 cannot be on together, and neither combines with 一炮多響. Switching 二五雞, 五一, 一二蚊, or another four-player preset to three players keeps that preset’s S and m; a self-draw total is split across the two opponents. Only 3番4辣辣上 replaces the table and uses 4/3. On a 半銃 table, 包付 replaces the 半銃 split: 包自摸 pays mS from the named player, 包輸 pays S from the named player, and every other player pays 0. The same amounts apply to three and four players. The hand screen says 本手包付，半銃分攤不適用.
 
 ### Fan range and the score table
 
@@ -451,7 +451,9 @@ The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as vi
 
 **相沖** has no payout rule. 調分 changes one player’s balance and stores a reason. It does not change 食糊, 莊, 圈風, or the pool, and it is not a correction of the original hand’s fan.
 
-**Still refused:** 半銃 combined with either 包 toggle, and either 包 toggle combined with 一炮多響.
+**麻雀諗 product decision (16 November 2026).** 半銃 combined with 包自摸 or 包輸 keeps the full 包 amount. The named payer pays mS or S, and the other players pay 0. There is no extra 半銃 share.
+
+**Still refused:** either 包 toggle combined with 一炮多響.
 
 ### Undo
 
@@ -576,7 +578,7 @@ Settings follow the local reference. This is a behavior and options inventory, n
 |---|---|---|
 | 玩法名稱 | Name of this rules setup | Demonstrated default: 新玩法 |
 | 人數 | Game format: 四人麻雀 or 三人麻雀 | In the demonstrated custom-setup flow, four-player remained selected. Not independently labelled as a global product default. |
-| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is the winner receiving the ordinary amount from the discarder only. Four-player and three-player 半銃 splits are in the Player count section. 半銃 combined with either 包 toggle is refused. | In one demonstrated custom-setup flow, 全銃 remained selected. A later edited 五一辣辣上 configuration was used with 半銃. Not independently labelled as a global default. |
+| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is the winner receiving the ordinary amount from the discarder only. Four-player and three-player 半銃 splits are in the Player count section. 包付 on a 半銃 table replaces that split for the hand. | In one demonstrated custom-setup flow, 全銃 remained selected. A later edited 五一辣辣上 configuration was used with 半銃. Not independently labelled as a global default. |
 | 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. 起糊 can go to 0. 滿糊 was moved from 8 through 10 to 13, where the control sat at its right-hand end in the reference. For 麻雀諗, 滿糊 may be set above 13 (product decision); do not invent undemonstrated rows. |
 | 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section; opened 辣辣上 and 半辣上 tables are recorded in the Rules, presets section. Editing one cell does not automatically recalculate later fans. |
 | 自摸分數 / 自摸倍數 | Displayed self-draw total, derived from the ordinary amount × the current multiplier | Demonstrated default ×1.50. The multiplier is editable (×2.00 was used in play). |
@@ -645,7 +647,7 @@ The technical approach for building the iOS and Android apps is Expo plus librar
 
 Still open:
 
-1. 半銃 combined with 出銃者包自摸 or 出銃者包輸, and 包 combined with 一炮多響. Each single case is scored; the mixes are refused.
+1. 包自摸 or 包輸 combined with 一炮多響. Each single case is scored; the mix is refused.
 2. 相沖 has no automatic payout. A named 調分 changes one balance only.
 3. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 

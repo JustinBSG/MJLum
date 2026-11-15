@@ -453,8 +453,8 @@ function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPr
 }
 
 /**
- * 出銃者包自摸. Four seated players. Only the 出銃者 pays the self-draw total.
- * The hand counts as 自摸. Three-player and 一炮多響 combinations were not recorded.
+ * 出銃者包自摸. The named payer alone pays mS, and the other players pay 0.
+ * 半銃 does not split this hand. It counts as 自摸. 一炮多響 is not combined with it.
  */
 function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: string): WinPreview | null {
   const seatLimit = seatLimitOf(session);
@@ -481,9 +481,9 @@ function discarderCoversSelfDraw(session: Session, input: WinInput, ordinary: st
 }
 
 /**
- * 出銃者包輸, with 包自摸 off. Four seated players. Only the 出銃者 pays the
- * ordinary amount. The hand counts as an ordinary discard win. Three-player
- * and 一炮多響 combinations were not recorded.
+ * 出銃者包輸, with 包自摸 off. The named payer alone pays S, and the other
+ * players pay 0. 半銃 does not split this hand. It counts as that player's
+ * 出銃. 一炮多響 is not combined with it.
  */
 function discarderCoversLoss(session: Session, input: WinInput, ordinary: string): WinPreview | null {
   const seatLimit = seatLimitOf(session);
