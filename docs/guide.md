@@ -627,12 +627,11 @@ Still open:
 2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows, including the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24. The three-player 自摸 split uses the rules’ multiplier; the unopened preset’s default multiplier is still open.
 3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將); and the unopened 一二蚊辣辣上 table beyond its list-caption min/cap.
 4. The complete dealer / 連莊 progression algorithm for every remaining edge case, including a 一炮多響 that does not include the dealer. 重新開始計算圈風 on now sets 東圈東風.
-5. Mid-session rule edits. A saved name is trimmed, required, at most 40 characters, and a duplicate asks to overwrite or save under another name.
-6. Invalid-entry handling and numeric validation.
-7. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
-8. Undo depth, redo, and editing or deleting an older history row.
-9. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
-10. Special abortive-hand types or reason codes beyond the demonstrated 流局.
-11. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+5. Invalid-entry handling and numeric validation.
+6. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
+7. Undo depth, redo, and editing or deleting an older history row.
+8. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
+9. Special abortive-hand types or reason codes beyond the demonstrated 流局.
+10. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.

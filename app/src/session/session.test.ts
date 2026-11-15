@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { createCustomDraft, setPassDealerOnDraw, setPlayerFormat, setTrackDealer } from '../rules/setup.ts';
-import { recordDraw } from './hand.ts';
+import { createCustomDraft, setFanRange, setOrdinary, setPassDealerOnDraw, setPlayerFormat, setTrackDealer } from '../rules/setup.ts';
+import { recordDraw, recordWin } from './hand.ts';
 import {
   addReserve,
   canStart,
@@ -20,6 +20,7 @@ import {
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
+  stageRules,
   startSession,
   substitute,
   swapSeats,
@@ -233,6 +234,35 @@ describe('roster edits', () => {
     assert.equal(swapped.dealerId, started.dealerId);
     assert.equal(swapped.roundWind, started.roundWind);
     assert.equal(swapped.players[0]?.balance, '0');
+  });
+});
+
+describe('下一手玩法', () => {
+  it('scores the next hand with the staged rules and keeps the earlier snapshot', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const winner = started.players[0]?.id ?? '';
+    const discarder = started.players[1]?.id ?? '';
+    const first = recordWin(started, { winnerId: winner, fan: 3, discarderId: discarder });
+    assert.equal(first.players[0]?.balance, '4');
+    const edited = stageRules(first, setOrdinary(first.rules, 3, '10'));
+    assert.equal(edited.rules.rows.find((row) => row.fan === 3)?.ordinary, '4');
+    const refused = recordWin(stageRules(first, setFanRange(first.rules, 5, 8)), {
+      winnerId: winner,
+      fan: 3,
+      discarderId: discarder,
+    });
+    assert.equal(refused.rules.minFan, 3);
+    assert.equal(refused.pendingRules?.minFan, 5);
+    const second = recordWin(edited, { winnerId: winner, fan: 3, discarderId: discarder });
+    assert.equal(second.rules.rows.find((row) => row.fan === 3)?.ordinary, '10');
+    assert.equal(second.pendingRules, undefined);
+    assert.equal(second.players[0]?.balance, '14');
+    assert.equal(second.ledger.find((entry) => entry.label.startsWith('玩法'))?.before.players[0]?.balance, '4');
   });
 });
 

@@ -54,6 +54,21 @@ export function startSession(input: {
   };
 }
 
+/** Keeps the current hand on the old rules. The next confirmed hand adopts this setup. */
+export function stageRules(session: Session, rules: RuleSetup): Session {
+  if (seatCount(rules) !== seatCount(session.rules)) return session;
+  return { ...session, pendingRules: rules };
+}
+
+/** Records a rules change and starts using it. Past ledger boards are left as they were. */
+export function applyPendingRules(session: Session): Session {
+  if (!session.pendingRules) return session;
+  const rules = session.pendingRules;
+  const noted = commitBoard(session, `玩法 ${rules.name}`, boardOf(session));
+  const { pendingRules: _pending, ...rest } = noted;
+  return { ...rest, rules };
+}
+
 /** A new session that keeps the same people, seats, and rules, with scores and records cleared. */
 export function reopenSession(session: Session, startedAt: string, pool = '0'): Session {
   const next = sessionFromRoster({
