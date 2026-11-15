@@ -52,6 +52,7 @@ export default function SessionScreen() {
   const [falseWinAsSelfDraw, setFalseWinAsSelfDraw] = useState(false);
   const [discarderPaysSelfDraw, setDiscarderPaysSelfDraw] = useState(false);
   const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
+  const [takeJackpot, setTakeJackpot] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -144,6 +145,7 @@ export default function SessionScreen() {
     setFalseWinAsSelfDraw(false);
     setDiscarderPaysSelfDraw(false);
     setDiscarderPaysLoss(false);
+    setTakeJackpot(false);
     setPanel('win');
   }
 
@@ -159,6 +161,7 @@ export default function SessionScreen() {
     setMulti(true);
     setDiscarderPaysSelfDraw(false);
     setDiscarderPaysLoss(false);
+    setTakeJackpot(false);
     if (payer === 'self-draw') setPayer(null);
     if (winnerId) {
       setWinnerIds([winnerId]);
@@ -191,6 +194,7 @@ export default function SessionScreen() {
       setMulti(false);
       setDiscarderPaysSelfDraw(false);
       setDiscarderPaysLoss(false);
+      setTakeJackpot(false);
     }
     setFalseWin((current) => !current);
   }
@@ -259,6 +263,7 @@ export default function SessionScreen() {
       discarderId: payer === 'self-draw' ? null : payer,
       discarderPaysSelfDraw,
       discarderPaysLoss,
+      takeJackpot: session.rules.jackpotEnabled && takeJackpot,
     });
     if (next === session) return;
     setPanel(null);
@@ -288,6 +293,7 @@ export default function SessionScreen() {
           falseWinAsSelfDraw,
           discarderPaysSelfDraw,
           discarderPaysLoss,
+          takeJackpot: session.rules.jackpotEnabled && !falseWin && !multi && takeJackpot,
         })
       : null;
 
@@ -413,6 +419,13 @@ export default function SessionScreen() {
                   {multi || discarderPaysSelfDraw || discarderPaysLoss ? null : (
                     <Choice label="自摸" onPress={() => setPayer('self-draw')} selected={payer === 'self-draw'} />
                   )}
+                  {session.rules.jackpotEnabled && !multi ? (
+                    <Choice
+                      label={`贏取Jackpot ${takeJackpot ? '開' : '關'}`}
+                      onPress={() => setTakeJackpot((value) => !value)}
+                      selected={takeJackpot}
+                    />
+                  ) : null}
                   {session.seats.map((seat) => {
                     const player = session.players.find((item) => item.id === seat.playerId);
                     const blocked = multi ? winnerIds.includes(player?.id ?? '') : player?.id === winnerId;
