@@ -8,7 +8,7 @@ import { formatSettlementBalance, hasPositiveBalance, poolUnallocated, settlemen
 const startedAt = '2026-11-15T02:00:00.000Z';
 
 describe('找數 nets', () => {
-  it('lists every roster net, including a zero and an unseated player', () => {
+  it('lists each non-zero net, including an unseated player', () => {
     const session = sessionWithNets([
       ['a', '872'],
       ['b', '-668'],
@@ -32,16 +32,15 @@ describe('找數 nets', () => {
         ['c', '-220', '-220'],
         ['d', '-8', '-8'],
         ['e', '24', '+24'],
-        ['f', '0', '0'],
       ],
     );
     assert.equal(rows.some((row) => row.playerId === seatedC.id), true);
-    assert.equal(rows.some((row) => row.playerId === incoming.id), true);
+    assert.equal(rows.some((row) => row.playerId === incoming.id), false);
     assert.equal(hasPositiveBalance(afterSwap), true);
     assert.equal(poolUnallocated(afterSwap), false);
   });
 
-  it('keeps every zero net and marks a leftover pool as unallocated', () => {
+  it('omits zero nets and marks a leftover pool as unallocated', () => {
     const started = startSession({
       rules: createCustomDraft(),
       names: ['a', 'b', 'c', 'd'],
@@ -51,7 +50,7 @@ describe('找數 nets', () => {
     const withPool = { ...started, pool: '40' };
     assert.deepEqual(
       settlementRows(withPool).map((row) => row.balance),
-      ['0', '0', '0', '0'],
+      [],
     );
     assert.equal(hasPositiveBalance(withPool), false);
     assert.equal(poolUnallocated(withPool), true);

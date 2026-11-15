@@ -52,7 +52,7 @@ The first release develops the point-counter / table scorekeeper features: exact
 
 ## Settlement (麻雀諗 product decision, with a reference example kept for context)
 
-- 找數 is a user-requested view of every roster player’s net, including a zero and anyone who has left a seat, plus the Jackpot remainder. A non-zero pool is marked 尚未分配.
+- 找數 is a user-requested view of each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配.
 - 麻雀諗 shows those nets and lets the user finish payment themselves. It does not compute payment instructions, choose transfers, tie-break, or show a currency label.
 - The reference’s demonstrated transfer list is recorded in `docs/guide.md` as what the reference showed, not as a 麻雀諗 requirement.
 - Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display.
