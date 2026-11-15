@@ -16,6 +16,7 @@ import { useSessionRepository } from '@/session/repository';
 import {
   formatSettlementBalance,
   hasPositiveBalance,
+  poolUnallocated,
   settlementRows,
 } from '@/session/settlement';
 import { clearRoster, stageRoster } from '@/session/pending-roster';
@@ -639,6 +640,10 @@ export default function SessionScreen() {
                   {`${row.name} ${formatSettlementBalance(row.balance)}`}
                 </ThemedText>
               ))}
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`彩池 ${formatAmount(session.pool)}`}</ThemedText>
+              {poolUnallocated(session) ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>尚未分配</ThemedText>
+              ) : null}
               <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
           ) : null}

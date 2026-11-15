@@ -9,18 +9,19 @@ export type SettlementRow = {
 };
 
 /**
- * 找數 rows: every roster player with a non-zero net, including someone
- * who has left a seat. The Jackpot pool is not shown; that view is unspecified.
+ * 找數 rows: every roster player, including a zero net and someone who has left a seat.
+ * No transfer list. A non-zero pool is still unallocated.
  */
 export function settlementRows(session: Session): SettlementRow[] {
-  const zero = Score.fromString('0');
-  return session.players
-    .filter((player) => !Score.fromString(player.balance).equals(zero))
-    .map((player) => ({
-      playerId: player.id,
-      name: player.name,
-      balance: player.balance,
-    }));
+  return session.players.map((player) => ({
+    playerId: player.id,
+    name: player.name,
+    balance: player.balance,
+  }));
+}
+
+export function poolUnallocated(session: Session): boolean {
+  return !Score.fromString(session.pool).equals(Score.fromString('0'));
 }
 
 /** True when at least one roster player has a positive net. */
