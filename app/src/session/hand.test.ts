@@ -784,10 +784,17 @@ describe('平分Jackpot', () => {
     const shared = splitJackpot(three, seatedIds(three));
     assert.equal(balance(shared, '甲家'), '200/3');
     const swapped = substitute(session, reserveId, 0);
-    assert.equal(eligibleJackpotIds(swapped).includes(idOf(swapped, '甲家')), true);
-    const toLeaver = splitJackpot(swapped, [idOf(swapped, '甲家')]);
-    assert.equal(balance(toLeaver, '甲家'), '200');
-    assert.equal(toLeaver.pool, '0');
+    assert.equal(eligibleJackpotIds(swapped).includes(idOf(swapped, '甲家')), false);
+    assert.equal(splitJackpot(swapped, [idOf(swapped, '甲家')]), swapped);
+
+    const video = withPool(four('custom', rules), '80');
+    const chosen = [idOf(video, '甲家'), idOf(video, '丙家')];
+    const paid = splitJackpot(video, chosen);
+    assert.equal(balance(paid, '甲家'), '40');
+    assert.equal(balance(paid, '丙家'), '40');
+    assert.equal(balance(paid, '乙家'), '0');
+    assert.equal(paid.pool, '0');
+    assert.equal(splitJackpot(video, []), video);
   });
 });
 

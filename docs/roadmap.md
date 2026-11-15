@@ -105,7 +105,7 @@ The in-app share-screen button is part of the second-release TV feature, as the 
 - **Release:** First release.
 - **Covers:** Optional Jackpot, off by default. When enabled, 流局時每位玩家須付彩池 starts at 0 and is editable (a typed 010 was used as 10). On a confirmed 流局, each seated player contributes that amount to the pool (demonstrated four-player contributions and stacked 流局 in [`docs/guide.md`](guide.md)). 贏取Jackpot on 食糊! adds the current pool to the winner’s total and empties the pool; the pool amount comes from the pool, not from the other players. 平分Jackpot is opened from the on-board pool amount (請選擇 → 平分Jackpot → 平分給哪些玩家？ among 在位玩家), then confirm. The demonstrated all-four split paid an equal share to each player, cleared the pool to 0, and left 莊 and 圈風 unchanged. Checkable scenes are in [`docs/flows.md`](flows.md) flow 9.
 - **Sources:** [`docs/guide.md`](guide.md) (Jackpot), [`docs/features.md`](features.md), [`docs/flows.md`](flows.md), [`docs/controls.md`](controls.md).
-- **Decided:** 平分Jackpot gives the whole pool to one or more eligible players. A reserve who never sat is not listed. Taking only part of the pool amount is still open.
+- **Decided:** 平分Jackpot gives the whole pool to one or more players sitting now. An empty selection cannot confirm. A player who has left is not a recipient. Taking only part of the pool amount is out of scope.
 
 ### 9. 找數 / settlement
 
