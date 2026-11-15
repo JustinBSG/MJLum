@@ -1,14 +1,14 @@
 import { router, Stack, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
+import { RadarChart } from '@/components/radar-chart';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
 import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
-import { Score } from '@/score/score';
 import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
@@ -615,9 +615,13 @@ export default function SessionScreen() {
                   {row.titles.length > 0 ? (
                     <ThemedText accessibilityLanguage={APP_LOCALE}>{row.titles.join('  ')}</ThemedText>
                   ) : null}
-                  <RadarAxis label="進攻" exact={row.attack} color={theme.text} track={theme.backgroundElement} />
-                  <RadarAxis label="牌力" exact={row.strength} color={theme.text} track={theme.backgroundElement} />
-                  <RadarAxis label="防守" exact={row.defense} color={theme.text} track={theme.backgroundElement} />
+                  <RadarChart
+                    attack={row.attack}
+                    strength={row.strength}
+                    defense={row.defense}
+                    color={theme.text}
+                    track={theme.backgroundElement}
+                  />
                 </ThemedView>
               ))}
               <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
@@ -777,37 +781,6 @@ function readFan(text: string): number | null {
   return Number.isSafeInteger(fan) ? fan : null;
 }
 
-function axisWidth(exact: string): `${number}%` {
-  const value = Score.fromString(exact);
-  const zero = Score.fromString('0');
-  const hundred = Score.fromString('100');
-  const clamped =
-    value.compare(zero) < 0 ? zero : value.compare(hundred) > 0 ? hundred : value;
-  const percent = Number(clamped.numerator) / Number(clamped.denominator);
-  return `${percent}%`;
-}
-
-function RadarAxis({
-  label,
-  exact,
-  color,
-  track,
-}: {
-  label: string;
-  exact: string;
-  color: string;
-  track: string;
-}) {
-  return (
-    <ThemedView style={styles.axis}>
-      <ThemedText accessibilityLanguage={APP_LOCALE}>{`${label} ${formatRate(exact)}`}</ThemedText>
-      <View style={[styles.track, { backgroundColor: track }]}>
-        <View style={[styles.fill, { width: axisWidth(exact), backgroundColor: color }]} />
-      </View>
-    </ThemedView>
-  );
-}
-
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable
@@ -827,9 +800,6 @@ const styles = StyleSheet.create({
   player: { gap: Spacing.half },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   panel: { gap: Spacing.two },
-  axis: { gap: Spacing.half },
-  track: { height: 8, overflow: 'hidden' },
-  fill: { height: 8 },
   fanHelpMark: {
     width: 24,
     height: 24,
