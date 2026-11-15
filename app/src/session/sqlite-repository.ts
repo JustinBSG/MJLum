@@ -20,5 +20,23 @@ export function createSqliteSessionRepository(db: SQLiteDatabase): SessionReposi
     async clearOpen() {
       await db.runAsync('DELETE FROM open_session WHERE id = 1');
     },
+    async archiveOpen() {
+      const row = await db.getFirstAsync<{ document: string }>('SELECT document FROM open_session WHERE id = 1');
+      if (!row) return;
+      const session = parseSession(row.document);
+      await db.runAsync(
+        `INSERT INTO archived_session (id, document) VALUES (?, ?)
+         ON CONFLICT(id) DO UPDATE SET document = excluded.document`,
+        session.id,
+        row.document,
+      );
+      await db.runAsync('DELETE FROM open_session WHERE id = 1');
+    },
+    async listArchived() {
+      const rows = await db.getAllAsync<{ document: string }>(
+        'SELECT document FROM archived_session ORDER BY rowid',
+      );
+      return rows.map((row) => parseSession(row.document));
+    },
   };
 }

@@ -4,6 +4,7 @@ import type { Session } from './types.ts';
 
 export function createMemorySessionRepository(open: Session | null = null): SessionRepository {
   let current = open ? clone(open) : null;
+  const archived: Session[] = [];
   return {
     async getOpen() {
       return current ? clone(current) : null;
@@ -13,6 +14,17 @@ export function createMemorySessionRepository(open: Session | null = null): Sess
     },
     async clearOpen() {
       current = null;
+    },
+    async archiveOpen() {
+      if (!current) return;
+      const stored = clone(current);
+      const index = archived.findIndex((item) => item.id === stored.id);
+      if (index === -1) archived.push(stored);
+      else archived[index] = stored;
+      current = null;
+    },
+    async listArchived() {
+      return archived.map(clone);
     },
   };
 }
