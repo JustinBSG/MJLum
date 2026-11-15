@@ -54,6 +54,16 @@ export function setName(setup: RuleSetup, name: string): RuleSetup {
   return { ...setup, name };
 }
 
+const RULE_NAME_LIMIT = 40;
+
+/** Trimmed, required, and at most 40 visible characters. */
+export function prepareRuleName(name: string): { name: string } | { error: string } {
+  const trimmed = name.trim();
+  if (trimmed === '') return { error: '請填寫玩法名稱' };
+  if ([...trimmed].length > RULE_NAME_LIMIT) return { error: '玩法名稱最多40個字' };
+  return { name: trimmed };
+}
+
 /** Fans above 13 have no generated amount. Each of those cells must be typed before save or start. */
 export function missingHighFans(setup: RuleSetup): number[] {
   return setup.rows.filter((row) => row.fan > 13 && !row.ordinary).map((row) => row.fan);

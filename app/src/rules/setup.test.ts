@@ -8,6 +8,7 @@ import {
   formatAmount,
   formatMultiplier,
   missingHighFans,
+  prepareRuleName,
   selfDrawAmount,
   setFanRange,
   setJackpotContribution,
@@ -133,6 +134,9 @@ describe('custom 新玩法', () => {
     assert.equal(selfDrawAmount(through14, 14), null);
     assert.deepEqual(missingHighFans(through14), [14]);
     assert.deepEqual(missingHighFans(through13), []);
+    assert.deepEqual(prepareRuleName('  新玩法  '), { name: '新玩法' });
+    assert.deepEqual(prepareRuleName('   '), { error: '請填寫玩法名稱' });
+    assert.equal('error' in prepareRuleName('番'.repeat(41)), true);
   });
 
   it('keeps an edited preset cell when 滿糊 rises', () => {
