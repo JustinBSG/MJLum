@@ -15,7 +15,7 @@ import {
   setPlayerFormat,
   setTrackDealer,
 } from '../rules/setup.ts';
-import { formatWinPreview, previewWin, recordDraw, recordWin } from './hand.ts';
+import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from './hand.ts';
 import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, undoLatest } from './session.ts';
 import type { Wind } from './types.ts';
 
@@ -722,6 +722,50 @@ describe('贏取Jackpot', () => {
   });
 });
 
+describe('平分Jackpot', () => {
+  it('pays an equal share to each of the four seated players and leaves 莊 in place', () => {
+    const rules = setJackpotEnabled(createCustomDraft(), true);
+    const session = withPool(
+      withDealer(
+        withBalances(four('custom', rules), { 甲家: '-50', 乙家: '-50', 丙家: '-50', 丁家: '-50' }),
+        '丙家',
+        'south',
+        'south',
+      ),
+      '200',
+    );
+    const next = splitJackpot(session, seatedIds(session));
+    assert.equal(balance(next, '甲家'), '0');
+    assert.equal(balance(next, '乙家'), '0');
+    assert.equal(balance(next, '丙家'), '0');
+    assert.equal(balance(next, '丁家'), '0');
+    assert.equal(next.pool, '0');
+    assert.equal(next.dealerId, idOf(next, '丙家'));
+    assert.equal(formatDealerBadge(next.dealerMark), '莊');
+    assert.equal(formatWind(next.roundWind, next.seatWind), '南圈南風');
+    assert.equal(next.handCount, session.handCount);
+    assert.equal(next.ledger.at(-1)?.label, '平分Jackpot');
+    const restored = undoLatest(next);
+    assert.equal(restored.pool, '200');
+    assert.equal(balance(restored, '丙家'), '-50');
+  });
+
+  it('does not pay a reserve or a subset of the seated players', () => {
+    const rules = setJackpotEnabled(createCustomDraft(), true);
+    const session = withPool(withBalances(addReserve(four('custom', rules), '戊家'), { 戊家: '7' }), '200');
+    const seated = seatedIds(session);
+    const next = splitJackpot(session, seated);
+    assert.equal(balance(next, '戊家'), '7');
+    assert.equal(balance(next, '甲家'), '50');
+    assert.equal(splitJackpot(session, seated.slice(0, 3)), session);
+    const three = withPool(
+      startNamed(setJackpotEnabled(setPlayerFormat(createCustomDraft(), 'three'), true), ['甲家', '乙家', '丙家']),
+      '200',
+    );
+    assert.equal(splitJackpot(three, seatedIds(three)), three);
+  });
+});
+
 describe('undo of a confirmed win', () => {
   it('restores the balances, counters, and hand count', () => {
     const session = four('custom');
@@ -741,6 +785,10 @@ describe('undo of a confirmed win', () => {
 
 function wide51() {
   return four('51', setFanRange(createPresetDraft('51-full'), 3, 13));
+}
+
+function seatedIds(session: ReturnType<typeof startNamed>): string[] {
+  return session.seats.flatMap((seat) => (seat.playerId ? [seat.playerId] : []));
 }
 
 function withPool(session: ReturnType<typeof startNamed>, pool: string) {

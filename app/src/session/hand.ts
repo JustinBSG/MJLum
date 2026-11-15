@@ -183,6 +183,34 @@ function drawContribution(session: Session): { players: Session['players']; pool
   return { players, pool: pool.toExact() };
 }
 
+/**
+ * 平分Jackpot among every seated player. The demonstrated case is four players,
+ * an equal share, and no change to 莊 or 圈風. A subset was not recorded.
+ */
+export function splitJackpot(session: Session, playerIds: string[]): Session {
+  if (!session.rules.jackpotEnabled) return session;
+  const seated = seatedPlayerIds(session);
+  if (seated.length !== 4 || playerIds.length !== seated.length) return session;
+  const recipients = new Set(playerIds);
+  if (recipients.size !== seated.length || seated.some((id) => !recipients.has(id))) return session;
+  const share = Score.fromString(session.pool).divide(Score.fromRational(seated.length, 1));
+  const players = session.players.map((player) =>
+    recipients.has(player.id)
+      ? { ...player, balance: Score.fromString(player.balance).add(share).toExact() }
+      : player,
+  );
+  return commitBoard(session, '平分Jackpot', {
+    players,
+    seats: session.seats,
+    dealerId: session.dealerId,
+    dealerMark: session.dealerMark,
+    roundWind: session.roundWind,
+    seatWind: session.seatWind,
+    handCount: session.handCount,
+    pool: '0',
+  });
+}
+
 function holdDraw(session: Session): { dealerId: string | null; dealerMark: DealerMark; roundWind: Wind; seatWind: Wind } {
   if (!session.rules.trackDealer || session.dealerId === null) {
     return {
