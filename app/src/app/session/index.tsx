@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
+import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
 import { Score } from '@/score/score';
 import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
@@ -34,7 +35,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | 'rules' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -338,7 +339,11 @@ export default function SessionScreen() {
       <Stack.Screen options={{ title: '現時賽果' }} />
       {session ? (
         <ScrollView contentContainerStyle={styles.content}>
-          <ThemedText accessibilityLanguage={APP_LOCALE}>{session.rules.name}</ThemedText>
+          {panel === null ? (
+            <Choice label={session.rules.name} onPress={() => setPanel('rules')} selected={false} />
+          ) : (
+            <ThemedText accessibilityLanguage={APP_LOCALE}>{session.rules.name}</ThemedText>
+          )}
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`開始日期 ${formatStartDate(session.startedAt)}`}</ThemedText>
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`總局數 ${session.handCount}`}</ThemedText>
           {session.rules.trackDealer ? (
@@ -533,6 +538,52 @@ export default function SessionScreen() {
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmSplit} selected={false} />
               </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === 'rules' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{session.rules.name}</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>
+                {session.rules.playerFormat === 'four' ? '四人麻雀' : '三人麻雀'}
+              </ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>
+                {session.rules.paymentMode === 'full-discard' ? '全銃' : '半銃'}
+              </ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`起糊 ${session.rules.minFan}`}</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`滿糊 ${session.rules.maxFan}`}</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`自摸倍數 ×${formatMultiplier(session.rules.multiplier)}`}</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>
+                {session.rules.jackpotEnabled ? 'Jackpot 啟用' : 'Jackpot 關閉'}
+              </ThemedText>
+              {session.rules.jackpotEnabled ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>
+                  {`流局時每位玩家須付彩池 ${formatAmount(session.rules.jackpotContribution)}`}
+                </ThemedText>
+              ) : null}
+              <ThemedText accessibilityLanguage={APP_LOCALE}>
+                {`紀錄莊家及圈風 ${session.rules.trackDealer ? '開' : '關'}`}
+              </ThemedText>
+              {session.rules.trackDealer ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>
+                  {`流局時過莊 ${session.rules.passDealerOnDraw ? '開' : '關'}`}
+                </ThemedText>
+              ) : null}
+              <ThemedView style={styles.row}>
+                <ThemedText accessibilityLanguage={APP_LOCALE}>番</ThemedText>
+                <ThemedText accessibilityLanguage={APP_LOCALE}>食糊分數</ThemedText>
+                <ThemedText accessibilityLanguage={APP_LOCALE}>自摸分數</ThemedText>
+              </ThemedView>
+              {session.rules.rows.map((row) => (
+                <ThemedView key={row.fan} style={styles.row}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{`${row.fan}`}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{formatAmount(row.ordinary)}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {formatAmount(selfDrawAmount(session.rules, row.fan))}
+                  </ThemedText>
+                </ThemedView>
+              ))}
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
           ) : null}
 
