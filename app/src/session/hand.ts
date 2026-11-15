@@ -381,18 +381,22 @@ function fullDiscard(session: Session, input: WinInput, ordinary: string): WinPr
   };
 }
 
-/** Four seated players. The winner receives F, the discarder pays F/2, and each other seated player pays F/4. */
+/** Four players: discarder pays F/2 and each other seated player pays F/4. Three players: discarder pays 2F/3 and the other pays F/3. */
 function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPreview | null {
-  if (session.rules.playerFormat !== 'four' || session.rules.paymentMode !== 'half-discard') return null;
+  if (session.rules.paymentMode !== 'half-discard') return null;
   const discarderId = input.discarderId;
   if (!discarderId || discarderId === input.winnerId) return null;
   const seated = seatedPlayerIds(session);
-  if (seated.length !== 4 || !seated.includes(discarderId)) return null;
+  if (!seated.includes(discarderId)) return null;
   const others = seated.filter((id) => id !== input.winnerId && id !== discarderId);
-  if (others.length !== 2) return null;
   const amount = Score.fromString(ordinary);
-  const half = amount.divide(Score.fromRational(2, 1));
-  const quarter = amount.divide(Score.fromRational(4, 1));
+  const four = session.rules.playerFormat === 'four' && seated.length === 4 && others.length === 2;
+  const three = session.rules.playerFormat === 'three' && seated.length === 3 && others.length === 1;
+  if (!four && !three) return null;
+  const discarderShare = four
+    ? amount.divide(Score.fromRational(2, 1))
+    : amount.multiply(Score.fromRational(2, 1)).divide(Score.fromRational(3, 1));
+  const otherShare = four ? amount.divide(Score.fromRational(4, 1)) : amount.divide(Score.fromRational(3, 1));
   return {
     kind: 'discard',
     fan: input.fan,
@@ -404,8 +408,8 @@ function halfDiscard(session: Session, input: WinInput, ordinary: string): WinPr
     winnerIds: [input.winnerId],
     deltas: [
       { playerId: input.winnerId, delta: amount.toExact() },
-      { playerId: discarderId, delta: negate(half) },
-      ...others.map((playerId) => ({ playerId, delta: negate(quarter) })),
+      { playerId: discarderId, delta: negate(discarderShare) },
+      ...others.map((playerId) => ({ playerId, delta: negate(otherShare) })),
     ],
   };
 }
@@ -493,26 +497,21 @@ function selfDraw(session: Session, input: WinInput, ordinary: string): WinPrevi
 
 function selfDrawPayers(session: Session, opponents: number): number | null {
   if (session.rules.playerFormat === 'four' && opponents === 3) return 3;
-  if (
-    session.rules.playerFormat === 'three' &&
-    session.rules.paymentMode === 'full-discard' &&
-    session.rules.multiplier === '4/3' &&
-    opponents === 2
-  ) {
-    return 2;
-  }
+  if (session.rules.playerFormat === 'three' && opponents === 2) return 2;
   return null;
 }
 
 function multiDiscard(session: Session, input: WinInput): WinPreview | null {
-  if (session.rules.playerFormat !== 'four' || input.discarderId === null) return null;
+  const seatLimit = session.rules.playerFormat === 'three' ? 3 : session.rules.playerFormat === 'four' ? 4 : 0;
+  if (seatLimit === 0 || input.discarderId === null) return null;
   const winners = [{ playerId: input.winnerId, fan: input.fan }, ...(input.also ?? [])];
-  if (winners.length < 2 || winners.length > 3) return null;
+  const maxWinners = seatLimit - 1;
+  if (winners.length < 2 || winners.length > maxWinners) return null;
   const winnerIds = winners.map((winner) => winner.playerId);
   if (new Set(winnerIds).size !== winnerIds.length) return null;
   const seated = seatedPlayerIds(session);
   const discarderId = input.discarderId;
-  if (!seated.includes(discarderId) || winnerIds.includes(discarderId)) return null;
+  if (seated.length !== seatLimit || !seated.includes(discarderId) || winnerIds.includes(discarderId)) return null;
   if (!winnerIds.every((id) => seated.includes(id))) return null;
   const scored = winners.flatMap((winner) => {
     const ordinary = ordinaryAmount(session, winner.fan);
@@ -553,39 +552,40 @@ function multiHalf(
   discarderId: string,
   scored: { playerId: string; fan: number; ordinary: string }[],
 ): WinPreview | null {
-  if (scored.length !== 2) return null;
   const seated = seatedPlayerIds(session);
-  if (seated.length !== 4) return null;
-  const other = seated.find((id) => id !== scored[0]?.playerId && id !== scored[1]?.playerId && id !== discarderId);
-  const first = scored[0];
-  const second = scored[1];
-  if (!other || !first || !second) return null;
-  const firstAmount = Score.fromString(first.ordinary);
-  const secondAmount = Score.fromString(second.ordinary);
-  const sum = firstAmount.add(secondAmount);
-  const nets = [firstAmount.subtract(quarter(secondAmount)), secondAmount.subtract(quarter(firstAmount))];
-  const selectedIndex = second.playerId === input.winnerId ? 1 : 0;
-  const selected = selectedIndex === 1 ? second : first;
+  const seatCount = seated.length;
+  if ((seatCount !== 3 && seatCount !== 4) || scored.length < 2 || scored.length >= seatCount) return null;
+  const seats = Score.fromRational(seatCount, 1);
+  const sum = scored.reduce((total, winner) => total.add(Score.fromString(winner.ordinary)), Score.fromString('0'));
+  const winnerIds = new Set(scored.map((winner) => winner.playerId));
+  const bystanders = seated.filter((id) => id !== discarderId && !winnerIds.has(id));
+  const selected = scored.find((winner) => winner.playerId === input.winnerId) ?? scored[0];
+  if (!selected) return null;
+  const nets = scored.map((winner) => {
+    const others = scored
+      .filter((item) => item.playerId !== winner.playerId)
+      .reduce((total, item) => total.add(Score.fromString(item.ordinary)), Score.fromString('0'));
+    return {
+      playerId: winner.playerId,
+      delta: Score.fromString(winner.ordinary).subtract(others.divide(seats)).toExact(),
+    };
+  });
+  const selectedNet = nets.find((item) => item.playerId === selected.playerId)?.delta ?? selected.ordinary;
   return {
     kind: 'multi',
     fan: selected.fan,
     winnerId: selected.playerId,
-    winnerIds: [first.playerId, second.playerId],
+    winnerIds: scored.map((winner) => winner.playerId),
     discarderId,
     ordinary: selected.ordinary,
     multiplier: null,
-    total: nets[selectedIndex].toExact(),
+    total: selectedNet,
     deltas: [
-      { playerId: first.playerId, delta: nets[0].toExact() },
-      { playerId: second.playerId, delta: nets[1].toExact() },
-      { playerId: discarderId, delta: negate(sum.divide(Score.fromRational(2, 1))) },
-      { playerId: other, delta: negate(quarter(sum)) },
+      ...nets,
+      { playerId: discarderId, delta: negate(sum.multiply(Score.fromRational(2, 1)).divide(seats)) },
+      ...bystanders.map((playerId) => ({ playerId, delta: negate(sum.divide(seats)) })),
     ],
   };
-}
-
-function quarter(score: Score): Score {
-  return score.divide(Score.fromRational(4, 1));
 }
 
 function negate(score: Score): string {

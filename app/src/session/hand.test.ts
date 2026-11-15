@@ -44,7 +44,7 @@ describe('全銃 ordinary win', () => {
     assert.equal(formatWind(next.roundWind, next.seatWind), '東圈南風');
   });
 
-  it('does not score an unrecorded fan or a three-player 半銃 discard', () => {
+  it('does not score an unrecorded fan, and splits a three-player 半銃 into 2/3 and 1/3', () => {
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
     assert.equal(previewWin(three, { winnerId: idOf(three, '甲家'), fan: 7, discarderId: idOf(three, '丙家') }), null);
     const halfThree = startNamed(setPaymentMode(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), 'half-discard'), [
@@ -52,10 +52,10 @@ describe('全銃 ordinary win', () => {
       '乙家',
       '丙家',
     ]);
-    assert.equal(
-      previewWin(halfThree, { winnerId: idOf(halfThree, '甲家'), fan: 3, discarderId: idOf(halfThree, '丙家') }),
-      null,
-    );
+    const next = recordWin(halfThree, { winnerId: idOf(halfThree, '甲家'), fan: 3, discarderId: idOf(halfThree, '丙家') });
+    assert.equal(balance(next, '甲家'), '3');
+    assert.equal(balance(next, '丙家'), '-2');
+    assert.equal(balance(next, '乙家'), '-1');
   });
 });
 
@@ -185,15 +185,11 @@ describe('自摸', () => {
     assert.equal(session.handCount, 3);
   });
 
-  it('does not invent a three-player 自摸 split at another multiplier', () => {
+  it('splits a three-player 自摸 by the rules multiplier', () => {
     const session = startNamed(setPlayerFormat(createCustomDraft(), 'three'), ['甲家', '乙家', '丙家']);
-    assert.equal(previewWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null }), null);
-    const discard = previewWin(session, {
-      winnerId: idOf(session, '甲家'),
-      fan: 3,
-      discarderId: idOf(session, '乙家'),
-    });
-    assert.equal(discard?.total, '4');
+    const preview = previewWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null });
+    assert.equal(preview?.total, '6');
+    assert.equal(preview?.deltas.find((item) => item.playerId === idOf(session, '乙家'))?.delta, '-3');
   });
 });
 
@@ -249,30 +245,36 @@ describe('一炮多響', () => {
     assert.equal(balance(next, '甲家'), '-96');
   });
 
-  it('does not score a three-winner 半銃 split or a three-player 一炮多響', () => {
-    const half = four('51', setPaymentMode(setFanRange(createPresetDraft('51-full'), 3, 8), 'half-discard'));
-    assert.equal(
-      previewWin(half, {
-        winnerId: idOf(half, '丁家'),
-        fan: 7,
-        discarderId: idOf(half, '丙家'),
-        also: [
-          { playerId: idOf(half, '乙家'), fan: 6 },
-          { playerId: idOf(half, '甲家'), fan: 5 },
-        ],
-      }),
-      null,
-    );
-    const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
-    assert.equal(
-      previewWin(three, {
-        winnerId: idOf(three, '甲家'),
-        fan: 3,
-        discarderId: idOf(three, '丙家'),
-        also: [{ playerId: idOf(three, '乙家'), fan: 4 }],
-      }),
-      null,
-    );
+  it('uses the checked 半銃 multi nets for three winners and a three-player double', () => {
+    let rules = setPaymentMode(createCustomDraft(), 'half-discard');
+    rules = setOrdinary(setOrdinary(setOrdinary(rules, 3, '2048'), 4, '16'), 5, '128');
+    const fourHands = four('custom', rules);
+    const triple = recordWin(fourHands, {
+      winnerId: idOf(fourHands, '乙家'),
+      fan: 3,
+      discarderId: idOf(fourHands, '甲家'),
+      also: [
+        { playerId: idOf(fourHands, '丙家'), fan: 4 },
+        { playerId: idOf(fourHands, '丁家'), fan: 5 },
+      ],
+    });
+    assert.equal(balance(triple, '乙家'), '2012');
+    assert.equal(balance(triple, '丙家'), '-528');
+    assert.equal(balance(triple, '丁家'), '-388');
+    assert.equal(balance(triple, '甲家'), '-1096');
+
+    let threeRules = setPaymentMode(setPlayerFormat(createCustomDraft(), 'three'), 'half-discard');
+    threeRules = setOrdinary(setOrdinary(threeRules, 3, '3'), 4, '384');
+    const three = startNamed(threeRules, ['甲家', '乙家', '丙家']);
+    const double = recordWin(three, {
+      winnerId: idOf(three, '乙家'),
+      fan: 4,
+      discarderId: idOf(three, '甲家'),
+      also: [{ playerId: idOf(three, '丙家'), fan: 3 }],
+    });
+    assert.equal(balance(double, '甲家'), '-258');
+    assert.equal(balance(double, '丙家'), '-125');
+    assert.equal(balance(double, '乙家'), '383');
   });
 });
 
