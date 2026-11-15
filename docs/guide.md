@@ -358,7 +358,7 @@ In an opened 五一辣辣上 rule setup, Jackpot 啟用 was off by default. Turn
 
 **贏取Jackpot.** 食糊! has a 贏取Jackpot toggle. A 13番 自摸 with it on, pool 80, showed footer 16384 × 1.50 + Jackpot 80 = 總分 24656. Ledger 北: a, b, and c each −8192; d +24656. 8192 = 24576/3; the 80 comes from the pool, not from the other players. After confirm, that award path emptied the pool. No separate withdraw control was shown besides this toggle and 平分Jackpot.
 
-**平分Jackpot.** Tapping the on-board Jackpot amount opens 請選擇 → 平分Jackpot → 平分給哪些玩家？ (在位玩家), then confirm. Demonstrated all-four split: all four were −50, Jackpot 200, 南圈南風, c 莊; after confirm, all four were 0, Jackpot 0, same 莊 and 圈風 (200/4 = 50 each).
+**平分Jackpot.** Tapping the on-board Jackpot amount opens 請選擇 → 平分Jackpot → 平分給哪些玩家？ (在位玩家), then confirm. The control is available for a three-player table as well as a four-player table. Demonstrated all-four split: all four were −50, Jackpot 200, 南圈南風, c 莊; after confirm, all four were 0, Jackpot 0, same 莊 and 圈風 (200/4 = 50 each). A three-player split of 200 is 200/3 each.
 
 The first release includes Jackpot as a visible option.
 
