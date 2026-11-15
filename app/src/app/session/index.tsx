@@ -17,6 +17,7 @@ import {
 } from '@/session/settlement';
 import { formatRate, rosterStatistics } from '@/session/statistics';
 import { clampDiceCount, MIN_DICE, rollDice, type DiceRoll } from '@/session/dice';
+import { FAN_HELP_BODY, FAN_HELP_TITLE } from '@/session/fan-help';
 import {
   addReserve,
   formatBalance,
@@ -64,6 +65,7 @@ export default function SessionScreen() {
   const [splitAll, setSplitAll] = useState(false);
   const [diceCount, setDiceCount] = useState(MIN_DICE);
   const [diceRoll, setDiceRoll] = useState<DiceRoll | null>(null);
+  const [fanHelp, setFanHelp] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -165,6 +167,7 @@ export default function SessionScreen() {
   }
 
   function openWin() {
+    setFanHelp(false);
     setWinnerId(null);
     setFanText('');
     setPayer(null);
@@ -417,6 +420,23 @@ export default function SessionScreen() {
                   />
                 );
               })}
+              <ThemedView style={styles.row}>
+                <ThemedText accessibilityLanguage={APP_LOCALE}>{falseWin ? '詐糊番數' : '番數'}</ThemedText>
+                <Pressable
+                  accessibilityLabel="番數?"
+                  accessibilityLanguage={APP_LOCALE}
+                  hitSlop={8}
+                  onPress={() => setFanHelp((open) => !open)}
+                  style={[styles.fanHelpMark, { borderColor: theme.text }]}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>?</ThemedText>
+                </Pressable>
+              </ThemedView>
+              {fanHelp ? (
+                <ThemedView style={styles.panel}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{FAN_HELP_TITLE}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{FAN_HELP_BODY}</ThemedText>
+                </ThemedView>
+              ) : null}
               <TextInput
                 accessibilityLabel={falseWin ? '詐糊番數' : '番數'}
                 accessibilityLanguage={APP_LOCALE}
@@ -752,6 +772,14 @@ const styles = StyleSheet.create({
   axis: { gap: Spacing.half },
   track: { height: 8, overflow: 'hidden' },
   fill: { height: 8 },
+  fanHelpMark: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   input: { minHeight: 48, borderWidth: 1, paddingHorizontal: Spacing.two, fontSize: 18 },
   choice: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.two },
 });
