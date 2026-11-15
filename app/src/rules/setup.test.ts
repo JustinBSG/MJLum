@@ -104,6 +104,11 @@ describe('Hong Kong presets', () => {
       ['3', '6', '9', '12', '18', '24'],
     );
     assert.equal(row(setFanRange(three, 3, 9), 9)?.ordinary, null);
+    assert.equal(formatMultiplier(three.multiplier), '1.50');
+    assert.equal(formatAmount(selfDrawAmount(three, 3)), '4.5');
+    assert.equal(formatAmount(selfDrawAmount(three, 5)), '13.5');
+    assert.equal(formatAmount(selfDrawAmount(three, 8)), '36');
+    assert.equal(formatMultiplier(setPlayerFormat(createCustomDraft(), 'three').multiplier), '1.50');
   });
 
   it('uses the demonstrated three-player 3番4辣辣上 rows', () => {

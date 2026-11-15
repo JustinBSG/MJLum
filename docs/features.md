@@ -19,7 +19,7 @@ The first release develops the point-counter / table scorekeeper features: exact
 ## Scoring and rule setups (reference-demonstrated functionality)
 
 - Choose a rules setup before play: Hong Kong presets, a saved custom setup, or a one-off configuration (直接使用) without saving.
-- Hong Kong preset families: 3番4, 二五雞, 五一, and 一二蚊, each in 半辣上 and 辣辣上 forms, plus 3番4 半辣上（三人）. Opened tables are in `docs/guide.md`. The tables for 一二蚊辣辣上 and 3番4 半辣上（三人） were listed but not opened as 玩法設定; only the visible list captions (minimum and cap amounts) are recorded. Do not invent the missing rows.
+- Hong Kong preset families: 3番4, 二五雞, 五一, and 一二蚊, each in 半辣上 and 辣辣上 forms, plus 3番4 半辣上（三人）. Opened tables, including the 3–8 rows of 一二蚊辣辣上 and 3番4 半辣上（三人）, are in `docs/guide.md`. Fans outside a shown range stay empty.
 - Create, edit, use once, save, and delete a custom setup (demonstrated default name 新玩法). Ordinary-win cells are individually editable; editing one fan does not automatically recalculate later fans. Deleting a saved custom setup is confirmed first.
 - Player-count format: 四人麻雀 or 三人麻雀, separate from roster size.
 - Payment modes: 全銃 and 半銃, with the demonstrated splits recorded in `docs/guide.md`.

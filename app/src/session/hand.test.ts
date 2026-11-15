@@ -185,6 +185,17 @@ describe('自摸', () => {
     assert.equal(session.handCount, 3);
   });
 
+  it('pays the 3番4半辣上（三人） self-draw from two opponents at ×1.50', () => {
+    const session = startNamed(createPresetDraft('3fan4-half-three'), ['甲家', '乙家', '丙家']);
+    const preview = previewWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null });
+    assert.equal(preview?.total, '9/2');
+    assert.equal(preview?.deltas.find((item) => item.playerId === idOf(session, '乙家'))?.delta, '-9/4');
+    assert.equal(preview?.deltas.find((item) => item.playerId === idOf(session, '丙家'))?.delta, '-9/4');
+    const next = recordWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null });
+    assert.equal(balance(next, '甲家'), '9/2');
+    assert.equal(balance(next, '乙家'), '-9/4');
+  });
+
   it('splits a three-player 自摸 by the rules multiplier', () => {
     const session = startNamed(setPlayerFormat(createCustomDraft(), 'three'), ['甲家', '乙家', '丙家']);
     const preview = previewWin(session, { winnerId: idOf(session, '甲家'), fan: 3, discarderId: null });

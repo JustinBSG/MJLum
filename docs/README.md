@@ -34,4 +34,4 @@ Read `product.md` and `features.md` first for scope, then `guide.md` for rules, 
 ## What is deliberately not in these documents
 
 - Screen layout, wireframes, visual style, or a component library. All UI/UX should be designed later by AI, following these documents, using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation. Setup for that skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
-- Invented score tables, including any exact progression for 番 above 13, and the unopened preset tables noted in `guide.md`.
+- Invented score tables, including any exact progression for 番 above 13, and fans outside the ranges recorded in `guide.md`.

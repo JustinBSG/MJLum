@@ -58,6 +58,8 @@ export type HongKongPreset = {
    */
   rows: Readonly<Record<number, string>>;
   opened: boolean;
+  /** Self-draw multiplier for this preset. Omitted presets use 3/2. */
+  multiplier?: string;
   /**
    * Demonstrated 3番4辣辣上 rows when the same preset is used as 三人麻雀.
    * A null amount is a fan inside that range that was not shown.

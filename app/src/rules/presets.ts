@@ -216,6 +216,7 @@ export const HONG_KONG_PRESETS: readonly HongKongPreset[] = [
     captionMaxFan: 8,
     captionMaxAmount: '24',
     opened: true,
+    multiplier: '3/2',
     rows: listedRows([
       [3, '3'],
       [4, '6'],
