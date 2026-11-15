@@ -16,6 +16,7 @@ import {
   settlementRows,
 } from '@/session/settlement';
 import { formatRate, rosterStatistics } from '@/session/statistics';
+import { clampDiceCount, MIN_DICE, rollDice, type DiceRoll } from '@/session/dice';
 import {
   addReserve,
   formatBalance,
@@ -31,7 +32,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | 'dice' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -61,6 +62,8 @@ export default function SessionScreen() {
   const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
   const [takeJackpot, setTakeJackpot] = useState(false);
   const [splitAll, setSplitAll] = useState(false);
+  const [diceCount, setDiceCount] = useState(MIN_DICE);
+  const [diceRoll, setDiceRoll] = useState<DiceRoll | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -153,6 +156,12 @@ export default function SessionScreen() {
     setReusePlayers(false);
     setReuseRules(false);
     setPanel('fresh');
+  }
+
+  function openDice() {
+    setDiceCount(MIN_DICE);
+    setDiceRoll(null);
+    setPanel('dice');
   }
 
   function openWin() {
@@ -387,6 +396,7 @@ export default function SessionScreen() {
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
               <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
               <Choice label="統計數據" onPress={() => setPanel('stats')} selected={false} />
+              <Choice label="擲骰" onPress={openDice} selected={false} />
               <Choice label="新牌局" onPress={openFresh} selected={false} />
             </ThemedView>
           ) : null}
@@ -537,6 +547,22 @@ export default function SessionScreen() {
                   <RadarAxis label="防守" exact={row.defense} color={theme.text} track={theme.backgroundElement} />
                 </ThemedView>
               ))}
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+            </ThemedView>
+          ) : null}
+
+          {panel === 'dice' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>擲骰</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>{`${diceCount}`}</ThemedText>
+              <ThemedView style={styles.row}>
+                <Choice label="−" onPress={() => setDiceCount(clampDiceCount(diceCount - 1))} selected={false} />
+                <Choice label="擲骰" onPress={() => setDiceRoll(rollDice(diceCount))} selected={false} />
+                <Choice label="+" onPress={() => setDiceCount(clampDiceCount(diceCount + 1))} selected={false} />
+              </ThemedView>
+              {diceRoll ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>{`${diceRoll.total} ${diceRoll.seat}`}</ThemedText>
+              ) : null}
               <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
           ) : null}
