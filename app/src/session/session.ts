@@ -1,4 +1,4 @@
-import { formatAmount } from '../rules/setup.ts';
+import { formatAmount, missingHighFans } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
 import type { BoardState, DealerMark, Player, ProgressDisplay, Session, Wind } from './types.ts';
@@ -20,6 +20,7 @@ export function canStart(rules: RuleSetup, names: string[], dealerIndex: number 
   const count = seatCount(rules);
   if (names.length !== count) return false;
   if (names.some((name) => name.trim() === '')) return false;
+  if (missingHighFans(rules).length > 0) return false;
   if (!rules.trackDealer) return true;
   return dealerIndex !== null && dealerIndex >= 0 && dealerIndex < count;
 }

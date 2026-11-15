@@ -15,7 +15,7 @@ import {
   setPlayerFormat,
   setTrackDealer,
 } from '../rules/setup.ts';
-import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from './hand.ts';
+import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from './hand.ts';
 import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, undoLatest } from './session.ts';
 import type { Wind } from './types.ts';
 
@@ -452,11 +452,12 @@ describe('詐糊', () => {
     assert.equal(balance(next, '甲家'), '16384');
   });
 
-  it('does not score a three-player 詐糊 or an unrecorded fan', () => {
+  it('does not score a three-player 詐糊 or an empty fan above 13', () => {
     const three = startNamed(setPlayerFormat(createPresetDraft('3fan4-full'), 'three'), ['甲家', '乙家', '丙家']);
     assert.equal(previewWin(three, { winnerId: idOf(three, '甲家'), fan: 4, discarderId: null, falseWin: true }), null);
-    const session = four('custom');
-    assert.equal(previewWin(session, { winnerId: idOf(session, '甲家'), fan: 13, discarderId: null, falseWin: true }), null);
+    const started = four('custom');
+    const session = { ...started, rules: setFanRange(started.rules, 3, 14) };
+    assert.equal(previewWin(session, { winnerId: idOf(session, '甲家'), fan: 14, discarderId: null, falseWin: true }), null);
     const reserve = addReserve(wide51(), '戊家');
     const next = recordWin(reserve, { winnerId: idOf(reserve, '丁家'), fan: 13, discarderId: null, falseWin: true });
     assert.equal(balance(next, '戊家'), '0');
@@ -780,6 +781,27 @@ describe('undo of a confirmed win', () => {
     assert.equal(player(restored, '乙家').discards, 0);
     assert.equal(restored.handCount, 0);
     assert.deepEqual(restored.ledger, []);
+  });
+});
+
+describe('fan bounds', () => {
+  it('refuses a fan below 起糊 and caps a fan above 滿糊 at the 滿糊 amount', () => {
+    const session = four('custom');
+    const low = { winnerId: idOf(session, '丙家'), fan: 2, discarderId: idOf(session, '乙家') };
+    assert.equal(previewWin(session, low), null);
+    assert.equal(winRefusal(session.rules, [2]), '番數不足');
+    assert.equal(recordWin(session, low), session);
+
+    const high = { winnerId: idOf(session, '丙家'), fan: 14, discarderId: idOf(session, '乙家') };
+    const preview = previewWin(session, high);
+    assert.ok(preview);
+    assert.equal(preview.scoringFan, 8);
+    assert.equal(preview.ordinary, '128');
+    assert.equal(formatWinPreview(preview)[0], '按8番計');
+    const next = recordWin(session, high);
+    assert.equal(player(next, '丙家').fanSum, 8);
+    assert.equal(player(next, '乙家').discardFanSum, 8);
+    assert.equal(next.ledger.at(-1)?.label, '14番 食糊');
   });
 });
 

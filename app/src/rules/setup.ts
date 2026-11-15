@@ -54,6 +54,11 @@ export function setName(setup: RuleSetup, name: string): RuleSetup {
   return { ...setup, name };
 }
 
+/** Fans above 13 have no generated amount. Each of those cells must be typed before save or start. */
+export function missingHighFans(setup: RuleSetup): number[] {
+  return setup.rows.filter((row) => row.fan > 13 && !row.ordinary).map((row) => row.fan);
+}
+
 export function setPaymentMode(setup: RuleSetup, paymentMode: PaymentMode): RuleSetup {
   return { ...setup, paymentMode };
 }

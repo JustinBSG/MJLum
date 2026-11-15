@@ -18,6 +18,7 @@ import {
   setFanRange,
   setJackpotContribution,
   setJackpotEnabled,
+  missingHighFans,
   setMultiplier,
   setName,
   setOrdinary,
@@ -82,14 +83,21 @@ export default function EditRuleSetupScreen() {
     };
   }, [draftKey, id, kind, repo]);
 
+  function highFanError(setup: RuleSetup): boolean {
+    const missing = missingHighFans(setup);
+    if (missing.length === 0) return false;
+    setError(`請先填 ${missing.join('、')} 番嘅食糊分數`);
+    return true;
+  }
+
   async function useOnce() {
-    if (!setup) return;
+    if (!setup || highFanError(setup)) return;
     await repo.setActive(setup);
     router.back();
   }
 
   async function save() {
-    if (!setup) return;
+    if (!setup || highFanError(setup)) return;
     await repo.save(setup);
     await repo.setActive(setup);
     router.back();
