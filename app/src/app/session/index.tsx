@@ -1,12 +1,13 @@
 import { router, Stack, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
+import { Score } from '@/score/score';
 import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
@@ -14,6 +15,7 @@ import {
   hasPositiveBalance,
   settlementRows,
 } from '@/session/settlement';
+import { formatRate, rosterStatistics } from '@/session/statistics';
 import {
   addReserve,
   formatBalance,
@@ -29,7 +31,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | 'stats' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -384,6 +386,7 @@ export default function SessionScreen() {
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
               <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
+              <Choice label="統計數據" onPress={() => setPanel('stats')} selected={false} />
               <Choice label="新牌局" onPress={openFresh} selected={false} />
             </ThemedView>
           ) : null}
@@ -511,6 +514,28 @@ export default function SessionScreen() {
                 <ThemedText accessibilityLanguage={APP_LOCALE} key={row.playerId}>
                   {`${row.name} ${formatSettlementBalance(row.balance)}`}
                 </ThemedText>
+              ))}
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
+            </ThemedView>
+          ) : null}
+
+          {panel === 'stats' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>統計數據</ThemedText>
+              {rosterStatistics(session).map((row) => (
+                <ThemedView key={row.playerId} style={styles.player}>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{row.name}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`食糊 ${row.wins}  自摸 ${row.selfDraws}  出銃 ${row.discards}`}
+                  </ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{`自摸率 ${formatRate(row.selfDrawRate)}`}</ThemedText>
+                  {row.titles.length > 0 ? (
+                    <ThemedText accessibilityLanguage={APP_LOCALE}>{row.titles.join('  ')}</ThemedText>
+                  ) : null}
+                  <RadarAxis label="進攻" exact={row.attack} color={theme.text} track={theme.backgroundElement} />
+                  <RadarAxis label="牌力" exact={row.strength} color={theme.text} track={theme.backgroundElement} />
+                  <RadarAxis label="防守" exact={row.defense} color={theme.text} track={theme.backgroundElement} />
+                </ThemedView>
               ))}
               <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
@@ -648,6 +673,37 @@ function readFan(text: string): number | null {
   return Number.isSafeInteger(fan) ? fan : null;
 }
 
+function axisWidth(exact: string): `${number}%` {
+  const value = Score.fromString(exact);
+  const zero = Score.fromString('0');
+  const hundred = Score.fromString('100');
+  const clamped =
+    value.compare(zero) < 0 ? zero : value.compare(hundred) > 0 ? hundred : value;
+  const percent = Number(clamped.numerator) / Number(clamped.denominator);
+  return `${percent}%`;
+}
+
+function RadarAxis({
+  label,
+  exact,
+  color,
+  track,
+}: {
+  label: string;
+  exact: string;
+  color: string;
+  track: string;
+}) {
+  return (
+    <ThemedView style={styles.axis}>
+      <ThemedText accessibilityLanguage={APP_LOCALE}>{`${label} ${formatRate(exact)}`}</ThemedText>
+      <View style={[styles.track, { backgroundColor: track }]}>
+        <View style={[styles.fill, { width: axisWidth(exact), backgroundColor: color }]} />
+      </View>
+    </ThemedView>
+  );
+}
+
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable
@@ -667,6 +723,9 @@ const styles = StyleSheet.create({
   player: { gap: Spacing.half },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   panel: { gap: Spacing.two },
+  axis: { gap: Spacing.half },
+  track: { height: 8, overflow: 'hidden' },
+  fill: { height: 8 },
   input: { minHeight: 48, borderWidth: 1, paddingHorizontal: Spacing.two, fontSize: 18 },
   choice: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.two },
 });
