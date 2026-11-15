@@ -9,15 +9,16 @@ export type SettlementRow = {
 };
 
 /**
- * 找數 rows: every roster player, including a zero net and someone who has left a seat.
- * No transfer list. A non-zero pool is still unallocated.
+ * 找數 rows: each non-zero net, including someone who has left a seat.
+ * A zero is omitted. No transfer list. A non-zero pool stays unallocated.
  */
 export function settlementRows(session: Session): SettlementRow[] {
-  return session.players.map((player) => ({
-    playerId: player.id,
-    name: player.name,
-    balance: player.balance,
-  }));
+  const zero = Score.fromString('0');
+  return session.players.flatMap((player) =>
+    Score.fromString(player.balance).equals(zero)
+      ? []
+      : [{ playerId: player.id, name: player.name, balance: player.balance }],
+  );
 }
 
 export function poolUnallocated(session: Session): boolean {

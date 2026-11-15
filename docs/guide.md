@@ -498,7 +498,7 @@ This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a r
 
 The transfer list above is what the local reference demonstrated. It is not a 麻雀諗 requirement.
 
-**麻雀諗 product decision:** settlement (找數) shows every roster player’s net, including a zero and anyone who has left a seat, plus the Jackpot remainder. A non-zero pool is marked 尚未分配. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
+**麻雀諗 product decision:** settlement (找數) shows each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配 and is not treated as another player. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
 
 Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 

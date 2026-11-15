@@ -176,7 +176,7 @@ An empty-session card for d showed 0/0/0, 0 平均番數, 0% rates, 0 平均出�
 
 ## 17. Settlement (找數)
 
-**麻雀諗 product decision:** open 找數 and show every roster player’s net, including a zero and anyone who has left a seat, plus the Jackpot remainder. A non-zero pool is marked 尚未分配. The user finishes payment themselves. Do not generate a transfer list, payment instructions, or a currency label.
+**麻雀諗 product decision:** open 找數 and show each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配. The user finishes payment themselves. Do not generate a transfer list, payment instructions, or a currency label.
 
 The reference’s own demonstrated transfer list, kept only as reference context, is in `docs/guide.md`. How a Jackpot pool would appear in this result view remains unspecified. This view is in the app, not on a second-release external display.
 
