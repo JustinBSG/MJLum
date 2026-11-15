@@ -15,8 +15,8 @@ import {
   setPlayerFormat,
   setTrackDealer,
 } from '../rules/setup.ts';
-import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from './hand.ts';
-import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, undoLatest } from './session.ts';
+import { eligibleJackpotIds, formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from './hand.ts';
+import { addReserve, commitBoard, formatDealerBadge, formatWind, startSession, substitute, undoLatest } from './session.ts';
 import type { Wind } from './types.ts';
 
 const startedAt = '2026-11-15T02:00:00.000Z';
@@ -753,19 +753,30 @@ describe('平分Jackpot', () => {
     assert.equal(balance(restored, '丙家'), '-50');
   });
 
-  it('does not pay a reserve or a subset of the seated players', () => {
+  it('splits the whole pool across a chosen subset and leaves a never-seated reserve out', () => {
     const rules = setJackpotEnabled(createCustomDraft(), true);
     const session = withPool(withBalances(addReserve(four('custom', rules), '戊家'), { 戊家: '7' }), '200');
     const seated = seatedIds(session);
-    const next = splitJackpot(session, seated);
-    assert.equal(balance(next, '戊家'), '7');
-    assert.equal(balance(next, '甲家'), '50');
-    assert.equal(splitJackpot(session, seated.slice(0, 3)), session);
+    const reserveId = idOf(session, '戊家');
+    assert.equal(eligibleJackpotIds(session).includes(reserveId), false);
+    assert.equal(splitJackpot(session, [reserveId, ...seated.slice(0, 2)]), session);
+    const pair = splitJackpot(session, seated.slice(0, 2));
+    assert.equal(balance(pair, '甲家'), '100');
+    assert.equal(balance(pair, '乙家'), '100');
+    assert.equal(balance(pair, '丙家'), '0');
+    assert.equal(balance(pair, '戊家'), '7');
+    assert.equal(pair.pool, '0');
     const three = withPool(
       startNamed(setJackpotEnabled(setPlayerFormat(createCustomDraft(), 'three'), true), ['甲家', '乙家', '丙家']),
       '200',
     );
-    assert.equal(splitJackpot(three, seatedIds(three)), three);
+    const shared = splitJackpot(three, seatedIds(three));
+    assert.equal(balance(shared, '甲家'), '200/3');
+    const swapped = substitute(session, reserveId, 0);
+    assert.equal(eligibleJackpotIds(swapped).includes(idOf(swapped, '甲家')), true);
+    const toLeaver = splitJackpot(swapped, [idOf(swapped, '甲家')]);
+    assert.equal(balance(toLeaver, '甲家'), '200');
+    assert.equal(toLeaver.pool, '0');
   });
 });
 
