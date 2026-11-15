@@ -453,7 +453,7 @@ The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as vi
 
 **麻雀諗 product decision (16 November 2026).** 半銃 combined with 包自摸 or 包輸 keeps the full 包 amount. The named payer pays mS or S, and the other players pay 0. There is no extra 半銃 share.
 
-**Still refused:** either 包 toggle combined with 一炮多響.
+**麻雀諗 product decision (16 November 2026).** 包自摸 or 包輸 combined with 一炮多響 stays out of this release. A normal 全銃 or 半銃 一炮多響 is scored, and a single-winner 包 hand is scored. Opening 一炮多響 while 包付 is on does not clear 包付 or record an ordinary multi-win. The screen asks for 包付 to be turned off first. Inside 一炮多響, both 包 controls stay off and the screen says 一炮多響未支援包自摸或包輸.
 
 ### Undo
 
@@ -647,8 +647,7 @@ The technical approach for building the iOS and Android apps is Expo plus librar
 
 Still open:
 
-1. 包自摸 or 包輸 combined with 一炮多響. Each single case is scored; the mix is refused.
-2. 相沖 has no automatic payout. A named 調分 changes one balance only.
-3. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+1. 相沖 has no automatic payout. A named 調分 changes one balance only.
+2. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
