@@ -66,6 +66,13 @@ export default function HomeScreen() {
         style={styles.button}>
         <ThemedText>玩法設定</ThemedText>
       </Pressable>
+      <Pressable
+        accessibilityLanguage={APP_LOCALE}
+        accessibilityRole="button"
+        onPress={() => router.push('/history' as Href)}
+        style={styles.button}>
+        <ThemedText>牌局紀錄</ThemedText>
+      </Pressable>
     </ThemedView>
   );
 }

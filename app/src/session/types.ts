@@ -53,11 +53,35 @@ export type BoardState = {
   pool: string;
 };
 
+export type SessionAction =
+  | {
+      type: 'win';
+      input: {
+        winnerId: string;
+        fan: number;
+        discarderId: string | null;
+        also?: { playerId: string; fan: number }[];
+        falseWin?: boolean;
+        falseWinAsSelfDraw?: boolean;
+        discarderPaysSelfDraw?: boolean;
+        discarderPaysLoss?: boolean;
+        takeJackpot?: boolean;
+      };
+    }
+  | { type: 'draw' }
+  | { type: 'rules'; name: string };
+
 export type LedgerEntry = {
   id: string;
   label: string;
   before: BoardState;
+  /** Present on hands recorded after this field existed. Older rows cannot be recomputed. */
+  action?: SessionAction;
 };
+
+export type RedoEntry = LedgerEntry & { after: BoardState };
+
+export type SessionStatus = 'playing' | 'paused' | 'completed' | 'void';
 
 export type Session = BoardState & {
   id: string;
@@ -65,8 +89,12 @@ export type Session = BoardState & {
   /** Rules that replace `rules` on the next confirmed hand. Earlier hands stay on the old rules. */
   pendingRules?: RuleSetup;
   startedAt: string;
+  /** Shown in the history list. The start time is used when this is empty. */
+  title?: string;
+  status: SessionStatus;
   progressDisplay: ProgressDisplay;
   ledger: LedgerEntry[];
+  redo: RedoEntry[];
   /** Pool moved out of this session and waiting for the next one to claim it. */
   outboundPool?: string;
 };

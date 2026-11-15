@@ -190,7 +190,7 @@ export function recordWin(session: Session, input: WinInput): Session {
     seatWind: dealer.seatWind,
     handCount: ready.handCount + 1,
     pool: preview.jackpot === undefined ? ready.pool : '0',
-  });
+  }, { type: 'win', input });
 }
 
 /**
@@ -215,7 +215,7 @@ export function recordDraw(session: Session): Session {
     seatWind: dealer.seatWind,
     handCount: ready.handCount + 1,
     pool: contribution.pool,
-  });
+  }, { type: 'draw' });
 }
 
 /** Each seated player pays the configured contribution. A player who has left the table does not. */

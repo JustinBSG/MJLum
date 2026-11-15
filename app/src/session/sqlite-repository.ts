@@ -46,5 +46,8 @@ export function createSqliteSessionRepository(db: SQLiteDatabase): SessionReposi
         serializeSession(session),
       );
     },
+    async deleteArchived(id: string) {
+      await db.runAsync('DELETE FROM archived_session WHERE id = ?', id);
+    },
   };
 }

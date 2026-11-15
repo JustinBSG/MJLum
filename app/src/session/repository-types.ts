@@ -7,4 +7,5 @@ export type SessionRepository = {
   archiveOpen(): Promise<void>;
   listArchived(): Promise<Session[]>;
   saveArchived(session: Session): Promise<void>;
+  deleteArchived(id: string): Promise<void>;
 };

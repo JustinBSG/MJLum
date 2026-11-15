@@ -1,7 +1,7 @@
 import { formatAmount, missingHighFans } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
-import type { BoardState, DealerMark, Player, ProgressDisplay, Session, Wind } from './types.ts';
+import type { BoardState, DealerMark, Player, ProgressDisplay, Session, SessionAction, Wind } from './types.ts';
 
 const AVATARS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸', '子', '丑', '寅', '卯'] as const;
 
@@ -51,6 +51,8 @@ export function startSession(input: {
     handCount: 0,
     pool: '0',
     ledger: [],
+    status: 'playing',
+    redo: [],
   };
 }
 
@@ -64,7 +66,7 @@ export function stageRules(session: Session, rules: RuleSetup): Session {
 export function applyPendingRules(session: Session): Session {
   if (!session.pendingRules) return session;
   const rules = session.pendingRules;
-  const noted = commitBoard(session, `玩法 ${rules.name}`, boardOf(session));
+  const noted = commitBoard(session, `玩法 ${rules.name}`, boardOf(session), { type: 'rules', name: rules.name });
   const { pendingRules: _pending, ...rest } = noted;
   return { ...rest, rules };
 }
@@ -148,6 +150,8 @@ export function sessionFromRoster(input: {
     handCount: 0,
     pool: '0',
     ledger: [],
+    status: 'playing',
+    redo: [],
   };
 }
 
@@ -309,12 +313,16 @@ export function setProgressDisplay(session: Session, progressDisplay: ProgressDi
   return { ...session, progressDisplay };
 }
 
-/** Records a confirmed board. Later features pass the calculated result. This function does not score a hand. */
-export function commitBoard(session: Session, label: string, next: BoardState): Session {
+/** Records a confirmed board. A new entry drops the redo branch. */
+export function commitBoard(session: Session, label: string, next: BoardState, action?: SessionAction): Session {
   return {
     ...session,
     ...cloneBoard(next),
-    ledger: [...session.ledger, { id: createId('entry'), label, before: boardOf(session) }],
+    redo: [],
+    ledger: [
+      ...session.ledger,
+      { id: createId('entry'), label, before: boardOf(session), ...(action ? { action } : {}) },
+    ],
   };
 }
 
@@ -325,7 +333,57 @@ export function undoLatest(session: Session): Session {
     ...session,
     ...cloneBoard(latest.before),
     ledger: session.ledger.slice(0, -1),
+    redo: [...session.redo, { ...latest, after: boardOf(session) }],
   };
+}
+
+export function redoLatest(session: Session): Session {
+  const latest = session.redo.at(-1);
+  if (!latest) return session;
+  const { after, ...entry } = latest;
+  return {
+    ...session,
+    ...cloneBoard(after),
+    ledger: [...session.ledger, entry],
+    redo: session.redo.slice(0, -1),
+  };
+}
+
+export function pauseSession(session: Session): Session {
+  if (session.status !== 'playing') return session;
+  return { ...session, status: 'paused' };
+}
+
+export function resumeSession(session: Session): Session {
+  if (session.status === 'void') return session;
+  return { ...session, status: 'playing' };
+}
+
+/** Completes the session only after the pool is empty. It does not add a hand. */
+export function completeSession(session: Session): Session {
+  if (session.status === 'void') return session;
+  if (!Score.fromString(session.pool).equals(Score.fromString('0'))) return session;
+  return { ...session, status: 'completed' };
+}
+
+export function voidSession(session: Session): Session {
+  return { ...session, status: 'void' };
+}
+
+export function setSessionTitle(session: Session, title: string): Session {
+  const trimmed = title.trim();
+  if (trimmed === '') {
+    const { title: _title, ...rest } = session;
+    return rest;
+  }
+  return { ...session, title: trimmed };
+}
+
+export function sessionStatusLabel(status: Session['status']): string {
+  if (status === 'paused') return '暫停';
+  if (status === 'completed') return '完成';
+  if (status === 'void') return '作廢';
+  return '進行中';
 }
 
 export function seatedPlayerIds(session: Session): string[] {
