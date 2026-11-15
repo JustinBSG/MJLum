@@ -53,6 +53,92 @@ export function startSession(input: {
   };
 }
 
+/** A new session that keeps the same people, seats, and rules, with scores and records cleared. */
+export function reopenSession(session: Session, startedAt: string): Session {
+  return sessionFromRoster({
+    rules: session.rules,
+    players: session.players.map(clearRecord),
+    seatPlayerIds: session.seats.flatMap((seat) => (seat.playerId ? [seat.playerId] : [])),
+    dealerIndex: dealerSeatIndex(session),
+    startedAt,
+  });
+}
+
+export type KeptPlayer = Player;
+
+/** People carried into the next session. Records are already cleared. */
+export function blankRoster(session: Session): { players: Player[]; seatedIds: string[] } {
+  return {
+    players: session.players.map(clearRecord),
+    seatedIds: session.seats.flatMap((seat) => (seat.playerId ? [seat.playerId] : [])),
+  };
+}
+
+export function namedPlayer(name: string, index: number): Player {
+  return createPlayer(name, index);
+}
+
+export function sessionFromRoster(input: {
+  rules: RuleSetup;
+  players: Player[];
+  seatPlayerIds: string[];
+  dealerIndex: number | null;
+  startedAt: string;
+}): Session {
+  const count = seatCount(input.rules);
+  const seats = input.seatPlayerIds;
+  if (seats.length !== count || new Set(seats).size !== count) {
+    throw new Error('A session needs one player in every seat.');
+  }
+  if (seats.some((id) => !input.players.some((player) => player.id === id))) {
+    throw new Error('A session needs one player in every seat.');
+  }
+  if (input.players.some((player) => player.name.trim() === '')) {
+    throw new Error('A session needs a name in every seat.');
+  }
+  const track = input.rules.trackDealer;
+  const dealerIndex = track ? input.dealerIndex : null;
+  if (track && (dealerIndex === null || dealerIndex < 0 || dealerIndex >= count)) {
+    throw new Error('A session needs a dealer.');
+  }
+  return {
+    id: createId('session'),
+    rules: input.rules,
+    startedAt: input.startedAt,
+    progressDisplay: 'wind',
+    players: input.players.map((player) => ({ ...player })),
+    seats: seats.map((playerId, index) => ({ index, playerId })),
+    dealerId: dealerIndex === null ? null : (seats[dealerIndex] ?? null),
+    dealerMark: { kind: 'plain' },
+    roundWind: 'east',
+    seatWind: 'east',
+    handCount: 0,
+    pool: '0',
+    ledger: [],
+  };
+}
+
+function dealerSeatIndex(session: Session): number | null {
+  if (!session.rules.trackDealer) return null;
+  const index = session.seats.findIndex((seat) => seat.playerId === session.dealerId);
+  return index >= 0 ? index : 0;
+}
+
+function clearRecord(player: Player): Player {
+  return {
+    ...player,
+    balance: '0',
+    wins: 0,
+    selfDraws: 0,
+    discards: 0,
+    hands: 0,
+    fanSum: 0,
+    discardFanSum: 0,
+    dealerStreak: 0,
+    bestDealerStreak: 0,
+  };
+}
+
 export function addReserve(session: Session, name: string): Session {
   const trimmed = name.trim();
   if (trimmed === '') return session;
@@ -83,9 +169,15 @@ export function substitute(session: Session, playerId: string, seatIndex: number
  * Manual 莊家設定.
  * 重置連莊數 clears 連N on the same dealer. 冧N is left as it is.
  * Choosing another seated player shows a plain 莊.
- * 重新開始計算圈風 is not applied: its on-state was not recorded.
+ * 重新開始計算圈風 on sets 東圈東風. Off leaves 圈風.
+ * Neither choice adds a 留莊 record. Resetting 連莊數 sets that dealer's current streak to 0.
  */
-export function selectDealer(session: Session, playerId: string, resetConsecutive: boolean): Session {
+export function selectDealer(
+  session: Session,
+  playerId: string,
+  resetConsecutive: boolean,
+  restartWind: boolean,
+): Session {
   if (!session.rules.trackDealer) return session;
   if (!session.seats.some((seat) => seat.playerId === playerId)) return session;
   const same = session.dealerId === playerId;
@@ -94,12 +186,30 @@ export function selectDealer(session: Session, playerId: string, resetConsecutiv
     dealerMark =
       resetConsecutive && session.dealerMark.kind === 'consecutive' ? { kind: 'plain' } : session.dealerMark;
   }
-  if (same && sameMark(dealerMark, session.dealerMark)) return session;
+  const roundWind = restartWind ? 'east' : session.roundWind;
+  const seatWind = restartWind ? 'east' : session.seatWind;
+  const players = session.players.map((player) => {
+    if (player.id === playerId) {
+      return !same || resetConsecutive ? { ...player, dealerStreak: 0 } : player;
+    }
+    if (!same && player.id === session.dealerId) return { ...player, dealerStreak: 0 };
+    return player;
+  });
+  const unchanged =
+    same &&
+    sameMark(dealerMark, session.dealerMark) &&
+    roundWind === session.roundWind &&
+    seatWind === session.seatWind &&
+    players.every((player, index) => player.dealerStreak === session.players[index]?.dealerStreak);
+  if (unchanged) return session;
   const name = session.players.find((player) => player.id === playerId)?.name ?? '';
   return commitBoard(session, `莊家 ${name}`, {
     ...boardOf(session),
+    players,
     dealerId: playerId,
     dealerMark,
+    roundWind,
+    seatWind,
   });
 }
 
@@ -278,6 +388,11 @@ function createPlayer(name: string, index: number): Player {
     wins: 0,
     selfDraws: 0,
     discards: 0,
+    hands: 0,
+    fanSum: 0,
+    discardFanSum: 0,
+    dealerStreak: 0,
+    bestDealerStreak: 0,
   };
 }
 

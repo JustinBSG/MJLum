@@ -516,28 +516,25 @@ A later session’s board was a −64, b 132, c 68, d −136, 南圈北風, b �
 
 In those cards, 自摸率 matched 自摸/食糊 where 食糊 > 0 (c 1/3, d 1/1). An empty-session card for d showed 0/0/0, 0 平均番數, 0% rates, 0 平均出銃番數, titles 冧莊王 and 陪跑員, and a radar labelled 進攻.
 
-**麻雀諗 product decision (14 November 2026), derived from the meaning of each title, not established as reference fact.** Titles remain not automatically exclusive, as already demonstrated. Counts and 平均番數 are the session figures already shown in statistics; how 平均番數 is computed is still unspecified and is not invented here.
+**麻雀諗 product decision (15 November 2026).** Counts stay on the player, not the seat. H is a completed normal hand while seated, including a normal 流局, and excludes 詐糊, undo, a cancelled entry, a pure balance change, a pool payout, and a seat change. W includes 自摸. Z includes 出銃者包自摸, and that payer does not gain D. One 一炮多響 adds 1 to D and adds every winner’s scoring fan to L. F and L use the scoring fan. Rates are 自摸率 100×Z/W, 食糊率 100×W/H, 出銃率 100×D/H, 平均番數 F/W, and 平均出銃番數 L/D. A zero denominator is shown as 「—」. Display uses two-decimal half-up from the raw counts: floor(100x+0.5)/100, with the count fraction beside a percent, for example 33.33%（1/3）. 平均出銃番數 is labelled 多響番數合計.
+
+Titles remain not automatically exclusive.
 
 - **食糊王:** every player whose 食糊 count equals the highest 食糊 count, provided that highest count is at least 1. If every 食糊 count is 0, no one receives 食糊王.
 - **自摸王:** every player whose 自摸 count equals the highest 自摸 count, provided that highest count is at least 1. If every 自摸 count is 0, no one receives 自摸王.
 - **出銃王:** every player whose 出銃 count equals the highest 出銃 count, provided that highest count is at least 1. If every 出銃 count is 0, no one receives 出銃王. Ties share the title, as in the demonstrated list where c and d both had 6 出銃 and both showed 出銃王.
-- **大牌王:** every player who has at least one 食糊 and whose 平均番數 is the highest among such players.
-- **細牌王:** every player who has at least one 食糊 and whose 平均番數 is the lowest among such players. The same player may hold both 大牌王 and 細牌王 when those averages are equal (for example only one player has a win, or all such averages are tied).
-- **陪跑員:** every player who holds none of 食糊王, 自摸王, 出銃王, or 大牌王. Holding 細牌王 does not prevent 陪跑員, as demonstrated when a held both. If every player holds at least one of those four titles, no one receives 陪跑員.
+- **大牌王:** highest unrounded F/W among players with at least 3 食糊.
+- **細牌王:** lowest unrounded F/W among those same players. If fewer than two players are eligible, or every eligible average is equal, neither title is awarded.
+- **冧莊王:** longest automatic 留莊 of at least 3. The count starts at 0. A dealer win, including 一炮多響 that includes the dealer, or a 流局 while 流局時過莊 is off, adds 1. 過莊 returns it to 0. A manual dealer change does not add to the record. A non-dealer 詐糊 that leaves the dealer in place adds 1 and does not add W.
+- **陪跑員:** every player who holds none of 食糊王, 自摸王, 出銃王, or 大牌王. Holding 細牌王 or 冧莊王 does not prevent 陪跑員. If every player holds at least one of those four titles, no one receives 陪跑員.
 
 The demonstrated title list is consistent with this rule. Other players’ 平均番數 were not shown, so that screen does not independently prove the 大牌王 / 細牌王 averages.
 
-**麻雀諗 product decision (14 November 2026), derived from the meaning of the three axes, not established as reference fact.** The radar is calculated from the already-displayed session rates. It does not invent rate denominators; those denominators remain unspecified, as recorded above. Each axis uses a 0–100 scale matching the percentage rates, with no extra weights:
-
-- **進攻** = 食糊率
-- **牌力** = 自摸率
-- **防守** = 100 − 出銃率
-
-Use the displayed rates as they are. If a rate is not yet available, that axis is 0.
+**麻雀諗 product decision (15 November 2026).** Each radar axis is 0–100 with no extra weights. 進攻 = 100×W/H. 防守 = 100×(1−D/H). 牌力 = 100×clamp((F/W−起糊)/(滿糊−起糊), 0, 1). H = 0 shows 未有資料 for 進攻 and 防守. W = 0 or 起糊 = 滿糊 shows 未有資料 for 牌力. A missing axis is not drawn as 0.
 
 **麻雀諗 product decision:** the dice utility is only a roll so players can see where they start collecting tiles from the four walls (bridges) in real life. Minimum 1 die, maximum 9 dice. It does not assign the dealer or write scores. This purpose sentence is not on-screen copy from the reference; the demonstrated UI is recorded above.
 
-**Unspecified:** exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, the 平均番數 formula, how 冧莊王 is awarded, and any fan-help content beyond the short popup recorded above.
+**Unspecified:** fan-help content beyond the short popup recorded above. Separate money attribution for a substitute, while the playing statistics stay with that person, is decided and not yet a control.
 
 ## Sharing
 
@@ -572,7 +569,7 @@ After configuration, the setup is confirmed. An edited-preset path may offer to 
 |---|---|---|
 | Who is dealer | Select the current dealer | No default stated (chosen by the user) |
 | 重置連莊數 | Reset consecutive-dealer count when manually setting the dealer | Shown on in the inspected reference dialog; downstream count behavior was not independently tested |
-| 重新開始計算圈風 | Restart circle/wind counting when manually setting the dealer | Shown off in the inspected reference dialog; on-state is unspecified |
+| 重新開始計算圈風 | Restart circle/wind counting when manually setting the dealer | Off leaves 圈風. On sets 東圈東風 immediately and can be undone. The change does not add a 留莊 record. |
 | Progress display: 圈風 / 局數 | Display choice for session progress (not a score change) | Both options exist; alternative main-table formatting is unspecified |
 | History emphasis: events / scores / combined | What the ledger emphasizes | No default stated |
 | History order | Ledger order, forward or reverse | No default stated |
@@ -615,7 +612,9 @@ Resolved, 14 November 2026, and recorded in the sections above (kept here only a
 - 流局時過莊 off: 莊 and 圈風 stay put, and 冧X increments.
 - Opened 半辣上 tables (3番4, 二五雞, 五一, 一二蚊 including 0起/13滿) and further 3番4辣辣上 rows.
 - Demonstrated three-player 3番4辣辣上 全銃 ×1.33 rows and hands.
-- Dice UI and 1–9 limits; 番數? full text; statistics fields including 平均番數 and rates (denominators still unspecified).
+- Dice UI and 1–9 limits; 番數? full text; statistics fields including 平均番數 and rates.
+- Statistic formulas, denominators, two-decimal half-up display, 一炮多響 aggregation, and 冧莊王 (15 November 2026).
+- 新牌局 reuse switches prefill the next session and do not block it. Both on keeps people, seats, and rules. Players only returns to 玩法設定 with those people. Rules only opens empty seats with the same rules. Both off opens 玩法設定 with empty seats. Scores, statistics, history, 連莊, and 圈風 reset. A non-zero Jackpot pool must be allocated or the old session kept; it is not carried silently. A change of seat count asks who sits, and anyone not chosen stays a reserve (15 November 2026).
 - Settlement transfer-choice is not needed (麻雀諗 product decision).
 
 Resolved as already recorded in [`docs/development.md`](development.md) and [`docs/product.md`](product.md) (kept here only as a pointer, 15 November 2026):
@@ -627,18 +626,16 @@ Still open:
 1. 半銃 interaction with three-player play, and combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated.
 2. Three-player tables and payouts other than the demonstrated 3番4辣辣上 全銃 ×1.33 rows and hands, including the unopened 3番4 半辣上（三人） table beyond its list-caption min/cap of 3/24.
 3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將); and the unopened 一二蚊辣辣上 table beyond its list-caption min/cap.
-4. Further 詐糊 effects on statistics beyond the dealer 過莊 already shown.
-5. Confirmed 平分Jackpot among a subset of 在位玩家; and how a Jackpot pool would appear in the 麻雀諗 找數 result view.
-6. What happens if a fan is typed below 起糊 or above 滿糊; and the exact 麻雀諗 progression for 番 above 13 (money must be calculated, but the sequence must not be invented).
-7. The complete dealer / 連莊 progression algorithm for every remaining edge case, including the exact 連莊 counting convention wherever it was not demonstrated.
-8. Saved-rules rename, name-length, and duplicate-name behaviour; mid-session rule edits. (Delete of a saved custom setup was demonstrated.)
-9. Invalid-entry handling and numeric validation.
-10. Roster limits, and editing or deleting an existing player.
-11. Undo depth, redo, and editing or deleting an older history row.
-12. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
-13. On-state behaviour of new-session reuse options (retain players and/or rules).
-14. Exact statistic formulas, rate denominators, rounding, substitution treatment, multiple-winner aggregation, the 平均番數 formula, and how 冧莊王 is awarded. (Title awards, the radar-chart mapping, dice min/max and purpose, and the 番數? text are now recorded.)
-15. Special abortive-hand types or reason codes beyond the demonstrated 流局.
-16. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+4. Confirmed 平分Jackpot among a subset of 在位玩家; and how a Jackpot pool would appear in the 麻雀諗 找數 result view.
+5. What happens if a fan is typed below 起糊 or above 滿糊; and the exact 麻雀諗 progression for 番 above 13 (money must be calculated, but the sequence must not be invented).
+6. The complete dealer / 連莊 progression algorithm for every remaining edge case, including the exact 連莊 counting convention wherever it was not demonstrated. 重新開始計算圈風 on now sets 東圈東風.
+7. Saved-rules rename, name-length, and duplicate-name behaviour; mid-session rule edits. (Delete of a saved custom setup was demonstrated.)
+8. Invalid-entry handling and numeric validation.
+9. Roster limits, and editing or deleting an existing player.
+10. Undo depth, redo, and editing or deleting an older history row.
+11. How past sessions are browsed or resumed while still keeping all local history; session naming; explicit pause / complete / discard if wanted.
+12. Special abortive-hand types or reason codes beyond the demonstrated 流局.
+13. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+14. Separate money attribution for a substitute (“入原玩家帳”) while the playing statistics stay with the substitute. The recorded statistics follow the person who played.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.

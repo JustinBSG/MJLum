@@ -8,7 +8,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
+import { useRuleRepository } from '@/rules/repository';
 import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
+import { Score } from '@/score/score';
 import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
@@ -16,7 +18,8 @@ import {
   hasPositiveBalance,
   settlementRows,
 } from '@/session/settlement';
-import { formatRate, rosterStatistics } from '@/session/statistics';
+import { clearRoster, stageRoster } from '@/session/pending-roster';
+import { formatAverage, formatCountRate, rosterStatistics } from '@/session/statistics';
 import { clampDiceCount, MIN_DICE, rollDice, type DiceRoll } from '@/session/dice';
 import { FAN_HELP_BODY, FAN_HELP_TITLE } from '@/session/fan-help';
 import {
@@ -26,6 +29,7 @@ import {
   formatStartDate,
   formatWind,
   ledgerLines,
+  reopenSession,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
@@ -41,6 +45,7 @@ type Payer = 'self-draw' | string | null;
 export default function SessionScreen() {
   const theme = useTheme();
   const repo = useSessionRepository();
+  const rulesRepo = useRuleRepository();
   const [session, setSession] = useState<Session | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
   const [reserveName, setReserveName] = useState('');
@@ -51,6 +56,7 @@ export default function SessionScreen() {
   const [restartWind, setRestartWind] = useState(false);
   const [reusePlayers, setReusePlayers] = useState(false);
   const [reuseRules, setReuseRules] = useState(false);
+  const [freshNotice, setFreshNotice] = useState<string | null>(null);
   const [direction, setDirection] = useState<'forward' | 'reverse'>('forward');
   const [emphasis, setEmphasis] = useState<LedgerEmphasis>('events');
   const [winnerId, setWinnerId] = useState<string | null>(null);
@@ -126,7 +132,7 @@ export default function SessionScreen() {
 
   async function confirmDealer() {
     if (!session || !dealerId) return;
-    await persist(selectDealer(session, dealerId, resetConsecutive));
+    await persist(selectDealer(session, dealerId, resetConsecutive, restartWind));
     setPanel(null);
   }
 
@@ -143,11 +149,34 @@ export default function SessionScreen() {
   }
 
   async function confirmFresh() {
-    if (reusePlayers || reuseRules) return;
+    if (!session) return;
+    if (!Score.fromString(session.pool).equals(Score.fromString('0'))) {
+      setFreshNotice('彩池尚未分配。請先分配、明確轉入新局，或取消以繼續舊局。');
+      return;
+    }
+    setFreshNotice(null);
+    if (reusePlayers && reuseRules) {
+      const next = reopenSession(session, new Date().toISOString());
+      await repo.archiveOpen();
+      await repo.saveOpen(next);
+      setSession(next);
+      setPanel(null);
+      return;
+    }
+    if (reusePlayers) {
+      stageRoster(session);
+      await repo.archiveOpen();
+      setSession(null);
+      setPanel(null);
+      router.replace('/rules' as Href);
+      return;
+    }
+    clearRoster();
+    if (reuseRules) await rulesRepo.setActive(session.rules);
     await repo.archiveOpen();
     setSession(null);
     setPanel(null);
-    router.replace('/rules' as Href);
+    router.replace((reuseRules ? '/session/seat' : '/rules') as Href);
   }
 
   function openDealer() {
@@ -609,9 +638,21 @@ export default function SessionScreen() {
                 <ThemedView key={row.playerId} style={styles.player}>
                   <ThemedText accessibilityLanguage={APP_LOCALE}>{row.name}</ThemedText>
                   <ThemedText accessibilityLanguage={APP_LOCALE}>
-                    {`食糊 ${row.wins}  自摸 ${row.selfDraws}  出銃 ${row.discards}`}
+                    {`食糊 ${row.wins}  自摸 ${row.selfDraws}  出銃 ${row.discards}  手數 ${row.hands}`}
                   </ThemedText>
-                  <ThemedText accessibilityLanguage={APP_LOCALE}>{`自摸率 ${formatRate(row.selfDrawRate)}`}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`自摸率 ${formatCountRate(row.selfDrawRate, row.selfDraws, row.wins)}`}
+                  </ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`食糊率 ${formatCountRate(row.winRate, row.wins, row.hands)}`}
+                  </ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`出銃率 ${formatCountRate(row.discardRate, row.discards, row.hands)}`}
+                  </ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>{`平均番數 ${formatAverage(row.averageFan)}`}</ThemedText>
+                  <ThemedText accessibilityLanguage={APP_LOCALE}>
+                    {`平均出銃番數 ${formatAverage(row.averageDiscardFan)}  多響番數合計`}
+                  </ThemedText>
                   {row.titles.length > 0 ? (
                     <ThemedText accessibilityLanguage={APP_LOCALE}>{row.titles.join('  ')}</ThemedText>
                   ) : null}
@@ -737,6 +778,7 @@ export default function SessionScreen() {
           {panel === 'fresh' ? (
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>新牌局</ThemedText>
+              {freshNotice ? <ThemedText accessibilityLanguage={APP_LOCALE}>{freshNotice}</ThemedText> : null}
               <Choice
                 label={`沿用現有玩家 ${reusePlayers ? '開' : '關'}`}
                 onPress={() => setReusePlayers((value) => !value)}

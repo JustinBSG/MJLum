@@ -23,9 +23,9 @@ export function RadarChart({
   color,
   track,
 }: {
-  attack: string;
-  strength: string;
-  defense: string;
+  attack: string | null;
+  strength: string | null;
+  defense: string | null;
   color: string;
   track: string;
 }) {
@@ -55,8 +55,8 @@ export function RadarChart({
           <ThemedText
             accessibilityLanguage={APP_LOCALE}
             key={axis.key}
-            style={[styles.label, { left: point.x - 48, top: point.y - 10 }]}>
-            {`${axis.label} ${formatRate(values[axis.key])}`}
+            style={[styles.label, { left: point.x - 60, top: point.y - 10 }]}>
+            {axisCaption(axis.label, values[axis.key])}
           </ThemedText>
         );
       })}
@@ -71,8 +71,13 @@ function spot(angle: number, ratio: number): { x: number; y: number } {
   };
 }
 
-/** Pixel radius only. The stored rate stays an exact string. */
-function unit(exact: string): number {
+function axisCaption(label: string, exact: string | null): string {
+  return exact === null ? `${label} 未有資料` : `${label} ${formatRate(exact)}`;
+}
+
+/** Pixel radius only. The stored rate stays an exact string. A missing axis sits at the centre. */
+function unit(exact: string | null): number {
+  if (exact === null) return 0;
   const value = Score.fromString(exact);
   const zero = Score.fromString('0');
   const hundred = Score.fromString('100');
@@ -82,5 +87,5 @@ function unit(exact: string): number {
 
 const styles = StyleSheet.create({
   chart: { width: SIZE, height: SIZE },
-  label: { position: 'absolute', width: 96, textAlign: 'center' },
+  label: { position: 'absolute', width: 120, textAlign: 'center' },
 });

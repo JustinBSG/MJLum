@@ -111,12 +111,20 @@ export function recordWin(session: Session, input: WinInput): Session {
   const preview = previewWin(session, input);
   if (!preview) return session;
   const deltaById = new Map(preview.deltas.map((item) => [item.playerId, item.delta]));
+  const counting = preview.kind !== 'false-win';
+  const seated = new Set(seatedPlayerIds(session));
+  const fanByWinner = new Map<string, number>();
+  if (counting) {
+    fanByWinner.set(input.winnerId, input.fan);
+    for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, extra.fan);
+  }
+  let lossFan = 0;
+  for (const fan of fanByWinner.values()) lossFan += fan;
   const players = session.players.map((player) => {
     const delta = deltaById.get(player.id);
     const balance = delta
       ? Score.fromString(player.balance).add(Score.fromString(delta)).toExact()
       : player.balance;
-    const counting = preview.kind !== 'false-win';
     const winner = counting && preview.winnerIds.includes(player.id);
     const discarder = counting && preview.kind !== 'self-draw' && player.id === preview.discarderId;
     return {
@@ -125,6 +133,9 @@ export function recordWin(session: Session, input: WinInput): Session {
       wins: player.wins + (winner ? 1 : 0),
       selfDraws: player.selfDraws + (winner && preview.kind === 'self-draw' ? 1 : 0),
       discards: player.discards + (discarder ? 1 : 0),
+      hands: player.hands + (counting && seated.has(player.id) ? 1 : 0),
+      fanSum: player.fanSum + (winner ? (fanByWinner.get(player.id) ?? 0) : 0),
+      discardFanSum: player.discardFanSum + (discarder ? lossFan : 0),
     };
   });
   const label =
@@ -137,7 +148,7 @@ export function recordWin(session: Session, input: WinInput): Session {
           : `${preview.fan}番 食糊`;
   const dealer = dealerAfter(session, preview);
   return commitBoard(session, label, {
-    players,
+    players: noteRetention(players, session, dealer.dealerId, retainsDealer(session, preview)),
     seats: session.seats,
     dealerId: dealer.dealerId,
     dealerMark: dealer.dealerMark,
@@ -156,8 +167,12 @@ export function recordDraw(session: Session): Session {
   const tracked = session.rules.trackDealer && session.dealerId !== null;
   const dealer = tracked && session.rules.passDealerOnDraw ? passDealer(session) : holdDraw(session);
   const contribution = drawContribution(session);
+  const seated = new Set(seatedPlayerIds(session));
+  const played = contribution.players.map((player) =>
+    seated.has(player.id) ? { ...player, hands: player.hands + 1 } : player,
+  );
   return commitBoard(session, '流局', {
-    players: contribution.players,
+    players: noteRetention(played, session, dealer.dealerId, tracked && !session.rules.passDealerOnDraw),
     seats: session.seats,
     dealerId: dealer.dealerId,
     dealerMark: dealer.dealerMark,
@@ -209,6 +224,39 @@ export function splitJackpot(session: Session, playerIds: string[]): Session {
     handCount: session.handCount,
     pool: '0',
   });
+}
+
+/** A 詐糊 does not count. A non-dealer 詐糊 still continues the dealer's 留莊. */
+function retainsDealer(session: Session, preview: WinPreview): boolean {
+  if (!session.rules.trackDealer || session.dealerId === null) return false;
+  if (preview.kind === 'false-win') return preview.winnerId !== session.dealerId;
+  if (preview.kind === 'multi') return preview.winnerIds.includes(session.dealerId);
+  return preview.winnerId === session.dealerId;
+}
+
+function noteRetention(
+  players: Session['players'],
+  session: Session,
+  nextDealerId: string | null,
+  retain: boolean,
+): Session['players'] {
+  const dealerId = session.dealerId;
+  if (!session.rules.trackDealer || dealerId === null) return players;
+  if (retain && nextDealerId === dealerId) {
+    return players.map((player) => {
+      if (player.id !== dealerId) return player;
+      const dealerStreak = player.dealerStreak + 1;
+      return {
+        ...player,
+        dealerStreak,
+        bestDealerStreak: Math.max(player.bestDealerStreak, dealerStreak),
+      };
+    });
+  }
+  if (nextDealerId !== dealerId) {
+    return players.map((player) => (player.id === dealerId ? { ...player, dealerStreak: 0 } : player));
+  }
+  return players;
 }
 
 function holdDraw(session: Session): { dealerId: string | null; dealerMark: DealerMark; roundWind: Wind; seatWind: Wind } {
