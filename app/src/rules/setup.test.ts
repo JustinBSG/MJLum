@@ -7,6 +7,7 @@ import {
   createPresetDraft,
   formatAmount,
   formatMultiplier,
+  missingHighFans,
   selfDrawAmount,
   setFanRange,
   setJackpotContribution,
@@ -130,6 +131,8 @@ describe('custom 新玩法', () => {
     assert.equal(row(through14, 13)?.ordinary, '4096');
     assert.equal(row(through14, 14)?.ordinary, null);
     assert.equal(selfDrawAmount(through14, 14), null);
+    assert.deepEqual(missingHighFans(through14), [14]);
+    assert.deepEqual(missingHighFans(through13), []);
   });
 
   it('keeps an edited preset cell when 滿糊 rises', () => {

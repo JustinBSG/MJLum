@@ -1,4 +1,5 @@
 import { formatAmount, formatMultiplier } from '../rules/setup.ts';
+import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
 import { commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
 import type { DealerMark, Session, Wind } from './types.ts';
@@ -34,6 +35,8 @@ export type WinPreview = {
   /** Pool added to the winner. Present only when 贏取Jackpot applies. The pool is then emptied. */
   jackpot?: string;
   deltas: { playerId: string; delta: string }[];
+  /** Present when the typed fan is above 滿糊 and the amount uses 滿糊. */
+  scoringFan?: number;
 };
 
 /**
@@ -42,7 +45,21 @@ export type WinPreview = {
  * An unrecorded fan amount is not calculated here.
  */
 export function previewWin(session: Session, input: WinInput): WinPreview | null {
-  return awardJackpot(session, input, previewHand(session, input));
+  const preview = previewHand(session, input);
+  if (!preview) return null;
+  const scored = scoringFan(session.rules, preview.fan);
+  return awardJackpot(session, input, scored === preview.fan ? preview : { ...preview, scoringFan: scored });
+}
+
+/** A typed fan below 起糊 cannot become a scored hand. */
+export function winRefusal(rules: RuleSetup, fans: number[]): string | null {
+  if (fans.some((fan) => Number.isInteger(fan) && fan < rules.minFan)) return '番數不足';
+  return null;
+}
+
+export function scoringFan(rules: RuleSetup, fan: number): number {
+  if (!Number.isInteger(fan)) return fan;
+  return fan > rules.maxFan ? rules.maxFan : fan;
 }
 
 function previewHand(session: Session, input: WinInput): WinPreview | null {
@@ -88,6 +105,14 @@ function awardJackpot(session: Session, input: WinInput, preview: WinPreview | n
 }
 
 export function formatWinPreview(preview: WinPreview): string[] {
+  const lines = formatWinBody(preview);
+  if (preview.scoringFan !== undefined && preview.scoringFan !== preview.fan) {
+    return [`按${preview.scoringFan}番計`, ...lines];
+  }
+  return lines;
+}
+
+function formatWinBody(preview: WinPreview): string[] {
   if (preview.kind === 'false-win') return formatFalseWin(preview);
   if (preview.kind === 'multi') {
     return [`${preview.fan}番分數 ${formatAmount(preview.ordinary)}`, `總分 ${formatAmount(preview.total)}`];
@@ -115,8 +140,8 @@ export function recordWin(session: Session, input: WinInput): Session {
   const seated = new Set(seatedPlayerIds(session));
   const fanByWinner = new Map<string, number>();
   if (counting) {
-    fanByWinner.set(input.winnerId, input.fan);
-    for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, extra.fan);
+    fanByWinner.set(input.winnerId, scoringFan(session.rules, input.fan));
+    for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, scoringFan(session.rules, extra.fan));
   }
   let lossFan = 0;
   for (const fan of fanByWinner.values()) lossFan += fan;
@@ -568,6 +593,7 @@ function negate(score: Score): string {
 }
 
 function ordinaryAmount(session: Session, fan: number): string | null {
-  if (!Number.isInteger(fan)) return null;
-  return session.rules.rows.find((row) => row.fan === fan)?.ordinary ?? null;
+  if (!Number.isInteger(fan) || fan < session.rules.minFan) return null;
+  const scored = scoringFan(session.rules, fan);
+  return session.rules.rows.find((row) => row.fan === scored)?.ordinary ?? null;
 }

@@ -11,7 +11,7 @@ import { APP_LOCALE } from '@/locale';
 import { useRuleRepository } from '@/rules/repository';
 import { formatAmount, formatMultiplier, selfDrawAmount } from '@/rules/setup';
 import { Score } from '@/score/score';
-import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
+import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot, winRefusal } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
   formatSettlementBalance,
@@ -535,6 +535,9 @@ export default function SessionScreen() {
                   })}
                 </>
               )}
+              {session && winRefusal(session.rules, [previewFan ?? NaN, ...also.map((item) => item.fan)]) ? (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>番數不足</ThemedText>
+              ) : null}
               {winPreview ? formatWinPreview(winPreview).map((line) => (
                 <ThemedText accessibilityLanguage={APP_LOCALE} key={line}>
                   {line}
