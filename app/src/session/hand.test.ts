@@ -554,6 +554,55 @@ describe('詐糊', () => {
   });
 });
 
+describe('半銃包付', () => {
+  function covered(format: 'three' | 'four') {
+    return setPaymentMode(setOrdinary(setPlayerFormat(createCustomDraft(), format), 3, '16'), 'half-discard');
+  }
+
+  it('charges mS to one payer for 包自摸 and leaves everyone else at 0', () => {
+    for (const names of [
+      ['甲家', '乙家', '丙家', '丁家'],
+      ['甲家', '乙家', '丙家'],
+    ]) {
+      const session = startNamed(covered(names.length === 4 ? 'four' : 'three'), names);
+      const next = recordWin(session, {
+        winnerId: idOf(session, '甲家'),
+        fan: 3,
+        discarderId: idOf(session, '丙家'),
+        discarderPaysSelfDraw: true,
+      });
+      assert.equal(balance(next, '甲家'), '24');
+      assert.equal(balance(next, '丙家'), '-24');
+      assert.equal(balance(next, '乙家'), '0');
+      if (names.length === 4) assert.equal(balance(next, '丁家'), '0');
+      assert.equal(player(next, '甲家').selfDraws, 1);
+      assert.equal(player(next, '丙家').discards, 0);
+    }
+  });
+
+  it('charges S to one payer for 包輸 and leaves everyone else at 0', () => {
+    for (const names of [
+      ['甲家', '乙家', '丙家', '丁家'],
+      ['甲家', '乙家', '丙家'],
+    ]) {
+      const session = startNamed(covered(names.length === 4 ? 'four' : 'three'), names);
+      const next = recordWin(session, {
+        winnerId: idOf(session, '甲家'),
+        fan: 3,
+        discarderId: idOf(session, '丙家'),
+        discarderPaysLoss: true,
+      });
+      assert.equal(balance(next, '甲家'), '16');
+      assert.equal(balance(next, '丙家'), '-16');
+      assert.equal(balance(next, '乙家'), '0');
+      if (names.length === 4) assert.equal(balance(next, '丁家'), '0');
+      assert.equal(player(next, '甲家').wins, 1);
+      assert.equal(player(next, '甲家').selfDraws, 0);
+      assert.equal(player(next, '丙家').discards, 1);
+    }
+  });
+});
+
 describe('出銃者包自摸', () => {
   it('makes only the discarder pay the self-draw total and counts the hand as 自摸', () => {
     const rules = setPaymentMode(setOrdinary(setFanRange(createPresetDraft('51-full'), 3, 13), 3, '15'), 'half-discard');
