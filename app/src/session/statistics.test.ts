@@ -50,7 +50,34 @@ describe('自摸率', () => {
   });
 });
 
-export function sessionWithCounts(entries: [string, number, number, number][]) {
+describe('titles', () => {
+  it('shares 出銃王 and gives 陪跑員 to anyone without 食糊王, 自摸王, 出銃王, or 大牌王', () => {
+    const session = sessionWithCounts([
+      ['a', 4, 1, 0],
+      ['b', 8, 0, 2],
+      ['c', 2, 0, 6],
+      ['d', 7, 3, 6],
+    ]);
+    const rows = Object.fromEntries(rosterStatistics(session).map((row) => [row.name, row.titles]));
+    assert.deepEqual(rows.a, ['陪跑員']);
+    assert.deepEqual(rows.b, ['食糊王']);
+    assert.deepEqual(rows.c, ['出銃王']);
+    assert.deepEqual(rows.d, ['自摸王', '出銃王']);
+  });
+
+  it('gives no count title when every count is 0, so every player is 陪跑員', () => {
+    const session = startSession({
+      rules: createCustomDraft(),
+      names: ['a', 'b', 'c', 'd'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const rows = rosterStatistics(session);
+    assert.equal(rows.every((row) => row.wins === 0 && row.titles.length === 1 && row.titles[0] === '陪跑員'), true);
+  });
+});
+
+function sessionWithCounts(entries: [string, number, number, number][]) {
   const session = startSession({
     rules: createCustomDraft(),
     names: entries.map(([name]) => name),
