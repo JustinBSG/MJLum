@@ -364,7 +364,7 @@ In an opened 五一辣辣上 rule setup, Jackpot 啟用 was off by default. Turn
 
 The first release includes Jackpot as a visible option.
 
-**麻雀諗 product decision:** 平分Jackpot can give the whole pool to one or more eligible players (seated, or someone who has already sat). A reserve who never sat is not listed. 找數 shows the pool remainder and marks a non-zero pool 尚未分配. It does not list transfers.
+**麻雀諗 product decision:** 平分Jackpot gives the whole current pool to one or more players who are sitting now. Nobody selected cannot confirm. Someone who has left the table is not a recipient. Taking only part of the pool is not in this scope. 找數 shows the pool remainder and marks a non-zero pool 尚未分配. It does not list transfers.
 
 ### Dealer, wind, and session progress
 

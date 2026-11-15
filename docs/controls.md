@@ -58,7 +58,7 @@ The share-screen button and the External display section below are second-releas
 | 還原分數 | Undoes the latest entry after confirmation, restoring previous scores and the visible dealer/progress state. It is not a manual balance editor. Undo depth, redo, and editing an older row remain unspecified. |
 | 詳細紀錄 | Ledger of recorded hands/events. Can emphasize events, scores, or a combined view, and can be shown in forward or reverse order. During a demonstrated 流局時過莊-off sequence, the 分數 tab stayed in 東圈1. |
 | 統計數據 | Session-wide statistics, titles, and radar. Includes everyone on the roster. Fields are in `docs/guide.md`. |
-| On-board Jackpot amount | Tapping the pool amount opens 請選擇 → 平分Jackpot → 平分給哪些玩家？ (在位玩家), then confirm. A demonstrated all-four split of 200 paid 50 to each player and cleared the pool to 0, leaving 莊 and 圈風 unchanged. Confirmed subset splits remain unspecified. |
+| On-board Jackpot amount | Tapping the pool amount opens 請選擇 → 平分Jackpot → 平分給哪些玩家？ (在位玩家), then confirm. A demonstrated all-four split of 200 paid 50 to each player and cleared the pool to 0, leaving 莊 and 圈風 unchanged. A seated subset also receives the whole pool in equal shares. An empty selection cannot confirm. |
 | 找數 | Opens settlement. In 麻雀諗 this shows net balances only; see `docs/guide.md`. Checked in the app, not on a second-release external display. |
 | 莊家設定 | Manually selects the current dealer. |
 | 重置連莊數 | When setting the dealer manually, can reset the consecutive-dealer count. Shown on in the inspected reference dialog; downstream count behaviour was not independently tested. |

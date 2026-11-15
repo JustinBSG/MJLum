@@ -233,20 +233,9 @@ function drawContribution(session: Session): { players: Session['players']; pool
   return { players, pool: pool.toExact() };
 }
 
-/** Seated players, plus anyone who has already sat. A reserve who never sat is left out. */
+/** Players sitting now. Someone who has left the table is not a recipient. */
 export function eligibleJackpotIds(session: Session): string[] {
-  const seen = new Set<string>();
-  const ordered: string[] = [];
-  const consider = (id: string | null) => {
-    if (!id || seen.has(id) || !session.players.some((player) => player.id === id)) return;
-    seen.add(id);
-    ordered.push(id);
-  };
-  for (const id of seatedPlayerIds(session)) consider(id);
-  for (const entry of session.ledger) {
-    for (const seat of entry.before.seats) consider(seat.playerId);
-  }
-  return ordered;
+  return seatedPlayerIds(session);
 }
 
 /**
