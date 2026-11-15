@@ -4,7 +4,7 @@ This file is the coder-ready tech and development document as of 15 November 202
 
 **麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
-Product rules that this file implements against are in [`docs/product.md`](product.md) and [`docs/features.md`](features.md). Visual UI/UX is still designed later; command-line setup for that later skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
+Product rules that this file implements against are in [`docs/guide.md`](guide.md). Visual UI/UX is still designed later; command-line setup for that later skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 
 Package versions and “as of” dates in this file were re-checked on 14 November 2026 against npm and official docs. Times from npm and vendor pages that carry a UTC or offset timestamp are given here in Asia/Hong Kong.
 

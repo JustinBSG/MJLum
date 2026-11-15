@@ -2,7 +2,7 @@
 
 This page is a short command-line introduction for the later UI/UX skill. On this `uat` branch the skill is already present (`.cursor/skills/`, and a generated [`design-system/default/MASTER.md`](../design-system/default/MASTER.md)). This page remains the setup reference; it does not tell a coder to run the installer or a design-system generator again now, or to design the UI now.
 
-Visual UI/UX for 麻雀諗 is still designed later, as stated in [`docs/product.md`](product.md). The assistant already named for that later work is [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Do not clone that GitHub repository into MJLum. The official installer is the npm package [`ui-ux-pro-max-cli`](https://www.npmjs.com/package/ui-ux-pro-max-cli) (command `uipro`). Do not use the older `uipro-cli` package; its latest release is stale.
+Visual UI/UX for 麻雀諗 is still designed later, as stated in [`docs/guide.md`](guide.md). The assistant already named for that later work is [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill). Do not clone that GitHub repository into MJLum. The official installer is the npm package [`ui-ux-pro-max-cli`](https://www.npmjs.com/package/ui-ux-pro-max-cli) (command `uipro`). Do not use the older `uipro-cli` package; its latest release is stale.
 
 Versions below were re-checked on 14 November 2026 (Asia/Hong Kong). npm `ui-ux-pro-max-cli` latest was `2.15.0`, published 14 August 2026, 01:10 HKT. The npm `license` field and the upstream GitHub README say MIT. The npm package README footer says CC-BY-NC-4.0. This page follows the license field and the GitHub README and does not treat the footer as definitive.
 

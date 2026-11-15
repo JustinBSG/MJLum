@@ -6,7 +6,7 @@ This document is the scoring and session guide for 麻雀諗. It records decided
 
 Scoring, session, and settings behaviour that is marked **taken from the local reference** (reference-demonstrated) is established by that reference and should be followed. **麻雀諗 product decisions** are decided for this app and must not be treated as reference-established fact. Behaviour that was not found in the reference and has not been decided is marked **unspecified** and must not be invented. This document does not copy a competitor UI. Ads that appear in the local reference are the reference app’s, not 麻雀諗 features.
 
-`docs/product.md` is the short product-direction summary. `docs/features.md` lists first-release features. `docs/controls.md` lists demonstrated controls. `docs/flows.md` has end-to-end handover scenes. `docs/README.md` explains how facts are labelled.
+How facts are labelled is in [`docs/README.md`](README.md). Technical choices are in [`docs/development.md`](development.md).
 
 ## What the app is for
 
@@ -26,14 +26,14 @@ The following points are decided:
 - The first release is a personal/table tool only, not a public App Store or Play Store app yet.
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
-- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. The first release also includes the reference’s rule categories (including 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將) and utilities (statistics, titles, a radar chart, a dice utility, and fan-help). The already-decided 麻雀諗 product rules in the list above that are not about external display / wireless TV are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; and no metadata sharing.
+- The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. This release scores Hong Kong mahjong only. 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將 wait until after the second release. Utilities in this release are statistics, titles, a radar chart, a dice utility, and fan-help. The already-decided 麻雀諗 product rules in the list above that are not about external display / wireless TV are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; and no metadata sharing.
 - The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section. Other extra features beyond the first-release point-counter scope can also come in a later release.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
 - Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in the sections below. Behavior that was not found in the reference remains unspecified.
 
-Visual design and navigation remain unspecified and are left to later AI UI/UX design. Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md) and [`docs/product.md`](product.md).
+Visual design and navigation remain unspecified and are left to later AI UI/UX design. Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md).
 
 ## First release and second release
 
@@ -69,13 +69,13 @@ Intended use, at a high level:
 2. One device at the table is used to keep the table's scores in 麻雀諗. The recorder enters who won, the fan value, and how the win happened; the app applies the chosen score table.
 3. Optionally, in the second release, 現時賽果 is shown on a smart TV wirelessly. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check.
 
-Detailed first-run, player-setup, and in-game screen layout are **unspecified** and are left to later AI UI/UX design, following this guide. End-to-end functional flows, with demonstrated numbers to check against, are in `docs/flows.md`.
+Detailed first-run, player-setup, and in-game screen layout are **unspecified** and are left to later AI UI/UX design, following this guide.
 
 ## Platforms
 
 First-release platforms are iOS and Android. Wireless connection to a smart TV is second-release work, not first-release fulfilment.
 
-Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md) and [`docs/product.md`](product.md).
+Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md).
 
 ## Language and locale
 
@@ -134,9 +134,9 @@ Visible Hong Kong preset minimum and cap amounts:
 | 一二蚊 辣辣上 | 3 fan | 32 | 8 fan | 1024 |
 | 3番4 半辣上（三人） | 3 fan | 3 | 8 fan | 24 |
 
-Opened Hong Kong preset tables are recorded below. Fans outside a shown range stay empty.
+Opened Hong Kong preset tables are recorded below. A typed cell is kept. Switching back to four players rebuilds that preset’s own table.
 
-**一二蚊辣辣上**, opened for 3–8. Self-draw totals are ×1.50. Fans above 8 were not on that screen.
+**一二蚊辣辣上**, opened for 3–8. Self-draw totals are ×1.50. Fans 9–13 continue `S(f) = 32 × 2^(f−3)`: 2048, 4096, 8192, 16384, 32768. That continuation is an extension of the opened table, not a filmed 9–13 hand. Fan 14 and above stay empty.
 
 | Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
 |---:|---:|---:|
@@ -147,7 +147,7 @@ Opened Hong Kong preset tables are recorded below. Fans outside a shown range st
 | 7 | 512 | 768 |
 | 8 | 1024 | 1536 |
 
-**3番4 半辣上（三人）**, opened for 3–8 at ×1.50. The self-draw total is 1.5S, split across the two opponents. Fans outside 3–8 were not on that screen. This preset does not use the 3番4辣辣上 three-player ×1.33.
+**3番4 半辣上（三人）**, opened for 3–8 at ×1.50. The self-draw total is 1.5S, split across the two opponents. Fans 9–13 continue the two-fan doubling from fan 4 = 6 and fan 5 = 9: 36, 48, 72, 96, 144. That continuation is an extension of the opened table, not a filmed 9–13 hand. Fan 14 and above stay empty. This preset does not use the 3番4辣辣上 three-player ×4/3.
 
 | Fan | Ordinary-win amount (食糊分數) | Self-draw total (自摸分數) |
 |---:|---:|---:|
@@ -271,9 +271,7 @@ The following **半辣上** tables were opened through 13 (滿糊 at the right-h
 
 A saved custom setup can be deleted: the reference asks 確定刪除嗎?, and after confirmation the custom list can show 未有自訂玩法. Adding a custom setup (增加玩法) creates another 新玩法. The default custom table starts at 3番起糊 with ordinary-win amount 4 and 8番滿糊, doubling each fan (3: 4/6, 4: 8/12, 5: 16/24, 6: 32/48). Extending 滿糊 to 13 kept doubling through 13: 4096/6144. Ordinary-win cells are individually editable; the matching 自摸分數 updates to ×1.50 of that cell. Editing one fan does not automatically recalculate later fans: after raising fans 3–6, fan 7 stayed 64/96, so 6 and 7 tied. That unsaved custom was then abandoned (放棄設定嗎? confirmed), returning to 未有自訂玩法. After configuration, 儲存此玩法嗎？ offers 取消, 直接使用, or 儲存; a saved setup appears under 自訂玩法.
 
-The first release includes the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將) as part of the same-functionality scope. Detailed scoring for those categories was not established in the reference, remains **unspecified**, and must not be invented.
-
-**Opened 3–8 rows:** 一二蚊辣辣上 is 32, 64, 128, 256, 512, 1024, with self-draw 48, 96, 192, 384, 768, 1536. 3番4 半辣上（三人） is 3, 6, 9, 12, 18, 24. Fans outside 3–8 were not on those screens. The other regional categories still have no scoring table.
+台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將 are not in this release. They wait until after the second release. Do not invent their scoring tables before then.
 
 ### Player count and payment mode
 
@@ -320,7 +318,7 @@ Demonstrated three-player settlements:
 - Then a 3番 自摸 (total 4; each of the other two paid 2): a +1, b −2, c +1, b 莊, 東圈西風.
 - Then 4番 自摸, footer 6 × 1.33 = 8 (self-draw total equals F × 4/3; each of the two opponents paid 4): a −3, b +6, c −3, b 莊 with 連1, 東圈西風.
 
-**Unspecified:** 半銃 combined with 出銃者包自摸 or 出銃者包輸. Three-player 半銃, the 3番4辣辣上 全銃 ×1.33 rows, and the 3番4 半辣上（三人） 3–8 rows at ×1.50 are decided. Switching to three players does not by itself change another setup to 4/3.
+**麻雀諗 product decision (16 November 2026).** Three-player 詐糊, 包自摸, and 包輸 use that setup’s own S and m. Three players are not forced to 4/3. 詐糊 with 賠位自摸 off: the offender pays 2S and each of the other two receives S. With 賠位自摸 on, those amounts are mS. 包自摸 pays mS from one named player and counts as 自摸. 包輸 pays S from one named player and counts as that player’s 出銃. The third player pays 0. 出銃者包自摸 and 出銃者包輸 cannot be on together, and neither combines with 一炮多響. Switching 二五雞, 五一, 一二蚊, or another four-player preset to three players keeps that preset’s S and m; a self-draw total is split across the two opponents. Only 3番4辣辣上 replaces the table and uses 4/3. 半銃 combined with either 包 toggle is still refused.
 
 ### Fan range and the score table
 
@@ -346,9 +344,9 @@ The main demonstrated custom table, with minimum 3 and cap 10:
 
 Example of the self-draw derivation: 512 × 1.50 = 768 total; 256 paid by each of the three opponents.
 
-**麻雀諗 product decision:** 滿糊 is user-decidable and may be set above 13. Money for 番 above 13 should be calculated. Do not invent the exact progression above 13; use only tables and rows that were demonstrated, and leave any further sequence unspecified until it is decided.
+**麻雀諗 product decision (16 November 2026).** 滿糊 may be set above 13. A declared fan above 滿糊 scores at the 滿糊 amount. If 滿糊 itself is set to 14 or higher, that fan’s cell must be filled before the session can start; the screen names the empty fans. Do not fill fan 14 from the previous cell, and do not keep doubling a 辣辣上 table past 13 unless the user typed the amount. Fans 9–13 are filled only for 一二蚊辣辣上 and 3番4半辣上（三人）, as recorded above. A three-player self-draw total is split across the two opponents.
 
-**Unspecified:** what happens in the reference if a user tries to type a fan below 起糊 or above 滿糊; any exact 滿糊 progression above 13; and three-player self-draw allocation outside the demonstrated ×1.33 hands above. Decimal display to two places was shown (for example −10.67 and the F = 15 半銃 split).
+The board and 找數 show at most two decimal places, half away from zero. 4.5 stays 4.5. −32/3 shows ≈−10.67. −10.665 shows −10.67. Tapping a score shows the exact fraction. The rounded text is not written back into the ledger. A jackpot of 200 split three ways stores 200/3 each.
 
 ### Jackpot
 
@@ -378,7 +376,7 @@ The first release includes Jackpot as a visible option.
 - Session progress can be shown as circle/wind (for example 東圈東風) or as a hand count. The session can also show the active rules name, start date, and hand count (for example 玩法, 開始日期, 總局數, 牌局進度, and 進度顯示方式 圈風 or 局數). A consecutive-dealer mark (連N) can appear on the dealer tile after a consecutive dealer win; 連1 was shown. 冧X is the drawn-hand badge when 流局時過莊 is off; it is not the same mark as 連N.
 - Mid-session rule values can be inspected. Whether they can be edited, and what that would do to already-recorded hands, is not established.
 
-**Unspecified:** the complete dealer-progression algorithm for every remaining result type, including the exact 連莊 counting convention in every edge case; and mid-session rule edits. Do not invent the missing cases.
+**麻雀諗 product decision (16 November 2026).** An older hand can be revised after the rules have changed when every later row has a replayable action and the rules used for that hand were stored. Later hands keep their own rules. If a later row cannot be replayed, the edit is blocked and the message names that row.
 
 ### Seats, roster, and substitution
 
@@ -388,7 +386,7 @@ The first release includes Jackpot as a visible option.
 - Each seated player has a name, an identifying avatar, and a running net balance starting at 0. A name is required before that player can be confirmed.
 - A further person can be added to the roster without adding another live seat, then substituted into a seat. The departing player’s balances and history stay with that person and still count in settlement. The substitute starts that seat at 0 and does not inherit the previous occupant’s result. Players not currently seated do not pay for later hands.
 
-**Unspecified:** maximum roster size; deleting a player; editing an existing name or avatar; and a clearly demonstrated seat-only swap of two seated players.
+**麻雀諗 product decision (16 November 2026).** The roster has no maximum size. Three or four players sit; everyone else is a reserve. Only players sitting now can receive a jackpot split.
 
 ### Starting a session and starting a new session
 
@@ -447,9 +445,13 @@ Demonstrated 13-fan 詐糊, with 詐糊賠位自摸 off. The preview footer show
 
 After confirmation, running totals, session progress, statistics, and the hand history update.
 
-The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as visible options. Confirmed settlements for 詐糊賠位自摸 off and on, 出銃者包自摸, and 出銃者包輸 are now recorded.
+The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as visible options. Confirmed settlements for 詐糊賠位自摸 off and on, 出銃者包自摸, and 出銃者包輸 are now recorded. Three-player amounts are in the Player count section. A 詐糊 does not count as 食糊, 自摸, or 出銃.
 
-**Unspecified:** further 詐糊 effects on statistics beyond the dealer 過莊 already shown; combined 半銃 plus 包-toggle cases that were not demonstrated; invalid-entry handling (for example winner = discarder, or invalid multi-winner sets); numeric validation; and special abortive-hand types or reason codes beyond the demonstrated 流局. The undemonstrated cases must not be invented.
+**例牌** records a normal win at the current 滿糊 amount. It still needs a winner and either 自摸 or a discarder. It does not add a second multiplier, and it is not a 流局. 例牌 with 詐糊 or 一炮多響 is refused.
+
+**相沖** has no payout rule. 調分 changes one player’s balance and stores a reason. It does not change 食糊, 莊, 圈風, or the pool, and it is not a correction of the original hand’s fan.
+
+**Still refused:** 半銃 combined with either 包 toggle, and either 包 toggle combined with 一炮多響.
 
 ### Undo
 
@@ -464,7 +466,7 @@ Demonstrated latest-entry undo, reversing a substitute’s self-draw of 24:
 | d | −8 | 0 |
 | e | 24 | 0 |
 
-**Unspecified:** undo depth, redo, and editing or deleting an arbitrary older history row.
+Redo is available until a new entry clears that branch. Editing an older hand is the rule in the Dealer section.
 
 ## Settlement
 
@@ -574,7 +576,7 @@ Settings follow the local reference. This is a behavior and options inventory, n
 |---|---|---|
 | 玩法名稱 | Name of this rules setup | Demonstrated default: 新玩法 |
 | 人數 | Game format: 四人麻雀 or 三人麻雀 | In the demonstrated custom-setup flow, four-player remained selected. Not independently labelled as a global product default. |
-| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is demonstrated as the winner receiving the ordinary amount from the discarder only. Four-player 半銃 ordinary discard (including when F is not divisible by 4), self-draw, and 一炮多響 splits are recorded in the Player count and Score entry sections. 半銃 plus three-player play, and combined 半銃 plus 包-toggle cases, remain unspecified. | In one demonstrated custom-setup flow, 全銃 remained selected. A later edited 五一辣辣上 configuration was used with 半銃. Not independently labelled as a global default. |
+| 全銃 / 半銃 | How a discard-win loss is allocated. 全銃 is the winner receiving the ordinary amount from the discarder only. Four-player and three-player 半銃 splits are in the Player count section. 半銃 combined with either 包 toggle is refused. | In one demonstrated custom-setup flow, 全銃 remained selected. A later edited 五一辣辣上 configuration was used with 半銃. Not independently labelled as a global default. |
 | 番數設定 (min / max) | Minimum winning fan (起糊) and capped fan (滿糊) | Not generally stated. 起糊 can go to 0. 滿糊 was moved from 8 through 10 to 13, where the control sat at its right-hand end in the reference. For 麻雀諗, 滿糊 may be set above 13 (product decision); do not invent undemonstrated rows. |
 | 食糊分數 (per fan) | Editable ordinary-win amount for each fan level in range | No universal default. Depends on the chosen preset or custom edits. The demonstrated custom 3–10 table is recorded in the Fan range section; opened 辣辣上 and 半辣上 tables are recorded in the Rules, presets section. Editing one cell does not automatically recalculate later fans. |
 | 自摸分數 / 自摸倍數 | Displayed self-draw total, derived from the ordinary amount × the current multiplier | Demonstrated default ×1.50. The multiplier is editable (×2.00 was used in play). |
@@ -639,21 +641,12 @@ Resolved, 14 November 2026, and recorded in the sections above (kept here only a
 - 新牌局 reuse switches prefill the next session and do not block it. Both on keeps people, seats, and rules. Players only returns to 玩法設定 with those people. Rules only opens empty seats with the same rules. Both off opens 玩法設定 with empty seats. Scores, statistics, history, 連莊, and 圈風 reset. A non-zero Jackpot pool must be allocated or the old session kept; it is not carried silently. A change of seat count asks who sits, and anyone not chosen stays a reserve (15 November 2026).
 - Settlement transfer-choice is not needed (麻雀諗 product decision).
 
-Resolved as already recorded in [`docs/development.md`](development.md) and [`docs/product.md`](product.md) (kept here only as a pointer, 15 November 2026):
-
-- The technical approach for building the iOS and Android apps is Expo plus libraries. Individual libraries remain suggestions unless those documents mark them required.
+The technical approach for building the iOS and Android apps is Expo plus libraries. Details are in [`docs/development.md`](development.md).
 
 Still open:
 
-1. Combined 半銃 plus 出銃者包自摸 / 出銃者包輸 cases that were not demonstrated. Three-player 半銃 and a general 半銃 一炮多響 are decided.
-2. Three-player tables other than the demonstrated 3番4辣辣上 全銃 rows and the opened 3番4 半辣上（三人） 3–8 rows. That 半辣上 preset uses ×1.50. Switching to three players does not by itself change another setup to 4/3.
-3. Detailed scoring tables and payout rules for the reference’s other regional categories (台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, 港式台灣麻將). 一二蚊辣辣上 and 3番4 半辣上（三人） now have their opened 3–8 rows; fans outside that range were not shown.
-4. The complete dealer / 連莊 progression algorithm for every remaining edge case. A 一炮多響 that includes the dealer keeps 莊, adds one 連莊, and leaves 圈風 unchanged, even when that winner’s net is negative. A 一炮多響 that leaves the dealer out passes 莊 to the next seat, sets the new 連莊數 to 0, and steps 圈風. 重新開始計算圈風 on now sets 東圈東風.
-5. Invalid-entry handling and numeric validation.
-6. Roster limits. Rename, delete of a never-seated reserve, a direct seat swap, and 入原玩家帳 are decided.
-7. Editing a hand after the rules changed mid-session. Undo and redo cover the latest branch. An older win can be revised when every later row has a stored action.
-8. Past sessions can be opened read-only, resumed, paused, completed, voided, or permanently deleted. A voided session stays in the list and is marked 作廢.
-9. Special abortive-hand types or reason codes beyond the demonstrated 流局.
-10. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+1. 半銃 combined with 出銃者包自摸 or 出銃者包輸, and 包 combined with 一炮多響. Each single case is scored; the mixes are refused.
+2. 相沖 has no automatic payout. A named 調分 changes one balance only.
+3. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
