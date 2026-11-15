@@ -8,6 +8,8 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
 import { useRuleRepository } from '@/rules/repository';
+import { useSessionRepository } from '@/session/repository';
+import { seatCount, stageRules } from '@/session/session';
 import { Score } from '@/score/score';
 import {
   createCustomDraft,
@@ -38,6 +40,7 @@ export default function EditRuleSetupScreen() {
   const kind = first(params.kind);
   const id = first(params.id);
   const repo = useRuleRepository();
+  const sessions = useSessionRepository();
   const draftKey = `${kind ?? ''}:${id ?? ''}`;
   const [storedKey, setStoredKey] = useState('');
   const [setup, setSetup] = useState<RuleSetup | null>(null);
@@ -102,10 +105,22 @@ export default function EditRuleSetupScreen() {
     return { ...setup, name: prepared.name };
   }
 
+  async function stageOpen(named: RuleSetup): Promise<boolean> {
+    const open = await sessions.getOpen();
+    if (!open) return true;
+    if (seatCount(named) !== seatCount(open.rules)) {
+      setError('進行中的牌局不能改人數');
+      return false;
+    }
+    await sessions.saveOpen(stageRules(open, named));
+    return true;
+  }
+
   async function useOnce() {
     if (!setup || highFanError(setup)) return;
     const named = namedSetup(setup);
     if (!named) return;
+    if (!(await stageOpen(named))) return;
     await repo.setActive(named);
     router.back();
   }
@@ -122,6 +137,7 @@ export default function EditRuleSetupScreen() {
       return;
     }
     const stored = overwriteId ? { ...named, id: overwriteId } : named;
+    if (!(await stageOpen(stored))) return;
     await repo.save(stored);
     await repo.setActive(stored);
     router.back();

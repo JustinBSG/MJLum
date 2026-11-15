@@ -62,6 +62,8 @@ export type LedgerEntry = {
 export type Session = BoardState & {
   id: string;
   rules: RuleSetup;
+  /** Rules that replace `rules` on the next confirmed hand. Earlier hands stay on the old rules. */
+  pendingRules?: RuleSetup;
   startedAt: string;
   progressDisplay: ProgressDisplay;
   ledger: LedgerEntry[];

@@ -14,6 +14,7 @@ export function parseSession(source: string): Session {
     ...board,
     id: text(raw.id, 'id'),
     rules: parseRuleSetup(JSON.stringify(raw.rules)),
+    ...(isRecord(raw.pendingRules) ? { pendingRules: parseRuleSetup(JSON.stringify(raw.pendingRules)) } : {}),
     startedAt: text(raw.startedAt, 'startedAt'),
     progressDisplay: progress(raw.progressDisplay),
     ledger: arrayOf(raw.ledger, 'ledger').map(parseEntry),

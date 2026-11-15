@@ -384,6 +384,9 @@ export default function SessionScreen() {
           ) : (
             <ThemedText accessibilityLanguage={APP_LOCALE}>{session.rules.name}</ThemedText>
           )}
+          {session.pendingRules ? (
+            <ThemedText accessibilityLanguage={APP_LOCALE}>{`下一手 ${session.pendingRules.name}`}</ThemedText>
+          ) : null}
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`開始日期 ${formatStartDate(session.startedAt)}`}</ThemedText>
           <ThemedText accessibilityLanguage={APP_LOCALE}>{`總局數 ${session.handCount}`}</ThemedText>
           {session.rules.trackDealer ? (
@@ -636,6 +639,7 @@ export default function SessionScreen() {
                   </ThemedText>
                 </ThemedView>
               ))}
+              <Choice label="改下一手玩法" onPress={() => router.push('/rules' as Href)} selected={false} />
               <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
           ) : null}

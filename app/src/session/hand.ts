@@ -1,7 +1,7 @@
 import { formatAmount, formatMultiplier } from '../rules/setup.ts';
 import type { RuleSetup } from '../rules/types.ts';
 import { Score } from '../score/score.ts';
-import { commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
+import { applyPendingRules, commitBoard, passDealer, retainDealer, seatedPlayerIds } from './session.ts';
 import type { DealerMark, Player, Session, Wind } from './types.ts';
 
 export type WinInput = {
@@ -146,18 +146,19 @@ function addMoney(players: Player[], playerId: string, delta: Score): Player[] {
 
 /** Confirms a preview. A dealer win keeps 莊. Anyone else’s win passes 莊. 一炮多響 does not move 莊. */
 export function recordWin(session: Session, input: WinInput): Session {
-  const preview = previewWin(session, input);
+  const ready = applyPendingRules(session);
+  const preview = previewWin(ready, input);
   if (!preview) return session;
   const counting = preview.kind !== 'false-win';
-  const seated = new Set(seatedPlayerIds(session));
+  const seated = new Set(seatedPlayerIds(ready));
   const fanByWinner = new Map<string, number>();
   if (counting) {
-    fanByWinner.set(input.winnerId, scoringFan(session.rules, input.fan));
-    for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, scoringFan(session.rules, extra.fan));
+    fanByWinner.set(input.winnerId, scoringFan(ready.rules, input.fan));
+    for (const extra of input.also ?? []) fanByWinner.set(extra.playerId, scoringFan(ready.rules, extra.fan));
   }
   let lossFan = 0;
   for (const fan of fanByWinner.values()) lossFan += fan;
-  let players = session.players.map((player) => {
+  let players = ready.players.map((player) => {
     const winner = counting && preview.winnerIds.includes(player.id);
     const discarder = counting && preview.kind !== 'self-draw' && player.id === preview.discarderId;
     return {
@@ -179,16 +180,16 @@ export function recordWin(session: Session, input: WinInput): Session {
         : preview.kind === 'self-draw'
           ? `${preview.fan}番 自摸`
           : `${preview.fan}番 食糊`;
-  const dealer = dealerAfter(session, preview);
-  return commitBoard(session, label, {
-    players: noteRetention(players, session, dealer.dealerId, retainsDealer(session, preview)),
-    seats: session.seats,
+  const dealer = dealerAfter(ready, preview);
+  return commitBoard(ready, label, {
+    players: noteRetention(players, ready, dealer.dealerId, retainsDealer(ready, preview)),
+    seats: ready.seats,
     dealerId: dealer.dealerId,
     dealerMark: dealer.dealerMark,
     roundWind: dealer.roundWind,
     seatWind: dealer.seatWind,
-    handCount: session.handCount + 1,
-    pool: preview.jackpot === undefined ? session.pool : '0',
+    handCount: ready.handCount + 1,
+    pool: preview.jackpot === undefined ? ready.pool : '0',
   });
 }
 
@@ -197,21 +198,22 @@ export function recordWin(session: Session, input: WinInput): Session {
  * When Jackpot is on, each seated player pays 流局時每位玩家須付彩池 into the pool.
  */
 export function recordDraw(session: Session): Session {
-  const tracked = session.rules.trackDealer && session.dealerId !== null;
-  const dealer = tracked && session.rules.passDealerOnDraw ? passDealer(session) : holdDraw(session);
-  const contribution = drawContribution(session);
-  const seated = new Set(seatedPlayerIds(session));
+  const ready = applyPendingRules(session);
+  const tracked = ready.rules.trackDealer && ready.dealerId !== null;
+  const dealer = tracked && ready.rules.passDealerOnDraw ? passDealer(ready) : holdDraw(ready);
+  const contribution = drawContribution(ready);
+  const seated = new Set(seatedPlayerIds(ready));
   const played = contribution.players.map((player) =>
     seated.has(player.id) ? { ...player, hands: player.hands + 1 } : player,
   );
-  return commitBoard(session, '流局', {
-    players: noteRetention(played, session, dealer.dealerId, tracked && !session.rules.passDealerOnDraw),
-    seats: session.seats,
+  return commitBoard(ready, '流局', {
+    players: noteRetention(played, ready, dealer.dealerId, tracked && !ready.rules.passDealerOnDraw),
+    seats: ready.seats,
     dealerId: dealer.dealerId,
     dealerMark: dealer.dealerMark,
     roundWind: dealer.roundWind,
     seatWind: dealer.seatWind,
-    handCount: session.handCount + 1,
+    handCount: ready.handCount + 1,
     pool: contribution.pool,
   });
 }
