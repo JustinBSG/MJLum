@@ -19,6 +19,7 @@ import {
   setJackpotContribution,
   setJackpotEnabled,
   missingHighFans,
+  prepareRuleName,
   setMultiplier,
   setName,
   setOrdinary,
@@ -29,7 +30,7 @@ import {
 } from '@/rules/setup';
 import type { RuleSetup } from '@/rules/types';
 
-type Prompt = 'save' | 'abandon' | 'delete' | null;
+type Prompt = 'save' | 'abandon' | 'delete' | 'duplicate' | null;
 
 export default function EditRuleSetupScreen() {
   const theme = useTheme();
@@ -42,6 +43,7 @@ export default function EditRuleSetupScreen() {
   const [setup, setSetup] = useState<RuleSetup | null>(null);
   const [missing, setMissing] = useState(false);
   const [prompt, setPrompt] = useState<Prompt>(null);
+  const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const drafts = useRef<Record<string, string>>({});
 
@@ -90,16 +92,38 @@ export default function EditRuleSetupScreen() {
     return true;
   }
 
+  function namedSetup(setup: RuleSetup): RuleSetup | null {
+    const prepared = prepareRuleName(setup.name);
+    if ('error' in prepared) {
+      setError(prepared.error);
+      return null;
+    }
+    setError(null);
+    return { ...setup, name: prepared.name };
+  }
+
   async function useOnce() {
     if (!setup || highFanError(setup)) return;
-    await repo.setActive(setup);
+    const named = namedSetup(setup);
+    if (!named) return;
+    await repo.setActive(named);
     router.back();
   }
 
-  async function save() {
+  async function save(overwriteId?: string) {
     if (!setup || highFanError(setup)) return;
-    await repo.save(setup);
-    await repo.setActive(setup);
+    const named = namedSetup(setup);
+    if (!named) return;
+    const saved = await repo.listSaved();
+    const clash = saved.find((item) => item.name === named.name && item.id !== named.id && item.id !== overwriteId);
+    if (!overwriteId && clash) {
+      setDuplicateId(clash.id);
+      setPrompt('duplicate');
+      return;
+    }
+    const stored = overwriteId ? { ...named, id: overwriteId } : named;
+    await repo.save(stored);
+    await repo.setActive(stored);
     router.back();
   }
 
@@ -304,7 +328,7 @@ export default function EditRuleSetupScreen() {
           actions={[
             { label: '取消', onPress: () => setPrompt(null) },
             { label: '直接使用', onPress: useOnce },
-            { label: '儲存', onPress: save },
+            { label: '儲存', onPress: () => save() },
           ]}
         />
       ) : null}
@@ -314,6 +338,22 @@ export default function EditRuleSetupScreen() {
           actions={[
             { label: '取消', onPress: () => setPrompt(null) },
             { label: '確定', onPress: () => router.back() },
+          ]}
+        />
+      ) : null}
+      {prompt === 'duplicate' ? (
+        <PromptBar
+          title="已有同名玩法。覆寫原玩法，定係另存？"
+          actions={[
+            { label: '取消', onPress: () => setPrompt(null) },
+            {
+              label: '另存',
+              onPress: () => {
+                setPrompt(null);
+                setError('請改一個未用過嘅名稱');
+              },
+            },
+            { label: '覆寫', onPress: () => save(duplicateId ?? undefined) },
           ]}
         />
       ) : null}
