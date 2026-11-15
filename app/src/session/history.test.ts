@@ -102,11 +102,11 @@ describe('history', () => {
       dealerIndex: 0,
       startedAt,
     });
-    const next = adjustScore(started, started.players[0]?.id ?? '', '-4', '相沖');
+    const next = adjustScore(started, started.players[0]?.id ?? '', '-4', '更正');
     assert.equal(next.players[0]?.balance, '-4');
     assert.equal(next.players[0]?.wins, 0);
     assert.equal(next.dealerId, started.dealerId);
     assert.equal(next.pool, '0');
-    assert.equal(next.ledger.at(-1)?.label, '調分 相沖');
+    assert.equal(next.ledger.at(-1)?.label, '調分 更正');
   });
 });

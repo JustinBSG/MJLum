@@ -779,7 +779,7 @@ export default function SessionScreen() {
           {panel === 'adjust' && session ? (
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>調分</ThemedText>
-              <ThemedText accessibilityLanguage={APP_LOCALE}>只改這個人的分數，不改食糊、莊家或彩池。</ThemedText>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>只改這個人的分數，不改食糊、莊家或彩池。這是獨立更正，不是相沖結算。</ThemedText>
               {session.players.map((player) => (
                 <Choice
                   key={player.id}

@@ -449,7 +449,7 @@ The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as vi
 
 **例牌** records a normal win at the current 滿糊 amount. It still needs a winner and either 自摸 or a discarder. It does not add a second multiplier, and it is not a 流局. 例牌 with 詐糊 or 一炮多響 is refused.
 
-**相沖** has no payout rule. 調分 changes one player’s balance and stores a reason. It does not change 食糊, 莊, 圈風, or the pool, and it is not a correction of the original hand’s fan.
+**麻雀諗 product decision (16 November 2026).** 相沖 is not in this release, and there is no automatic 相沖 payout. 調分 stays a separate correction of one player's balance. It stores a reason and does not change 食糊, 莊, 圈風, or the pool. It is not a 相沖 settlement, because a transfer between players has to record who gains and who loses in the same entry, with the amounts adding to 0. A later manual 相沖 would submit every related player's plus and minus together and reject an entry that does not total 0.
 
 **麻雀諗 product decision (16 November 2026).** 半銃 combined with 包自摸 or 包輸 keeps the full 包 amount. The named payer pays mS or S, and the other players pay 0. There is no extra 半銃 share.
 
@@ -647,7 +647,6 @@ The technical approach for building the iOS and Android apps is Expo plus librar
 
 Still open:
 
-1. 相沖 has no automatic payout. A named 調分 changes one balance only.
-2. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+1. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
