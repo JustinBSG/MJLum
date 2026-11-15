@@ -91,6 +91,7 @@ export default function SessionScreen() {
   const [falseWinAsSelfDraw, setFalseWinAsSelfDraw] = useState(false);
   const [discarderPaysSelfDraw, setDiscarderPaysSelfDraw] = useState(false);
   const [discarderPaysLoss, setDiscarderPaysLoss] = useState(false);
+  const [winNotice, setWinNotice] = useState<string | null>(null);
   const [takeJackpot, setTakeJackpot] = useState(false);
   const [splitIds, setSplitIds] = useState<string[]>([]);
   const [diceCount, setDiceCount] = useState(MIN_DICE);
@@ -264,6 +265,7 @@ export default function SessionScreen() {
     setFalseWinAsSelfDraw(false);
     setDiscarderPaysSelfDraw(false);
     setDiscarderPaysLoss(false);
+    setWinNotice(null);
     setTakeJackpot(false);
     setLimitHand(false);
     setPanel('win');
@@ -272,16 +274,20 @@ export default function SessionScreen() {
   function toggleMulti() {
     if (multi) {
       setMulti(false);
+      setWinNotice(null);
       if (selectedWinnerId) {
         setWinnerId(selectedWinnerId);
         setFanText(fans[selectedWinnerId] ?? '');
       }
       return;
     }
+    if (discarderPaysSelfDraw || discarderPaysLoss) {
+      setWinNotice('請先取消包付，先可以開一炮多響');
+      return;
+    }
+    setWinNotice(null);
     setMulti(true);
     setLimitHand(false);
-    setDiscarderPaysSelfDraw(false);
-    setDiscarderPaysLoss(false);
     setTakeJackpot(false);
     if (payer === 'self-draw') setPayer(null);
     if (winnerId) {
@@ -298,6 +304,10 @@ export default function SessionScreen() {
     if (!multi) {
       setWinnerId(playerId);
       if (payer === playerId) setPayer(null);
+      return;
+    }
+    if ((discarderPaysSelfDraw || discarderPaysLoss) && !winnerIds.includes(playerId)) {
+      setWinNotice('請先取消包付，先可以加入另一個贏家');
       return;
     }
     if (payer === playerId) setPayer(null);
@@ -332,10 +342,11 @@ export default function SessionScreen() {
   }
 
   function toggleCoverSelfDraw() {
+    if (multi) return;
+    setWinNotice(null);
     setDiscarderPaysSelfDraw((current) => {
       if (!current) {
         setDiscarderPaysLoss(false);
-        setMulti(false);
         if (payer === 'self-draw') setPayer(null);
       }
       return !current;
@@ -343,10 +354,11 @@ export default function SessionScreen() {
   }
 
   function toggleCoverLoss() {
+    if (multi) return;
+    setWinNotice(null);
     setDiscarderPaysLoss((current) => {
       if (!current) {
         setDiscarderPaysSelfDraw(false);
-        setMulti(false);
         if (payer === 'self-draw') setPayer(null);
       }
       return !current;
@@ -390,6 +402,7 @@ export default function SessionScreen() {
     }
     if (payer === null) return;
     if (multi) {
+      if (discarderPaysSelfDraw || discarderPaysLoss) return;
       if (!selectedWinnerId || payer === 'self-draw') return;
       const fan = readFan(fans[selectedWinnerId] ?? '');
       if (fan === null) return;
@@ -620,11 +633,13 @@ export default function SessionScreen() {
                 <>
                   <Choice label={`一炮多響 ${multi ? '開' : '關'}`} onPress={toggleMulti} selected={multi} />
                   <Choice
+                    disabled={multi}
                     label={`出銃者包自摸 ${discarderPaysSelfDraw ? '開' : '關'}`}
                     onPress={toggleCoverSelfDraw}
                     selected={discarderPaysSelfDraw}
                   />
                   <Choice
+                    disabled={multi}
                     label={`出銃者包輸 ${discarderPaysLoss ? '開' : '關'}`}
                     onPress={toggleCoverLoss}
                     selected={discarderPaysLoss}
@@ -663,9 +678,10 @@ export default function SessionScreen() {
               {discarderPaysSelfDraw && discarderPaysLoss ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>包自摸同包輸不能同時開</ThemedText>
               ) : null}
-              {(discarderPaysSelfDraw || discarderPaysLoss) && multi ? (
+              {multi ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>一炮多響未支援包自摸或包輸</ThemedText>
               ) : null}
+              {winNotice ? <ThemedText accessibilityLanguage={APP_LOCALE}>{winNotice}</ThemedText> : null}
               {limitHand && (falseWin || multi) ? (
                 <ThemedText accessibilityLanguage={APP_LOCALE}>例牌未支援詐糊或一炮多響</ThemedText>
               ) : null}
@@ -1215,12 +1231,23 @@ function readFan(text: string): number | null {
   return Number.isSafeInteger(fan) ? fan : null;
 }
 
-function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Choice({
+  label,
+  selected,
+  disabled = false,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       accessibilityLanguage={APP_LOCALE}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ disabled, selected }}
+      disabled={disabled}
       onPress={onPress}
       style={styles.choice}>
       <ThemedText>{selected ? `${label} · 已選` : label}</ThemedText>
