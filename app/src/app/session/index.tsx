@@ -10,6 +10,11 @@ import { APP_LOCALE } from '@/locale';
 import { formatWinPreview, previewWin, recordDraw, recordWin, splitJackpot } from '@/session/hand';
 import { useSessionRepository } from '@/session/repository';
 import {
+  formatSettlementBalance,
+  hasPositiveBalance,
+  settlementRows,
+} from '@/session/settlement';
+import {
   addReserve,
   formatBalance,
   formatDealerBadge,
@@ -24,7 +29,7 @@ import {
 } from '@/session/session';
 import type { Session } from '@/session/types';
 
-type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | null;
+type Panel = 'win' | 'draw' | 'swap' | 'dealer' | 'undo' | 'fresh' | 'pool' | 'split' | 'settle' | null;
 type Payer = 'self-draw' | string | null;
 
 export default function SessionScreen() {
@@ -378,6 +383,7 @@ export default function SessionScreen() {
               <Choice label="換人" onPress={() => setPanel('swap')} selected={false} />
               {session.rules.trackDealer ? <Choice label="莊家設定" onPress={openDealer} selected={false} /> : null}
               <Choice label="還原分數" onPress={() => setPanel('undo')} selected={false} />
+              <Choice label="找數" onPress={() => setPanel('settle')} selected={false} />
               <Choice label="新牌局" onPress={openFresh} selected={false} />
             </ThemedView>
           ) : null}
@@ -492,6 +498,21 @@ export default function SessionScreen() {
                 <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
                 <Choice label="確定" onPress={confirmSplit} selected={false} />
               </ThemedView>
+            </ThemedView>
+          ) : null}
+
+          {panel === 'settle' ? (
+            <ThemedView style={styles.panel}>
+              <ThemedText accessibilityLanguage={APP_LOCALE}>找數</ThemedText>
+              {hasPositiveBalance(session) ? null : (
+                <ThemedText accessibilityLanguage={APP_LOCALE}>未有玩家分數為正數</ThemedText>
+              )}
+              {settlementRows(session).map((row) => (
+                <ThemedText accessibilityLanguage={APP_LOCALE} key={row.playerId}>
+                  {`${row.name} ${formatSettlementBalance(row.balance)}`}
+                </ThemedText>
+              ))}
+              <Choice label="取消" onPress={() => setPanel(null)} selected={false} />
             </ThemedView>
           ) : null}
 
