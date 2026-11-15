@@ -6,12 +6,15 @@ import { recordDraw } from './hand.ts';
 import {
   addReserve,
   canStart,
+  claimOutbound,
   commitBoard,
   formatBalance,
   formatDealerBadge,
   formatWind,
   ledgerLabels,
   ledgerLines,
+  markPoolTransfer,
+  reopenSession,
   seatedPlayerIds,
   selectDealer,
   setProgressDisplay,
@@ -175,6 +178,31 @@ describe('roster and dealer', () => {
     assert.equal(shown.progressDisplay, 'hand-count');
     assert.equal(shown.ledger.length, started.ledger.length);
     assert.equal(formatBalance(shown.players[0]?.balance ?? '0'), '0');
+  });
+});
+
+describe('彩池轉入新局', () => {
+  it('moves the pool onto the next session and leaves the old balances', () => {
+    const started = startSession({
+      rules: createCustomDraft(),
+      names: ['甲家', '乙家', '丙家', '丁家'],
+      dealerIndex: 0,
+      startedAt,
+    });
+    const funded = { ...started, pool: '40' };
+    const marked = markPoolTransfer(funded);
+    assert.equal(marked.pool, '0');
+    assert.equal(marked.outboundPool, '40');
+    assert.equal(marked.ledger.at(-1)?.label, '彩池轉入新局');
+    assert.equal(marked.players[0]?.balance, '0');
+    assert.equal(markPoolTransfer(started), started);
+    const reopened = reopenSession(marked, startedAt, '40');
+    assert.equal(reopened.pool, '40');
+    assert.equal(reopened.id === marked.id, false);
+    assert.equal(reopened.handCount, 0);
+    const claimed = claimOutbound(reopenSession(marked, startedAt), [marked]);
+    assert.equal(claimed.session.pool, '40');
+    assert.equal(claimed.archive?.outboundPool, undefined);
   });
 });
 

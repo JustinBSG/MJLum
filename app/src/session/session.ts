@@ -55,14 +55,31 @@ export function startSession(input: {
 }
 
 /** A new session that keeps the same people, seats, and rules, with scores and records cleared. */
-export function reopenSession(session: Session, startedAt: string): Session {
-  return sessionFromRoster({
+export function reopenSession(session: Session, startedAt: string, pool = '0'): Session {
+  const next = sessionFromRoster({
     rules: session.rules,
     players: session.players.map(clearRecord),
     seatPlayerIds: session.seats.flatMap((seat) => (seat.playerId ? [seat.playerId] : [])),
     dealerIndex: dealerSeatIndex(session),
     startedAt,
   });
+  return pool === '0' ? next : { ...next, pool };
+}
+
+/** Moves the pool off this session and marks it for the next session. Balances stay. */
+export function markPoolTransfer(session: Session): Session {
+  const pool = Score.fromString(session.pool);
+  if (pool.equals(Score.fromString('0'))) return session;
+  const released = commitBoard(session, '彩池轉入新局', { ...boardOf(session), pool: '0' });
+  return { ...released, outboundPool: pool.toExact() };
+}
+
+/** Gives a waiting pool to a new session and clears it on the archived source. */
+export function claimOutbound(session: Session, archives: Session[]): { session: Session; archive: Session | null } {
+  const source = [...archives].reverse().find((item) => item.outboundPool && !Score.fromString(item.outboundPool).equals(Score.fromString('0')));
+  if (!source?.outboundPool) return { session, archive: null };
+  const { outboundPool: _pool, ...rest } = source;
+  return { session: { ...session, pool: source.outboundPool }, archive: rest };
 }
 
 export type KeptPlayer = Player;

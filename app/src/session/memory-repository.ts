@@ -26,6 +26,12 @@ export function createMemorySessionRepository(open: Session | null = null): Sess
     async listArchived() {
       return archived.map(clone);
     },
+    async saveArchived(session: Session) {
+      const stored = clone(session);
+      const index = archived.findIndex((item) => item.id === stored.id);
+      if (index === -1) archived.push(stored);
+      else archived[index] = stored;
+    },
   };
 }
 
