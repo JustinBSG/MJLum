@@ -43,8 +43,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "node --experimental-strip-types --test src/score/score.test.ts src/rules/setup.test.ts src/rules/repository.test.ts src/session/session.test.ts src/session/repository.test.ts src/session/hand.test.ts src/session/settlement.test.ts src/session/statistics.test.ts src/session/dice.test.ts src/session/fan-help.test.ts",
