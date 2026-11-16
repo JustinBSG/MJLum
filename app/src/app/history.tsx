@@ -3,7 +3,7 @@ import { LedgerTable } from "@/components/ledger-table";
 import { Action } from "@/components/table-ui";
 import { router, Stack, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -113,33 +113,21 @@ export default function HistoryScreen() {
             </ThemedText>
             <LedgerTable session={selected} />
             {selected.status === "void" ? null : (
-              <Pressable
-                accessibilityLanguage={APP_LOCALE}
-                accessibilityRole="button"
+              <Action
+                label="繼續牌局"
+                primary
                 onPress={() => resume(selected)}
-                style={styles.row}
-              >
-                <ThemedText>繼續牌局</ThemedText>
-              </Pressable>
+              />
             )}
-            <Pressable
-              accessibilityLanguage={APP_LOCALE}
-              accessibilityRole="button"
-              onPress={() => remove(selected)}
-              style={styles.row}
-            >
-              <ThemedText>刪除</ThemedText>
-            </Pressable>
+            <Action label="刪除" onPress={() => remove(selected)} />
           </ThemedView>
         ) : null}
-        <Pressable
-          accessibilityLanguage={APP_LOCALE}
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          style={styles.row}
-        >
-          <ThemedText>返回</ThemedText>
-        </Pressable>
+        <Action
+          label="返回"
+          onPress={() =>
+            router.canGoBack() ? router.back() : router.replace("/")
+          }
+        />
       </ScrollView>
     </ThemedView>
   );
@@ -162,6 +150,5 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
   },
-  row: { gap: Spacing.one, paddingVertical: Spacing.two },
-  detail: { gap: Spacing.one, paddingVertical: Spacing.two },
+  detail: { gap: 16, paddingVertical: Spacing.two },
 });
