@@ -805,12 +805,6 @@ export default function SessionScreen() {
                   );
                 })}
               </View>
-              {reserves.map((player) => (
-                <ThemedText accessibilityLanguage={APP_LOCALE} key={player.id}>
-                  {`${player.name} ${formatBalance(player.balance)}`}
-                </ThemedText>
-              ))}
-
               {session.status === "playing" ? (
                 <View style={styles.row}>
                   <View style={{ flex: 2 }}>
@@ -830,6 +824,72 @@ export default function SessionScreen() {
                     disabled={!session.ledger.length}
                     onPress={() => setPanel("undo")}
                   />
+                </View>
+              ) : null}
+              {reserves.length > 0 ? (
+                <View style={styles.reserveSection}>
+                  <View style={styles.heading}>
+                    <ThemedText
+                      accessibilityRole="header"
+                      style={{ fontSize: 18, fontWeight: "700" }}
+                    >
+                      未入座玩家
+                    </ThemedText>
+                    <ThemedText
+                      type="small"
+                      themeColor="textSecondary"
+                    >{`${reserves.length} 位`}</ThemedText>
+                  </View>
+                  {reserves.map((player) => {
+                    const sign = Score.fromString(player.balance).compare(
+                      Score.fromString("0"),
+                    );
+                    return (
+                      <View
+                        key={player.id}
+                        accessible
+                        accessibilityLabel={`${player.name}，未入座，累積分數 ${formatBalance(player.balance)}`}
+                        style={styles.reserveCard}
+                      >
+                        <View style={{ flex: 1, gap: 8 }}>
+                          <ThemedText
+                            style={{ fontSize: 18, fontWeight: "700" }}
+                          >
+                            {player.name}
+                          </ThemedText>
+                          <ThemedText style={styles.reserveBadge}>
+                            未入座
+                          </ThemedText>
+                        </View>
+                        <View style={styles.reserveBalance}>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            累積分數
+                          </ThemedText>
+                          <ThemedText
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.5}
+                            style={[
+                              styles.score,
+                              {
+                                fontSize: 28,
+                                lineHeight: 36,
+                                textAlign: "right",
+                                color:
+                                  sign < 0
+                                    ? palette.negative
+                                    : sign > 0
+                                      ? palette.positive
+                                      : palette.ink,
+                              },
+                            ]}
+                          >
+                            {formatBalance(player.balance)}
+                          </ThemedText>
+                        </View>
+                      </View>
+                    );
+                  })}
                 </View>
               ) : null}
             </>
@@ -1974,6 +2034,32 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   scoreGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  reserveSection: { gap: 12, paddingTop: 8 },
+  reserveCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: palette.line,
+    borderRadius: 16,
+    backgroundColor: palette.surface,
+  },
+  reserveBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: palette.background,
+    color: palette.muted,
+    fontSize: 13,
+  },
+  reserveBalance: {
+    gap: 4,
+    alignItems: "flex-end",
+    maxWidth: "50%",
+    flexShrink: 1,
+  },
   scoreCard: {
     width: "47%",
     flexGrow: 1,
