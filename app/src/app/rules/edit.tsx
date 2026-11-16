@@ -4,13 +4,12 @@ import { NumberField as TextInput } from "@/components/number-field";
 import { Action, palette } from "@/components/table-ui";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { APP_LOCALE } from "@/locale";
 import { useRuleRepository } from "@/rules/repository";
 import { useSessionRepository } from "@/session/repository";
 import { seatCount, stageRules } from "@/session/session";
@@ -205,7 +204,7 @@ export default function EditRuleSetupScreen() {
           headerLeft: () => (
             <Pressable
               accessibilityRole="button"
-              onPress={() => setPrompt("save")}
+              onPress={() => setPrompt("abandon")}
               style={styles.headerButton}
             >
               <ThemedText>返回</ThemedText>
@@ -221,7 +220,7 @@ export default function EditRuleSetupScreen() {
           alignItems: "center",
         }}
       >
-        <Action label="返回" onPress={() => setPrompt("save")} />
+        <Action label="返回" onPress={() => setPrompt("abandon")} />
         <ThemedText type="subtitle">玩法設定</ThemedText>
       </ThemedView>
       {missing || !setup ? (
@@ -433,6 +432,7 @@ export default function EditRuleSetupScreen() {
       ) : null}
       {prompt === "save" ? (
         <PromptBar
+          onCancel={() => setPrompt(null)}
           title="儲存此玩法嗎？"
           actions={[
             { label: "取消", onPress: () => setPrompt(null) },
@@ -443,15 +443,23 @@ export default function EditRuleSetupScreen() {
       ) : null}
       {prompt === "abandon" ? (
         <PromptBar
-          title="放棄設定嗎?"
+          onCancel={() => setPrompt(null)}
+          title="放棄設定並返回？"
           actions={[
             { label: "取消", onPress: () => setPrompt(null) },
-            { label: "確定", onPress: () => router.back() },
+            {
+              label: "確定",
+              onPress: () =>
+                router.canGoBack()
+                  ? router.back()
+                  : router.replace("/rules/hong-kong"),
+            },
           ]}
         />
       ) : null}
       {prompt === "duplicate" ? (
         <PromptBar
+          onCancel={() => setPrompt(null)}
           title="已有同名玩法。覆寫原玩法，定係另存？"
           actions={[
             { label: "取消", onPress: () => setPrompt(null) },
@@ -468,6 +476,7 @@ export default function EditRuleSetupScreen() {
       ) : null}
       {prompt === "delete" ? (
         <PromptBar
+          onCancel={() => setPrompt(null)}
           title="確定刪除嗎?"
           actions={[
             { label: "取消", onPress: () => setPrompt(null) },
@@ -494,26 +503,30 @@ function Choice({
 function PromptBar({
   title,
   actions,
+  onCancel,
 }: {
+  onCancel: () => void;
   title: string;
   actions: { label: string; onPress: () => void }[];
 }) {
   return (
-    <ThemedView style={styles.prompt}>
-      <ThemedText accessibilityLanguage={APP_LOCALE}>{title}</ThemedText>
-      <ThemedView style={styles.choices}>
-        {actions.map((action) => (
-          <Pressable
-            accessibilityRole="button"
-            key={action.label}
-            onPress={action.onPress}
-            style={styles.rowButton}
-          >
-            <ThemedText>{action.label}</ThemedText>
-          </Pressable>
-        ))}
-      </ThemedView>
-    </ThemedView>
+    <Modal transparent animationType="fade" visible onRequestClose={onCancel}>
+      <View style={styles.overlay}>
+        <View accessibilityViewIsModal style={styles.dialog}>
+          <ThemedText type="subtitle">{title}</ThemedText>
+          <View style={styles.choices}>
+            {actions.map((action, index) => (
+              <Action
+                key={action.label}
+                label={action.label}
+                onPress={action.onPress}
+                primary={index === actions.length - 1}
+              />
+            ))}
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -531,6 +544,18 @@ function first(value: string | string[] | undefined): string | undefined {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+  },
+  dialog: {
+    padding: 24,
+    gap: 24,
+    borderRadius: 20,
+    backgroundColor: palette.surface,
+  },
   content: {
     width: "100%",
     maxWidth: 720,
