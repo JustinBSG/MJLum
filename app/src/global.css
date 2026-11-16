@@ -1,0 +1,18 @@
+:root {
+  --font-display:
+    -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei",
+    sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-rounded: var(--font-display);
+  --font-serif: var(--font-display);
+}
+*:focus-visible {
+  outline: 3px solid #1e3a8a !important;
+  outline-offset: 3px;
+}
+[role="button"] {
+  cursor: pointer;
+}
+input {
+  font-family: var(--font-display);
+}
