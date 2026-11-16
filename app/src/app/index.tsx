@@ -1,13 +1,12 @@
 import { router, useFocusEffect, type Href } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { BrandMark } from "@/components/brand-mark";
 import { ScrollView, StyleSheet, View, Modal } from "react-native";
 import {
   CirclePlus,
   History,
   Settings2,
   ArrowRight,
-  Grid2X2,
   ShieldCheck,
 } from "lucide-react-native";
 
@@ -27,10 +26,6 @@ export default function HomeScreen() {
   const [ready, setReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
   const [hasRules, setHasRules] = useState(false);
-
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,7 +48,7 @@ export default function HomeScreen() {
     <View style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.brand}>
-          <Grid2X2 aria-hidden size={28} color={palette.primary} />
+          <BrandMark size={44} />
           <ThemedText style={{ fontWeight: "700", fontSize: 20 }}>
             {ui.appName}
           </ThemedText>

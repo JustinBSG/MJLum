@@ -17,3 +17,6 @@ Minimalism / Soft UI Evolution。淺色優先、實體牌桌單手操作、繁�
 
 ## 無障礙
 互動有語意、名稱、選中／停用狀態；焦點3px深藍，按下有底色反饋；使用Lucide SVG。遵守安全區及鍵盤避讓，無裝飾動畫。淺色是本次交付主題，深色不宣稱完成。
+
+## 品牌圖示
+原創圓潤紅中麻雀牌角色：白色牌面、深藍輪廓及笑臉、深綠牌底。App 圖示使用深藍實色背景，首頁與啟動畫面使用透明角色。向量來源為 `app/src/constants/brand.ts`；以 `npm run generate:brand` 匯出 iOS、Android、網頁及啟動畫面素材。

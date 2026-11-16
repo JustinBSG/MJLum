@@ -34,6 +34,7 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/react": "~19.3.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
@@ -46,7 +47,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "node --experimental-strip-types --test src/score/score.test.ts src/rules/setup.test.ts src/rules/repository.test.ts src/session/session.test.ts src/session/repository.test.ts src/session/hand.test.ts src/session/settlement.test.ts src/session/statistics.test.ts src/session/dice.test.ts src/session/fan-help.test.ts"
+    "test": "node --experimental-strip-types --test src/score/score.test.ts src/rules/setup.test.ts src/rules/repository.test.ts src/session/session.test.ts src/session/repository.test.ts src/session/hand.test.ts src/session/settlement.test.ts src/session/statistics.test.ts src/session/dice.test.ts src/session/fan-help.test.ts",
+    "generate:brand": "node --experimental-strip-types scripts/generate-brand-assets.mjs"
   },
   "private": true
 }
