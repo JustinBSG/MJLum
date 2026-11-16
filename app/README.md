@@ -19,6 +19,10 @@ npx expo start --go --lan
 npx expo start --go --lan --clear
 ```
 
+## 獨立安裝
+
+獨立安裝到 Android 或 iPhone 的完整步驟見 [Standalone installation guide](../docs/deployment.md)（英文）。包括 Android APK、免費 Xcode Personal Team 安裝及每七日續簽、EAS／TestFlight、離線驗證，以及 Xcode 和 Developer Mode 常見問題。獨立安裝版毋須保持 Expo Go、Metro 或與電腦連接同一 Wi-Fi。
+
 ## 驗證
 
 ```powershell

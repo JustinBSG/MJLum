@@ -7,6 +7,7 @@
 | 文件 | 用途 |
 |---|---|
 | [releases/v1.0.0.md](releases/v1.0.0.md) | 首次發行範圍、來源、版本及驗證紀錄 |
+| [deployment.md](deployment.md) | Android APK、免費 iPhone 安裝及續簽、EAS／TestFlight、離線驗證及常見問題（英文） |
 | [guide.md](guide.md) | 計分、牌局行為及產品決定；保留影片證據與推論的區別 |
 | [product.md](product.md) | 產品規則入口 |
 | [features.md](features.md) | 目前已實作的功能及介面操作 |
