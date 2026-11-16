@@ -374,7 +374,7 @@ function formatFalseWin(preview: WinPreview): string[] {
   return [`${preview.fan}番分數 詐糊 ${loss} ×${opponents}`, `總分 ${total}`];
 }
 
-function dealerAfter(session: Session, preview: WinPreview) {
+function dealerAfter(session: Session, preview: WinPreview): { dealerId: string | null; dealerMark: DealerMark; roundWind: Wind; seatWind: Wind } {
   const unchanged = {
     dealerId: session.dealerId,
     dealerMark: session.dealerMark,
