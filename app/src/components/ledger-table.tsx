@@ -22,7 +22,7 @@ export function LedgerTable({
   const heads = [
     "手次",
     "進度",
-    ...(mode !== "scores" ? ["事件", "玩家"] : []),
+    ...(mode !== "scores" ? ["事件", "食糊玩家"] : []),
     ...(mode !== "events" ? players.map((p) => p.name) : []),
   ];
   const rows = hands.map(({ entry, i, after }) => {
