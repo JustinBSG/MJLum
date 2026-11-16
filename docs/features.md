@@ -1,5 +1,7 @@
 # UI 功能入口
 
+目前版本為 **Version 1 · Release 1（1.0.0）**。完整發行內容及驗證範圍見 [發行紀錄](releases/v1.0.0.md)。
+
 產品行為以 [guide.md](guide.md) 為準；視覺以 [MASTER.md](../design-system/mjlum/MASTER.md) 為準。
 
 - 開局：選玩法、修改番數表／開關、入座並指定莊家。

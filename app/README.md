@@ -1,56 +1,42 @@
-# Welcome to your Expo app 👋
+# 麻雀諗 App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Version 1 · Release 1：`1.0.0`，iOS build `1`，Android version code `1`，Expo extra release `1`。發行紀錄見 [v1.0.0](../docs/releases/v1.0.0.md)。
 
-## Get started
+## 環境及執行
 
-1. Install dependencies
+使用 Node.js 22.13+（22.x）或 24.3+（24.x）及 npm；相依版本以 `package-lock.json` 為準。技術基礎為 Expo SDK 58、React Native 0.88、Expo Router 及 SQLite。
 
-   ```bash
-   npm install
-   ```
+在本目錄執行：
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```powershell
+npm ci
+npx expo start --go --lan
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+手機與電腦連接同一 Wi-Fi，掃描 Terminal 的 QR Code，以 Expo Go 開啟。測試期間保持 Terminal 運行。若介面仍顯示舊版，先確認已更新對應 Git 分支，再使用：
 
-### Other setup steps
+```powershell
+npx expo start --go --lan --clear
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## 驗證
 
-## Learn more
+```powershell
+npm run lint
+npx tsc --noEmit
+npm test
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## 原始碼及資料
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- `src/app/`：Expo Router 頁面；牌桌、記分、紀錄、找數及統計共用 `/session` 內部面板。
+- `src/session/`、`src/score/`、`src/rules/`：牌局、精確分數及玩法規則。
+- `src/storage/`：iOS／Android 本機 SQLite 儲存。
+- `src/components/`：表格、數字鍵盤、雙端滑桿、擲骰動畫、載入畫面及共用按鈕。
+- 網頁使用記憶體資料庫，只供預覽；重新載入會清除該次網頁資料。
 
-## Join the community
+## 品牌素材
 
-Join our community of developers creating universal apps.
+修改 `src/constants/brand.ts` 後執行 `npm run generate:brand`，產生 App 圖示、Android adaptive icon、啟動畫面圖案及 favicon。匯出工具只屬開發相依套件。
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Expo Go 可測試介面及程式內載入畫面；完整原生啟動畫面及手機桌面圖示需以獨立安裝版驗證。Native build、簽署及商店上架是另外的發佈步驟；今次 `main` 發行不會自動產生或上載安裝檔。

@@ -1,5 +1,7 @@
 # 麻雀諗
 
+**Version 1 · Release 1（1.0.0）於 2026-11-17 確認 UAT 完成。** 目前已實作的操作見 [features.md](features.md)，版本及驗證範圍見 [發行紀錄](releases/v1.0.0.md)。本文保留較早的影片觀察；早期標為 unspecified 的介面／歷史操作，若已有後文產品決定及目前功能文件，應按已實作行為理解。此版本宣告不會更改任何計分公式或證據標記。
+
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
 This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 15 November 2026, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
@@ -33,7 +35,7 @@ The following points are decided:
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
 - Scoring, session, and settings behavior follow the local reference where that behavior is established, as recorded in the sections below. Behavior that was not found in the reference remains unspecified.
 
-Visual design and navigation remain unspecified and are left to later AI UI/UX design. Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md).
+Visual design and navigation for Version 1 / Release 1 are implemented; see [the design system](../design-system/mjlum/MASTER.md) and [current features](features.md). Expo plus libraries is the recorded development approach for building the iOS and Android apps; individual libraries are suggestions unless stated otherwise. Details are in [`docs/development.md`](development.md).
 
 ## First release and second release
 

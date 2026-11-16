@@ -1,21 +1,20 @@
-# 麻雀諗 UI implementation
+# 麻雀諗 UI implementation · Version 1 / Release 1
 
-The existing MASTER.md remains the base. The five page overrides document the mobile-specific changes requested by the user.
+設計依據為 [MASTER.md](MASTER.md)，功能及計分規則以 [features.md](../../docs/features.md) 和 [guide.md](../../docs/guide.md) 為準。發行來源為 UAT `233c446`。
 
-## Screen map
+## 畫面對應
 
-- `/`: start or resume, rules and history.
-- `/rules/hong-kong` → `/rules/edit`: choose and review rules, with an explicit continue action.
-- `/session/seat`: named players and dealer; start is disabled until valid.
-- `/session?view=scores`: two-column scoreboard, signed balances, dealer, collapsible tools and ledger.
-- `/session?view=entry`: winner, fan presets or typed fan, self-draw/discarder, optional advanced rules and preview before confirmation.
-- `/session?view=settle`: non-zero roster nets and unallocated pool; no transfer algorithm.
-- `/session?view=stats`: counts first, expandable rates, titles and radar.
+- `/`：開始／繼續牌局、清除現局並開新局、玩法及牌局紀錄。
+- `/rules/hong-kong` → `/rules/edit`：預設／自訂玩法、雙端番數滑桿、分數表、開關及儲存／放棄彈窗。
+- `/session/seat`：玩家名稱、明確的起莊玩家選擇。
+- `/session`：使用元件狀態切換牌桌、記分、紀錄、找數、統計及工具面板，沒有使用 `?view=` 作為頁籤路由。
+- 牌桌：兩欄大字分數、圈風進度、未入座玩家卡片；流局及還原以覆蓋牌桌的彈窗確認。
+- 記分：選食糊玩家、設定範圍內的完整番數選項、自摸或出銃者、特殊規則及預覽確認。
+- 換人：在座及未入座兩個獨立區域，已選玩家／座位可再按取消。
+- 紀錄／牌局設定：欄名、格線及數字對齊的表格，較寬表格可橫向捲動。
+- 找數：非零淨額及未分配彩池；統計：既有計數、比率、稱號及雷達圖。
+- 擲骰：SVG 骰仔及短暫翻滾動畫，尊重減少動態效果。
 
-Uses existing repositories and scoring engine. iOS and Android persist locally with SQLite. The existing web repository is in-memory, for preview only; refreshing clears its data. No new dependency was added.
+共用元件位於 `app/src/components/`，操作圖示使用 Lucide SVG，品牌麻雀圖示為原創向量。正式平台為 iOS／Android，本機 SQLite 保存資料；網頁採記憶體資料庫，只作預覽。淺色為本次交付主題。
 
-Product source: docs/guide.md, as designated by docs/README.md. The requested docs/product.md and docs/features.md do not exist in this repository.
-
-Shared accessible controls and semantic tokens: app/src/components/table-ui.tsx. Dark mode is deferred; the app explicitly uses the light theme.
-
-Verification: TypeScript, Expo lint, the existing 103 tests, and browser interaction through rules → seats → three-fan self-draw → updated scores → settlement → statistics. Browser widths checked: 375, 768, 1024 and 1440. Native device rendering and VoiceOver/TalkBack still require device verification.
+相依套件以 `app/package-lock.json` 為準；`@resvg/resvg-js` 為品牌素材匯出用的開發相依套件，不是 App 原生模組。載入畫面支援 Expo Go；原生啟動畫面需使用獨立安裝版驗證。

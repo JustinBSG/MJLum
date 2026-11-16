@@ -1,10 +1,12 @@
 # 麻雀諗 development
 
+**2026-11-17 發行狀態：Version 1 · Release 1（1.0.0）UAT 已完成。** 目前執行及驗證指令見 [App README](../app/README.md)，發行內容見 [v1.0.0](releases/v1.0.0.md)。下列 14–15 November 2026 的套件調查保留作歷史背景；實際安裝版本以 `app/package-lock.json` 為準。
+
 This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong). It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
 
 **麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
-Product rules that this file implements against are in [`docs/guide.md`](guide.md). Visual UI/UX is still designed later; command-line setup for that later skill is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
+Product rules that this file implements against are in [`docs/guide.md`](guide.md). The first-release UI is implemented in [the design system](../design-system/mjlum/MASTER.md); historical skill setup is in [`docs/ui-ux-pro-max-skill.md`](ui-ux-pro-max-skill.md).
 
 Package versions and “as of” dates in this file were re-checked on 14 November 2026 against npm and official docs. Times from npm and vendor pages that carry a UTC or offset timestamp are given here in Asia/Hong Kong.
 
