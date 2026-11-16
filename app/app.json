@@ -8,13 +8,18 @@
     "scheme": "mjlum",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.justinbsg.mjlum",
       "icon": "./assets/images/icon.png",
       "infoPlist": {
-        "CFBundleDevelopmentRegion": "zh-Hant-HK"
+        "CFBundleDevelopmentRegion": "zh-Hant-HK",
+        "CFBundleLocalizations": [
+          "zh-Hant-HK"
+        ]
       },
       "buildNumber": "1"
     },
     "android": {
+      "package": "com.justinbsg.mjlum",
       "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#1E3A8A",
@@ -53,7 +58,15 @@
       "reactCompiler": true
     },
     "extra": {
-      "release": 1
+      "release": 1,
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "930fdbd5-d9e8-4cc2-8340-74718a08ace2"
+      }
     }
   }
 }
