@@ -1282,7 +1282,11 @@ export default function SessionScreen() {
                 <Choice
                   key={player.id}
                   label={`${player.name}`}
-                  onPress={() => setIncomingId(player.id)}
+                  onPress={() =>
+                    setIncomingId((current) =>
+                      current === player.id ? null : player.id,
+                    )
+                  }
                   selected={incomingId === player.id}
                 />
               ))}
@@ -1294,7 +1298,11 @@ export default function SessionScreen() {
                   <Choice
                     key={seat.index}
                     label={`${seat.index + 1} ${player?.name ?? ""}`}
-                    onPress={() => setSeatIndex(seat.index)}
+                    onPress={() =>
+                      setSeatIndex((current) =>
+                        current === seat.index ? null : seat.index,
+                      )
+                    }
                     selected={seatIndex === seat.index}
                   />
                 );
@@ -1305,7 +1313,12 @@ export default function SessionScreen() {
                   onPress={() => setPanel(null)}
                   selected={false}
                 />
-                <Choice label="確定" onPress={confirmSwap} selected={false} />
+                <Choice
+                  label="確定"
+                  onPress={confirmSwap}
+                  selected={false}
+                  disabled={incomingId === null || seatIndex === null}
+                />
               </ThemedView>
             </ThemedView>
           ) : null}
@@ -1318,8 +1331,9 @@ export default function SessionScreen() {
                   key={player.id}
                   label={`${player.name}${canRemovePlayer(session, player.id) ? " · 可移除" : ""}`}
                   onPress={() => {
-                    setRosterPlayerId(player.id);
-                    setRosterName(player.name);
+                    const deselect = rosterPlayerId === player.id;
+                    setRosterPlayerId(deselect ? null : player.id);
+                    setRosterName(deselect ? "" : player.name);
                   }}
                   selected={rosterPlayerId === player.id}
                 />
@@ -1339,6 +1353,7 @@ export default function SessionScreen() {
               <ThemedView style={styles.row}>
                 <Choice
                   label="改名"
+                  disabled={rosterPlayerId === null || rosterName.trim() === ""}
                   onPress={() => {
                     if (!rosterPlayerId) return;
                     const next = renamePlayer(
@@ -1352,6 +1367,10 @@ export default function SessionScreen() {
                 />
                 <Choice
                   label="移除"
+                  disabled={
+                    rosterPlayerId === null ||
+                    !canRemovePlayer(session, rosterPlayerId)
+                  }
                   onPress={() => {
                     if (!rosterPlayerId) return;
                     const next = removePlayer(session, rosterPlayerId);
@@ -1372,6 +1391,15 @@ export default function SessionScreen() {
                     key={seat.index}
                     label={`${seat.index + 1} ${player?.name ?? ""}`}
                     onPress={() => {
+                      if (swapA === seat.index) {
+                        setSwapA(swapB);
+                        setSwapB(null);
+                        return;
+                      }
+                      if (swapB === seat.index) {
+                        setSwapB(null);
+                        return;
+                      }
                       if (
                         swapA === null ||
                         (swapA !== null && swapB !== null)
@@ -1399,6 +1427,7 @@ export default function SessionScreen() {
                 />
                 <Choice
                   label="換位"
+                  disabled={swapA === null || swapB === null}
                   onPress={() => {
                     if (swapA === null || swapB === null) return;
                     const next = swapSeats(session, swapA, swapB);
