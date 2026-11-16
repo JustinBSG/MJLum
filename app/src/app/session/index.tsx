@@ -601,13 +601,13 @@ export default function SessionScreen() {
                       ? "統計數據"
                       : panel === "ledger"
                         ? "詳細記錄"
-                        : panel && panel !== "draw"
+                        : panel && panel !== "draw" && panel !== "undo"
                           ? "牌局設定"
                           : "現時牌局"}
               </ThemedText>
             </View>
             <Action label="首頁" onPress={() => router.replace("/")} />
-            {panel && panel !== "draw" ? (
+            {panel && panel !== "draw" && panel !== "undo" ? (
               <Action
                 label="返回"
                 icon={ArrowLeft}
@@ -621,7 +621,7 @@ export default function SessionScreen() {
               />
             )}
           </View>
-          {panel === null || panel === "draw" ? (
+          {panel === null || panel === "draw" || panel === "undo" ? (
             <>
               {savedNotice ? (
                 <ThemedText
@@ -1576,23 +1576,6 @@ export default function SessionScreen() {
             </ThemedView>
           ) : null}
 
-          {panel === "undo" ? (
-            <ThemedView style={styles.panel}>
-              <ThemedText type="subtitle">還原上一筆？</ThemedText>
-              <ThemedText themeColor="textSecondary">
-                分數、彩池及牌局進度會回到上一筆記錄之前。
-              </ThemedText>
-              <ThemedView style={styles.row}>
-                <Choice
-                  label="取消"
-                  onPress={() => setPanel(null)}
-                  selected={false}
-                />
-                <Choice label="確定" onPress={confirmUndo} selected={false} />
-              </ThemedView>
-            </ThemedView>
-          ) : null}
-
           {panel === "fresh" ? (
             <ThemedView style={styles.panel}>
               <ThemedText accessibilityLanguage={APP_LOCALE}>新牌局</ThemedText>
@@ -1709,6 +1692,28 @@ export default function SessionScreen() {
             <View style={styles.row}>
               <Action label="取消" onPress={() => setPanel(null)} />
               <Action label="確認流局" primary onPress={confirmDraw} />
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={panel === "undo"}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPanel(null)}
+      >
+        <View style={styles.overlay}>
+          <View accessibilityViewIsModal style={styles.dialog}>
+            <ThemedText type="subtitle">還原上一筆？</ThemedText>
+            <ThemedText>分數、彩池及牌局進度會回到上一筆記錄之前。</ThemedText>
+            <View style={styles.row}>
+              <Action label="取消" onPress={() => setPanel(null)} />
+              <Action
+                label="確定還原"
+                primary
+                onPress={confirmUndo}
+                disabled={!session?.ledger.length}
+              />
             </View>
           </View>
         </View>
