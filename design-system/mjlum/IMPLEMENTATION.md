@@ -1,20 +1,20 @@
-# 麻雀諗 UI implementation · Version 1 / Release 1
+# MJLum UI implementation · Version 1 / Release 1
 
-設計依據為 [MASTER.md](MASTER.md)，功能及計分規則以 [features.md](../../docs/features.md) 和 [guide.md](../../docs/guide.md) 為準。發行來源為 UAT `233c446`。
+Visual design follows [MASTER.md](MASTER.md). Functionality and scoring follow [features.md](../../docs/features.md) and [guide.md](../../docs/guide.md). The accepted UAT feature baseline is `233c446`; the designated release commit is `e50f8ec`.
 
-## 畫面對應
+## Screen mapping
 
-- `/`：開始／繼續牌局、清除現局並開新局、玩法及牌局紀錄。
-- `/rules/hong-kong` → `/rules/edit`：預設／自訂玩法、雙端番數滑桿、分數表、開關及儲存／放棄彈窗。
-- `/session/seat`：玩家名稱、明確的起莊玩家選擇。
-- `/session`：使用元件狀態切換牌桌、記分、紀錄、找數、統計及工具面板，沒有使用 `?view=` 作為頁籤路由。
-- 牌桌：兩欄大字分數、圈風進度、未入座玩家卡片；流局及還原以覆蓋牌桌的彈窗確認。
-- 記分：選食糊玩家、設定範圍內的完整番數選項、自摸或出銃者、特殊規則及預覽確認。
-- 換人：在座及未入座兩個獨立區域，已選玩家／座位可再按取消。
-- 紀錄／牌局設定：欄名、格線及數字對齊的表格，較寬表格可橫向捲動。
-- 找數：非零淨額及未分配彩池；統計：既有計數、比率、稱號及雷達圖。
-- 擲骰：SVG 骰仔及短暫翻滾動畫，尊重減少動態效果。
+- `/`: start/continue a session, confirm clearing the current session and starting another, choose rules, and browse saved sessions.
+- `/rules/hong-kong` → `/rules/edit`: presets/custom rules, dual-handle fan slider, score table, switches, and save/discard dialogs.
+- `/session/seat`: player names and explicit starting-dealer selection.
+- `/session`: component state switches between table, scoring, history, settlement, statistics, and tool panels; tabs do not use `?view=` routes.
+- **Table:** two-column large scores, wind progress, and reserve-player cards. Draw and undo confirmations appear in modals above the table.
+- **Scoring:** winner selection, the full configured fan range, self-draw or discarder, special cases, and preview confirmation.
+- **Substitution:** separate seated and reserve zones; tap a selected player or seat again to deselect it.
+- **History/session settings:** tables with headings, grid lines, aligned numbers, and horizontal scrolling where needed.
+- **Settlement:** non-zero net balances and the unallocated pool. **Statistics:** existing counts, rates, titles, and radar charts.
+- **Dice:** SVG faces and short rolling animation that respects reduced-motion preferences.
 
-共用元件位於 `app/src/components/`，操作圖示使用 Lucide SVG，品牌麻雀圖示為原創向量。正式平台為 iOS／Android，本機 SQLite 保存資料；網頁採記憶體資料庫，只作預覽。淺色為本次交付主題。
+Shared components are in `app/src/components/`. Action icons use Lucide SVG; the Mahjong brand icon is original vector artwork. The production platforms are iOS and Android with local SQLite storage. The web version is a preview with an in-memory database. The delivered theme is light.
 
-相依套件以 `app/package-lock.json` 為準；`@resvg/resvg-js` 為品牌素材匯出用的開發相依套件，不是 App 原生模組。載入畫面支援 Expo Go；原生啟動畫面需使用獨立安裝版驗證。
+Dependencies are pinned in `app/package-lock.json`. `@resvg/resvg-js` is a development dependency for brand-asset export, not an app native module. The in-app loading screen works in Expo Go; verify the native splash in a standalone installation.

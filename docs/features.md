@@ -1,20 +1,20 @@
-# UI 功能入口
+# Implemented interface features
 
-目前版本為 **Version 1 · Release 1（1.0.0）**。完整發行內容及驗證範圍見 [發行紀錄](releases/v1.0.0.md)。
+The current version is **Version 1 · Release 1 (1.0.0)**. See the [release record](releases/v1.0.0.md) for the full scope and validation record.
 
-產品行為以 [guide.md](guide.md) 為準；視覺以 [MASTER.md](../design-system/mjlum/MASTER.md) 為準。
+Product behavior follows [guide.md](guide.md); visual design follows [MASTER.md](../design-system/mjlum/MASTER.md).
 
-- 開局：選玩法、修改番數表／開關、入座並指定莊家。
-- 牌桌：大字分數、莊家標記、食糊及流局；其他工具收進更多。
-- 未入座玩家：在牌桌主要操作下方以獨立卡片顯示姓名、未入座標記及累積分數；保留正負號及分數顏色。
-- 換人：分開在座玩家與未入座玩家兩個區域，分別選換出及換入對象；新玩家在未入座區加入，再按已選項目可取消。
-- 擲骰：1–9 粒骰仔以短暫翻滾動畫顯示，停低後顯示各粒點數、總點數及方位；動畫期間停用重複擲骰及數量調整，離開會清理動畫。啟用減少動態效果時直接顯示結果，沿用原有隨機及方位算法。
-- 食糊：選玩家、從起糊至滿糊的完整選項選番數、選自摸或出銃者、開關特殊情況、預覽確認。
-- 記錄：事件／分數／綜合以表格呈現，支援順序／倒序與既有編輯功能。
-- 玩法界限：起糊及滿糊共用一條雙端滑桿。
-- 流局：在現時牌局上以彈窗確認；取消不會改動牌局。
-- 首頁：可繼續牌局，或經確認清除現局並開新局；保留其他已儲存牌局。
-- 找數：玩家淨額及彩池未分配狀態。
-- 統計：現有統計引擎、稱號及雷達圖，不能自行新增公式。
-- 輸入：數字鍵盤支援完成、取消、刪除，小數及精確分數；保留原驗證。
-- 開啟 App：顯示麻雀角色及「正在準備牌桌」；本機資料庫初始化期間保留載入畫面，完成後進入介面。Expo Go 顯示共用的程式內載入畫面，原生啟動畫面的完整效果需在正式版本驗證。
+- **Session setup:** choose rules, edit the fan table and switches, seat players, and select the starting dealer.
+- **Table:** large scores, dealer indicators, win entry, and drawn-hand entry. Other utilities are in the More menu.
+- **Unseated players:** separate cards below the main table actions show each person's name, reserve status, and accumulated balance, preserving signs and score colors.
+- **Substitution:** separate seated and unseated zones identify the outgoing and incoming players. Add new players in the unseated zone. Tap a selected option again to deselect it.
+- **Dice:** roll one to nine dice with a short animation, then show individual faces, the total, and the direction. Repeated rolls and count changes are disabled during animation; leaving the panel cleans it up. Reduced-motion mode shows the result immediately. The existing random-number and direction algorithms are preserved.
+- **Win entry:** choose winners, select from the full configured minimum-to-cap fan range, choose self-draw or the discarder, set special cases, and confirm the preview.
+- **History:** event, score, and combined tables support forward/reverse ordering and the existing editing actions. Event and combined views identify the winning player.
+- **Rule limits:** minimum and capped fan values share one dual-handle slider.
+- **Draw confirmation:** a modal appears over the current table. Cancelling leaves the session unchanged.
+- **Home:** continue the current session or confirm clearing it and starting another, while retaining other saved sessions.
+- **Settlement:** player net balances and unallocated pool status.
+- **Statistics:** existing counts, rates, titles, and radar charts; interface changes do not introduce new formulas.
+- **Numeric input:** Done, Cancel, Delete, decimals, and exact fractions, with existing validation retained.
+- **Startup:** the Mahjong mascot and a table-preparation message (正在準備牌桌) remain visible while the local database initializes. Expo Go displays the shared in-app loading screen; verify the complete native splash behavior in a standalone release build.

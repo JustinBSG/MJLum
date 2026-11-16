@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** 麻雀諗
+**Project:** MJLum
 **Generated:** 2026-11-15 01:04:36
 **Category:** Wiki / Encyclopedia
 **Design Dials:** Variance 4/10 (Balanced / Modern) | Motion 3/10 (Subtle) | Density 8/10 (Dense / Dashboard)

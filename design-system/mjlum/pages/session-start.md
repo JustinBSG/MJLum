@@ -1,4 +1,4 @@
-# 麻雀諗 — session-start
+# MJLum — session-start
 
 Overrides to ../MASTER.md for the physical-table Expo / React Native app.
 
@@ -8,6 +8,6 @@ Overrides to ../MASTER.md for the physical-table Expo / React Native app.
 - Mobile tool layout, not FAQ/marketing layout. No search requirement for a four-person scoreboard.
 - Touch controls ≥52 units, gap ≥8, visible 3-unit focus ring, explicit selected state, safe areas and scrolling.
 - Lucide SVG; no emoji, gradients, glass or decorative animation. Respect system reduced-motion preferences; dice rolling has a short functional animation.
-- Traditional Chinese (Hong Kong) UI only; use 彩池 for Jackpot UI.
+- Traditional Chinese (Hong Kong) UI only; use the pool label 彩池 for Jackpot UI.
 - Product source: docs/guide.md as designated by docs/README.md. docs/product.md links to that guide; docs/features.md records the implemented Version 1 / Release 1 UI.
 - Keep existing exact-score engine, local repositories, player attribution and statistics formulas. Settlement shows non-zero roster balances and unallocated pool; no transfer calculation or payment tracking.

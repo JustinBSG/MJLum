@@ -1,7 +1,7 @@
-# 產品規則入口
+# Product rules
 
-目前版本為 **Version 1 · Release 1（1.0.0）**，UAT 已確認完成。版本來源及範圍見 [發行紀錄](releases/v1.0.0.md)。
+The current version is **Version 1 · Release 1 (1.0.0)**, with UAT accepted. See the [release record](releases/v1.0.0.md) for provenance and scope.
 
-本專案的完整產品規則已記錄於 [guide.md](guide.md)。本文件不另設或覆寫計分規則。
+The complete product rules are in [guide.md](guide.md). This entry point does not define or override scoring rules.
 
-麻雀諗是繁體中文（香港）的實體牌桌記分工具：本機保存、單裝置、無帳號、無廣告、無資料分享。首版香港麻雀；電視顯示為第二版。找數顯示淨額及彩池，不產生轉帳配對。UI 改版保留現有計分引擎與驗證。
+MJLum is an in-person Mahjong scorekeeper with a Traditional Chinese (Hong Kong) interface. It stores data locally on one device, with no account, ads, or data sharing. The first release supports Hong Kong Mahjong; TV display is second-release work. Settlement shows net balances and the pool, without generating transfer pairings. Interface changes preserve the existing scoring engine and validation.

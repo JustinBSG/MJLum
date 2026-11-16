@@ -1,14 +1,46 @@
-# 麻雀諗
+# MJLum scoring and session guide
 
-**Version 1 · Release 1（1.0.0）於 2026-11-17 確認 UAT 完成。** 目前已實作的操作見 [features.md](features.md)，版本及驗證範圍見 [發行紀錄](releases/v1.0.0.md)。本文保留較早的影片觀察；早期標為 unspecified 的介面／歷史操作，若已有後文產品決定及目前功能文件，應按已實作行為理解。此版本宣告不會更改任何計分公式或證據標記。
+**Version 1 · Release 1 (1.0.0) completed UAT on 17 November 2026.** See [features.md](features.md) for implemented interactions and the [release record](releases/v1.0.0.md) for versions and validation scope. This guide retains earlier video observations. Where an interface or history flow was originally marked unspecified, later product decisions and the current feature guide describe the implemented behavior. The release declaration does not change scoring formulas or evidence labels.
 
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
 This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 15 November 2026, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
 
-Scoring, session, and settings behaviour that is marked **taken from the local reference** (reference-demonstrated) is established by that reference and should be followed. **麻雀諗 product decisions** are decided for this app and must not be treated as reference-established fact. Behaviour that was not found in the reference and has not been decided is marked **unspecified** and must not be invented. This document does not copy a competitor UI. Ads that appear in the local reference are the reference app’s, not 麻雀諗 features.
+Scoring, session, and settings behaviour that is marked **taken from the local reference** (reference-demonstrated) is established by that reference and should be followed. **MJLum product decisions** are decided for this app and must not be treated as reference-established fact. Behaviour that was not found in the reference and has not been decided is marked **unspecified** and must not be invented. This document does not copy a competitor UI. Ads that appear in the local reference are the reference app’s, not 麻雀諗 features.
 
 How facts are labelled is in [`docs/README.md`](README.md). Technical choices are in [`docs/development.md`](development.md).
+
+## Interface and rule terminology
+
+The explanations in this guide are English. Original Traditional Chinese interface labels, preset names, and reference quotations are retained to make the evidence and app controls identifiable. They are not a request to translate the app interface.
+
+| Original label | English meaning used in this guide |
+|---|---|
+| 麻雀諗 | MJLum, the app name |
+| 食糊 / 食糊玩家 | Win / winning player |
+| 自摸 / 出銃者 | Self-draw / discarder |
+| 全銃 / 半銃 | Full-discard / half-discard payment |
+| 詐糊 / 詐糊賠位自摸 | False win / compensate opponents at the self-draw amount |
+| 包付 / 出銃者包自摸 / 出銃者包輸 | Liability payment / named payer covers self-draw / named payer covers the ordinary win |
+| 一炮多響 | Multiple winners on one discard |
+| 番數 / 起糊 / 滿糊 | Fan value / minimum winning fan / capped fan |
+| 食糊分數 / 自摸分數 / 自摸倍數 | Ordinary-win amount / self-draw total / self-draw multiplier |
+| 流局 / 流局時過莊 | Drawn hand / pass dealer on a drawn hand |
+| 莊 / 連莊 / 留莊 / 過莊 | Dealer / consecutive dealership / retain dealer / pass dealer |
+| 圈風 / 局數 / 牌局進度 | Circle and wind / hand count / session progress |
+| 彩池 / 贏取Jackpot / 平分Jackpot | Pool / claim the pool / split the pool |
+| 尚未分配 / 未有資料 | Unallocated / no data |
+| 牌桌 / 現時賽果 / 找數 | Table / Current Scores / Settlement |
+| 玩法設定 / 新牌局 / 詳細紀錄 | Rules Setup / New Session / Detailed History |
+| 事件 / 分數 / 綜合 | Events / Scores / Combined |
+| 食糊率 / 自摸率 / 出銃率 | Win rate / self-draw rate / discard-loss rate |
+| 平均番數 / 平均出銃番數 | Average winning fan / average fan conceded on winning discards |
+| 食糊王 / 自摸王 / 出銃王 | Most wins / most self-draws / most winning discards conceded |
+| 大牌王 / 細牌王 / 冧莊王 / 陪跑員 | Highest average fan / lowest average fan / longest retained dealership / supporting player |
+| 進攻 / 牌力 / 防守 | Attack / hand strength / defense |
+| 擲骰 / 自家 / 下家 / 對家 / 上家 | Roll dice / own seat / next seat / opposite seat / previous seat |
+
+Preset names such as 3番4, 二五雞, 五一, 一二蚊, 半辣上, and 辣辣上 are retained as identifiers. Their score tables, rather than an inferred English name, define their behavior. Wind examples use 東 (East), 南 (South), 西 (West), and 北 (North).
 
 ## What the app is for
 
@@ -320,7 +352,7 @@ Demonstrated three-player settlements:
 - Then a 3番 自摸 (total 4; each of the other two paid 2): a +1, b −2, c +1, b 莊, 東圈西風.
 - Then 4番 自摸, footer 6 × 1.33 = 8 (self-draw total equals F × 4/3; each of the two opponents paid 4): a −3, b +6, c −3, b 莊 with 連1, 東圈西風.
 
-**麻雀諗 product decision (16 November 2026).** Three-player 詐糊, 包自摸, and 包輸 use that setup’s own S and m. Three players are not forced to 4/3. 詐糊 with 賠位自摸 off: the offender pays 2S and each of the other two receives S. With 賠位自摸 on, those amounts are mS. 包自摸 pays mS from one named player and counts as 自摸. 包輸 pays S from one named player and counts as that player’s 出銃. The third player pays 0. 出銃者包自摸 and 出銃者包輸 cannot be on together, and neither combines with 一炮多響. Switching 二五雞, 五一, 一二蚊, or another four-player preset to three players keeps that preset’s S and m; a self-draw total is split across the two opponents. Only 3番4辣辣上 replaces the table and uses 4/3. On a 半銃 table, 包付 replaces the 半銃 split: 包自摸 pays mS from the named player, 包輸 pays S from the named player, and every other player pays 0. The same amounts apply to three and four players. The hand screen says 本手包付，半銃分攤不適用.
+**MJLum product decision (16 November 2026).** Three-player 詐糊, 包自摸, and 包輸 use that setup’s own S and m. Three players are not forced to 4/3. 詐糊 with 賠位自摸 off: the offender pays 2S and each of the other two receives S. With 賠位自摸 on, those amounts are mS. 包自摸 pays mS from one named player and counts as 自摸. 包輸 pays S from one named player and counts as that player’s 出銃. The third player pays 0. 出銃者包自摸 and 出銃者包輸 cannot be on together, and neither combines with 一炮多響. Switching 二五雞, 五一, 一二蚊, or another four-player preset to three players keeps that preset’s S and m; a self-draw total is split across the two opponents. Only 3番4辣辣上 replaces the table and uses 4/3. On a 半銃 table, 包付 replaces the 半銃 split: 包自摸 pays mS from the named player, 包輸 pays S from the named player, and every other player pays 0. The same amounts apply to three and four players. The hand screen states that liability payment replaces the half-discard split (本手包付，半銃分攤不適用).
 
 ### Fan range and the score table
 
@@ -346,7 +378,7 @@ The main demonstrated custom table, with minimum 3 and cap 10:
 
 Example of the self-draw derivation: 512 × 1.50 = 768 total; 256 paid by each of the three opponents.
 
-**麻雀諗 product decision (16 November 2026).** 滿糊 may be set above 13. A declared fan above 滿糊 scores at the 滿糊 amount. If 滿糊 itself is set to 14 or higher, that fan’s cell must be filled before the session can start; the screen names the empty fans. Do not fill fan 14 from the previous cell, and do not keep doubling a 辣辣上 table past 13 unless the user typed the amount. Fans 9–13 are filled only for 一二蚊辣辣上 and 3番4半辣上（三人）, as recorded above. A three-player self-draw total is split across the two opponents.
+**MJLum product decision (16 November 2026).** 滿糊 may be set above 13. A declared fan above 滿糊 scores at the 滿糊 amount. If 滿糊 itself is set to 14 or higher, that fan’s cell must be filled before the session can start; the screen names the empty fans. Do not fill fan 14 from the previous cell, and do not keep doubling a 辣辣上 table past 13 unless the user typed the amount. Fans 9–13 are filled only for 一二蚊辣辣上 and 3番4半辣上（三人）, as recorded above. A three-player self-draw total is split across the two opponents.
 
 The board and 找數 show at most two decimal places, half away from zero. 4.5 stays 4.5. −32/3 shows ≈−10.67. −10.665 shows −10.67. Tapping a score shows the exact fraction. The rounded text is not written back into the ledger. A jackpot of 200 split three ways stores 200/3 each.
 
@@ -364,7 +396,7 @@ In an opened 五一辣辣上 rule setup, Jackpot 啟用 was off by default. Turn
 
 The first release includes Jackpot as a visible option.
 
-**麻雀諗 product decision:** 平分Jackpot gives the whole current pool to one or more players who are sitting now. Nobody selected cannot confirm. Someone who has left the table is not a recipient. Taking only part of the pool is not in this scope. 找數 shows the pool remainder and marks a non-zero pool 尚未分配. It does not list transfers.
+**MJLum product decision:** 平分Jackpot gives the whole current pool to one or more players who are sitting now. Nobody selected cannot confirm. Someone who has left the table is not a recipient. Taking only part of the pool is not in this scope. 找數 shows the pool remainder and marks a non-zero pool 尚未分配. It does not list transfers.
 
 ### Dealer, wind, and session progress
 
@@ -378,7 +410,7 @@ The first release includes Jackpot as a visible option.
 - Session progress can be shown as circle/wind (for example 東圈東風) or as a hand count. The session can also show the active rules name, start date, and hand count (for example 玩法, 開始日期, 總局數, 牌局進度, and 進度顯示方式 圈風 or 局數). A consecutive-dealer mark (連N) can appear on the dealer tile after a consecutive dealer win; 連1 was shown. 冧X is the drawn-hand badge when 流局時過莊 is off; it is not the same mark as 連N.
 - Mid-session rule values can be inspected. Whether they can be edited, and what that would do to already-recorded hands, is not established.
 
-**麻雀諗 product decision (16 November 2026).** An older hand can be revised after the rules have changed when every later row has a replayable action and the rules used for that hand were stored. Later hands keep their own rules. If a later row cannot be replayed, the edit is blocked and the message names that row.
+**MJLum product decision (16 November 2026).** An older hand can be revised after the rules have changed when every later row has a replayable action and the rules used for that hand were stored. Later hands keep their own rules. If a later row cannot be replayed, the edit is blocked and the message names that row.
 
 ### Seats, roster, and substitution
 
@@ -388,7 +420,7 @@ The first release includes Jackpot as a visible option.
 - Each seated player has a name, an identifying avatar, and a running net balance starting at 0. A name is required before that player can be confirmed.
 - A further person can be added to the roster without adding another live seat, then substituted into a seat. The departing player’s balances and history stay with that person and still count in settlement. The substitute starts that seat at 0 and does not inherit the previous occupant’s result. Players not currently seated do not pay for later hands.
 
-**麻雀諗 product decision (16 November 2026).** The roster has no maximum size. Three or four players sit; everyone else is a reserve. Only players sitting now can receive a jackpot split.
+**MJLum product decision (16 November 2026).** The roster has no maximum size. Three or four players sit; everyone else is a reserve. Only players sitting now can receive a jackpot split.
 
 ### Starting a session and starting a new session
 
@@ -451,11 +483,11 @@ The first release includes 詐糊, 出銃者包自摸, and 出銃者包輸 as vi
 
 **例牌** records a normal win at the current 滿糊 amount. It still needs a winner and either 自摸 or a discarder. It does not add a second multiplier, and it is not a 流局. 例牌 with 詐糊 or 一炮多響 is refused.
 
-**麻雀諗 product decision (16 November 2026).** 相沖 is not in this release, and there is no automatic 相沖 payout. 調分 stays a separate correction of one player's balance. It stores a reason and does not change 食糊, 莊, 圈風, or the pool. It is not a 相沖 settlement, because a transfer between players has to record who gains and who loses in the same entry, with the amounts adding to 0. A later manual 相沖 would submit every related player's plus and minus together and reject an entry that does not total 0.
+**MJLum product decision (16 November 2026).** 相沖 is not in this release, and there is no automatic 相沖 payout. 調分 stays a separate correction of one player's balance. It stores a reason and does not change 食糊, 莊, 圈風, or the pool. It is not a 相沖 settlement, because a transfer between players has to record who gains and who loses in the same entry, with the amounts adding to 0. A later manual 相沖 would submit every related player's plus and minus together and reject an entry that does not total 0.
 
-**麻雀諗 product decision (16 November 2026).** 半銃 combined with 包自摸 or 包輸 keeps the full 包 amount. The named payer pays mS or S, and the other players pay 0. There is no extra 半銃 share.
+**MJLum product decision (16 November 2026).** 半銃 combined with 包自摸 or 包輸 keeps the full 包 amount. The named payer pays mS or S, and the other players pay 0. There is no extra 半銃 share.
 
-**麻雀諗 product decision (16 November 2026).** 包自摸 or 包輸 combined with 一炮多響 stays out of this release. A normal 全銃 or 半銃 一炮多響 is scored, and a single-winner 包 hand is scored. Opening 一炮多響 while 包付 is on does not clear 包付 or record an ordinary multi-win. The screen asks for 包付 to be turned off first. Inside 一炮多響, both 包 controls stay off and the screen says 一炮多響未支援包自摸或包輸.
+**MJLum product decision (16 November 2026).** 包自摸 or 包輸 combined with 一炮多響 stays out of this release. A normal 全銃 or 半銃 一炮多響 is scored, and a single-winner 包 hand is scored. Opening 一炮多響 while 包付 is on does not clear 包付 or record an ordinary multi-win. The screen asks for 包付 to be turned off first. Inside 一炮多響, both 包 controls stay off and the screen says 一炮多響未支援包自摸或包輸.
 
 ### Undo
 
@@ -504,7 +536,7 @@ This reconciles: c pays 24 + 196 = 220; b pays 668; d pays 8; e receives 24; a r
 
 The transfer list above is what the local reference demonstrated. It is not a 麻雀諗 requirement.
 
-**麻雀諗 product decision:** settlement (找數) shows each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配 and is not treated as another player. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
+**MJLum product decision:** settlement (找數) shows each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配 and is not treated as another player. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
 
 Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
@@ -520,7 +552,7 @@ These utilities are part of the same-functionality first release, not extra feat
 - Title badges summarize performance. Demonstrated titles include 自摸王, 出銃王, 食糊王, 大牌王, 細牌王, 陪跑員, and 冧莊王 (冧 U+51A7; shown on an empty-session card together with 陪跑員). More than one player can hold the same title at once, so a title is not automatically exclusive (in the demonstrated list, c and d both had 6 出銃 and both showed 出銃王). How 冧莊王 is awarded remains unspecified.
 - A radar chart is a visual summary of a player across three labelled dimensions: 進攻, 牌力, and 防守. No numeric scale, weights, or formula was established in the reference; the 麻雀諗 mapping is recorded below as a product decision.
 - A dice utility (擲骰) can be used at the table to roll dice. The demonstrated dialog is − / 擲骰 / +. The count ranges from 1 to 9. A roll shows a total and a seat label (對家, 自家, and 上家 were seen; 下家 did not appear in those rolls). Demonstrated rolls: 35 對家 (9 dice), 29 自家 (9), 20 上家 (6), 13 自家 (3), 9 自家 (3), 3 對家 (1). After the dialog closed, scores were still 0 and d was still 莊 with 東圈東風: the roll did not assign the dealer or write scores. The button label is 擲骰, not 重擲.
-- Fan-help is opened from the 食糊! dialog by the circled ? beside 番數. It is not a separate page. The full demonstrated help text is only: title 現時設定下; body 這裏只需輸入牌型番數 (這裏 uses 裏 U+88CF, not 這裡). A separate page titled 番數說明 was not shown, and no further help content was opened. This help text is reference-demonstrated, not a 麻雀諗 invention.
+- Fan-help is opened from the 食糊! dialog by the circled ? beside 番數. It is not a separate page. The full demonstrated help text is only: title "Under the current settings" (現時設定下); body "Only enter the hand-pattern fan here" (這裏只需輸入牌型番數) (這裏 uses 裏 U+88CF, not 這裡). A separate page titled 番數說明 was not shown, and no further help content was opened. This help text is reference-demonstrated, not a 麻雀諗 invention.
 
 Demonstrated statistics list in one session:
 
@@ -544,7 +576,7 @@ A later session’s board was a −64, b 132, c 68, d −136, 南圈北風, b �
 
 In those cards, 自摸率 matched 自摸/食糊 where 食糊 > 0 (c 1/3, d 1/1). An empty-session card for d showed 0/0/0, 0 平均番數, 0% rates, 0 平均出銃番數, titles 冧莊王 and 陪跑員, and a radar labelled 進攻.
 
-**麻雀諗 product decision (15 November 2026).** Counts stay on the player, not the seat. H is a completed normal hand while seated, including a normal 流局, and excludes 詐糊, undo, a cancelled entry, a pure balance change, a pool payout, and a seat change. W includes 自摸. Z includes 出銃者包自摸, and that payer does not gain D. One 一炮多響 adds 1 to D and adds every winner’s scoring fan to L. F and L use the scoring fan. Rates are 自摸率 100×Z/W, 食糊率 100×W/H, 出銃率 100×D/H, 平均番數 F/W, and 平均出銃番數 L/D. A zero denominator is shown as 「—」. Display uses two-decimal half-up from the raw counts: floor(100x+0.5)/100, with the count fraction beside a percent, for example 33.33%（1/3）. 平均出銃番數 is labelled 多響番數合計.
+**MJLum product decision (15 November 2026).** Counts stay on the player, not the seat. H is a completed normal hand while seated, including a normal 流局, and excludes 詐糊, undo, a cancelled entry, a pure balance change, a pool payout, and a seat change. W includes 自摸. Z includes 出銃者包自摸, and that payer does not gain D. One 一炮多響 adds 1 to D and adds every winner’s scoring fan to L. F and L use the scoring fan. Rates are 自摸率 100×Z/W, 食糊率 100×W/H, 出銃率 100×D/H, 平均番數 F/W, and 平均出銃番數 L/D. A zero denominator is shown as 「—」. Display uses two-decimal half-up from the raw counts: floor(100x+0.5)/100, with the count fraction beside a percent, for example 33.33%（1/3）. 平均出銃番數 is labelled 多響番數合計.
 
 Titles remain not automatically exclusive.
 
@@ -558,9 +590,9 @@ Titles remain not automatically exclusive.
 
 The demonstrated title list is consistent with this rule. Other players’ 平均番數 were not shown, so that screen does not independently prove the 大牌王 / 細牌王 averages.
 
-**麻雀諗 product decision (15 November 2026).** Each radar axis is 0–100 with no extra weights. 進攻 = 100×W/H. 防守 = 100×(1−D/H). 牌力 = 100×clamp((F/W−起糊)/(滿糊−起糊), 0, 1). H = 0 shows 未有資料 for 進攻 and 防守. W = 0 or 起糊 = 滿糊 shows 未有資料 for 牌力. A missing axis is not drawn as 0.
+**MJLum product decision (15 November 2026).** Each radar axis is 0–100 with no extra weights. 進攻 = 100×W/H. 防守 = 100×(1−D/H). 牌力 = 100×clamp((F/W−起糊)/(滿糊−起糊), 0, 1). H = 0 shows 未有資料 for 進攻 and 防守. W = 0 or 起糊 = 滿糊 shows 未有資料 for 牌力. A missing axis is not drawn as 0.
 
-**麻雀諗 product decision:** the dice utility is only a roll so players can see where they start collecting tiles from the four walls (bridges) in real life. Minimum 1 die, maximum 9 dice. It does not assign the dealer or write scores. This purpose sentence is not on-screen copy from the reference; the demonstrated UI is recorded above.
+**MJLum product decision:** the dice utility is only a roll so players can see where they start collecting tiles from the four walls (bridges) in real life. Minimum 1 die, maximum 9 dice. It does not assign the dealer or write scores. This purpose sentence is not on-screen copy from the reference; the demonstrated UI is recorded above.
 
 **Unspecified:** fan-help content beyond the short popup recorded above. Separate money attribution for a substitute, while the playing statistics stay with that person, is decided and not yet a control.
 

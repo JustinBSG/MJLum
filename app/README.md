@@ -1,29 +1,29 @@
-# 麻雀諗 App
+# MJLum App
 
-Version 1 · Release 1：`1.0.0`，iOS build `1`，Android version code `1`，Expo extra release `1`。發行紀錄見 [v1.0.0](../docs/releases/v1.0.0.md)。
+Version 1 · Release 1: app version `1.0.0`, iOS build `1`, Android version code `1`, and Expo extra release `1`. See the [release record](../docs/releases/v1.0.0.md).
 
-## 環境及執行
+## Environment and development
 
-使用 Node.js 22.13+（22.x）或 24.3+（24.x）及 npm；相依版本以 `package-lock.json` 為準。技術基礎為 Expo SDK 58、React Native 0.88、Expo Router 及 SQLite。
+Use Node.js 22.13+ within 22.x or 24.3+ within 24.x, with npm. Dependency versions are pinned in `package-lock.json`. The app uses Expo SDK 58, React Native 0.88, Expo Router, and SQLite.
 
-在本目錄執行：
+Run from this directory:
 
 ```powershell
 npm ci
 npx expo start --go --lan
 ```
 
-手機與電腦連接同一 Wi-Fi，掃描 Terminal 的 QR Code，以 Expo Go 開啟。測試期間保持 Terminal 運行。若介面仍顯示舊版，先確認已更新對應 Git 分支，再使用：
+Connect the phone and computer to the same Wi-Fi network, then scan the terminal QR code with Expo Go. Keep the terminal running while testing. If the interface looks outdated, first update the relevant Git branch, then run:
 
 ```powershell
 npx expo start --go --lan --clear
 ```
 
-## 獨立安裝
+## Standalone installation
 
-獨立安裝到 Android 或 iPhone 的完整步驟見 [Standalone installation guide](../docs/deployment.md)（英文）。包括 Android APK、免費 Xcode Personal Team 安裝及每七日續簽、EAS／TestFlight、離線驗證，以及 Xcode 和 Developer Mode 常見問題。獨立安裝版毋須保持 Expo Go、Metro 或與電腦連接同一 Wi-Fi。
+Follow the [standalone installation guide](../docs/deployment.md) for Android APKs, free iPhone installation with Xcode Personal Team and seven-day signing renewal, EAS/TestFlight distribution, offline checks, and Xcode/Developer Mode troubleshooting. A standalone installation runs without Expo Go, Metro, or a computer on the same Wi-Fi network.
 
-## 驗證
+## Validation
 
 ```powershell
 npm run lint
@@ -31,16 +31,16 @@ npx tsc --noEmit
 npm test
 ```
 
-## 原始碼及資料
+## Source code and data
 
-- `src/app/`：Expo Router 頁面；牌桌、記分、紀錄、找數及統計共用 `/session` 內部面板。
-- `src/session/`、`src/score/`、`src/rules/`：牌局、精確分數及玩法規則。
-- `src/storage/`：iOS／Android 本機 SQLite 儲存。
-- `src/components/`：表格、數字鍵盤、雙端滑桿、擲骰動畫、載入畫面及共用按鈕。
-- 網頁使用記憶體資料庫，只供預覽；重新載入會清除該次網頁資料。
+- `src/app/`: Expo Router screens. The table, scoring, history, settlement, and statistics share internal panels under `/session`.
+- `src/session/`, `src/score/`, `src/rules/`: session state, exact-score arithmetic, and scoring rules.
+- `src/storage/`: local SQLite storage on iOS and Android.
+- `src/components/`: tables, numeric keypad, dual-handle slider, dice animation, loading screen, and shared buttons.
+- The web version uses an in-memory database for previews. Refreshing it clears that preview's data.
 
-## 品牌素材
+## Brand assets
 
-修改 `src/constants/brand.ts` 後執行 `npm run generate:brand`，產生 App 圖示、Android adaptive icon、啟動畫面圖案及 favicon。匯出工具只屬開發相依套件。
+After editing `src/constants/brand.ts`, run `npm run generate:brand` to generate the app icon, Android adaptive icons, splash artwork, and favicon. The export tool is a development dependency.
 
-Expo Go 可測試介面及程式內載入畫面；完整原生啟動畫面及手機桌面圖示需以獨立安裝版驗證。Native build、簽署及商店上架是另外的發佈步驟；今次 `main` 發行不會自動產生或上載安裝檔。
+Expo Go supports interface testing and the in-app loading screen. Verify the native splash screen and home-screen icon in a standalone build. Native compilation, signing, and store distribution are separate release steps; pushing `main` does not create or upload installers.
