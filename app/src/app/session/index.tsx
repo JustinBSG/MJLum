@@ -1,3 +1,4 @@
+import { DiceRoller } from "@/components/dice-roller";
 import { DataTable } from "@/components/data-table";
 import { LedgerTable } from "@/components/ledger-table";
 import { router, Stack, useFocusEffect, type Href } from "expo-router";
@@ -48,13 +49,6 @@ import { reviseEntry } from "@/session/history";
 import { useSessionRepository } from "@/session/repository";
 
 import { clearRoster, stageRoster } from "@/session/pending-roster";
-
-import {
-  clampDiceCount,
-  MIN_DICE,
-  rollDice,
-  type DiceRoll,
-} from "@/session/dice";
 
 import {
   addReserve,
@@ -156,8 +150,6 @@ export default function SessionScreen() {
   const [winNotice, setWinNotice] = useState<string | null>(null);
   const [takeJackpot, setTakeJackpot] = useState(false);
   const [splitIds, setSplitIds] = useState<string[]>([]);
-  const [diceCount, setDiceCount] = useState(MIN_DICE);
-  const [diceRoll, setDiceRoll] = useState<DiceRoll | null>(null);
 
   const [lifeError, setLifeError] = useState<string | null>(null);
   const [sessionTitle, setSessionTitleText] = useState("");
@@ -328,8 +320,6 @@ export default function SessionScreen() {
   }
 
   function openDice() {
-    setDiceCount(MIN_DICE);
-    setDiceRoll(null);
     setPanel("dice");
   }
 
@@ -599,13 +589,15 @@ export default function SessionScreen() {
                     ? "找數"
                     : panel === "stats"
                       ? "統計數據"
-                      : panel === "swap"
-                        ? "更換玩家"
-                        : panel === "ledger"
-                          ? "詳細記錄"
-                          : panel && panel !== "draw" && panel !== "undo"
-                            ? "牌局設定"
-                            : "現時牌局"}
+                      : panel === "dice"
+                        ? "擲骰"
+                        : panel === "swap"
+                          ? "更換玩家"
+                          : panel === "ledger"
+                            ? "詳細記錄"
+                            : panel && panel !== "draw" && panel !== "undo"
+                              ? "牌局設定"
+                              : "現時牌局"}
               </ThemedText>
             </View>
             <Action label="首頁" onPress={() => router.replace("/")} />
@@ -1285,39 +1277,7 @@ export default function SessionScreen() {
           {panel === "stats" ? <StatisticsSummary session={session} /> : null}
 
           {panel === "dice" ? (
-            <ThemedView style={styles.panel}>
-              <ThemedText accessibilityLanguage={APP_LOCALE}>擲骰</ThemedText>
-              <ThemedText
-                accessibilityLanguage={APP_LOCALE}
-              >{`${diceCount}`}</ThemedText>
-              <ThemedView style={styles.row}>
-                <Choice
-                  label="−"
-                  onPress={() => setDiceCount(clampDiceCount(diceCount - 1))}
-                  selected={false}
-                />
-                <Choice
-                  label="擲骰"
-                  onPress={() => setDiceRoll(rollDice(diceCount))}
-                  selected={false}
-                />
-                <Choice
-                  label="+"
-                  onPress={() => setDiceCount(clampDiceCount(diceCount + 1))}
-                  selected={false}
-                />
-              </ThemedView>
-              {diceRoll ? (
-                <ThemedText
-                  accessibilityLanguage={APP_LOCALE}
-                >{`${diceRoll.total} ${diceRoll.seat}`}</ThemedText>
-              ) : null}
-              <Choice
-                label="取消"
-                onPress={() => setPanel(null)}
-                selected={false}
-              />
-            </ThemedView>
+            <DiceRoller onClose={() => setPanel(null)} />
           ) : null}
 
           {panel === "swap" ? (
