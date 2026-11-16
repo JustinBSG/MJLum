@@ -51,6 +51,8 @@ npx expo start --go --lan --clear
 
 Expo Go supports UI testing and the in-app loading screen. Validate the complete native splash screen and home-screen icon in a standalone build.
 
+To install the app on a phone and use it without Metro or the same Wi-Fi network, follow the [standalone installation guide](docs/deployment.md). It covers Android APKs, free iPhone installation with Xcode, and iOS distribution through EAS and TestFlight.
+
 ## Development
 
 The app uses **Expo SDK 58**, **React Native 0.88**, **React 19.3**, **Expo Router**, and **SQLite**. Dependency versions are pinned in [`app/package-lock.json`](app/package-lock.json).
@@ -83,6 +85,7 @@ iOS and Android persist records locally. The web version is an interface preview
 |---|---|
 | [Documentation index](docs/README.md) | Product scope and document map |
 | [Release notes](docs/releases/v1.0.0.md) | Version 1 · Release 1 |
+| [Standalone installation](docs/deployment.md) | Android APK, free iPhone signing, EAS distribution, offline checks, and troubleshooting |
 | [Product and scoring guide](docs/guide.md) | Scoring rules, session behavior, and evidence behind decisions |
 | [Feature guide](docs/features.md) | Implemented features and interactions |
 | [App development guide](app/README.md) | Setup, checks, storage, and brand-asset generation |

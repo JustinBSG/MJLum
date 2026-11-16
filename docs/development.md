@@ -1,5 +1,7 @@
 # 麻雀諗 development
 
+Current device deployment and standalone installation steps are in the [Android and iOS installation guide](deployment.md), including free iPhone signing and offline verification.
+
 **2026-11-17 發行狀態：Version 1 · Release 1（1.0.0）UAT 已完成。** 目前執行及驗證指令見 [App README](../app/README.md)，發行內容見 [v1.0.0](releases/v1.0.0.md)。下列 14–15 November 2026 的套件調查保留作歷史背景；實際安裝版本以 `app/package-lock.json` 為準。
 
 This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong). It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
