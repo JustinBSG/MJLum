@@ -19,10 +19,13 @@ export default function RulesScreen() {
             key={family.id}
             onPress={() =>
               router.push(
-                (family.id === 'hong-kong' ? '/rules/hong-kong' : `/rules/family?id=${family.id}`) as Href,
+                (family.id === 'hong-kong'
+                  ? '/rules/hong-kong'
+                  : `/rules/family?id=${family.id}`) as Href,
               )
             }
-            style={styles.row}>
+            style={styles.row}
+          >
             <ThemedText>{family.label}</ThemedText>
           </Pressable>
         ))}
@@ -33,9 +36,20 @@ export default function RulesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.two },
+  content: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
+    padding: 20,
+    gap: 16,
+  },
   row: {
-    minHeight: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    gap: 8,
+    minHeight: 64,
     justifyContent: 'center',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,

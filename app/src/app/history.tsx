@@ -111,7 +111,7 @@ function heading(session: Session): string {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.two },
+  content: { width: '100%', maxWidth: 720, alignSelf: 'center', padding: 20, gap: 16 },
   row: { gap: Spacing.one, paddingVertical: Spacing.two },
   detail: { gap: Spacing.one, paddingVertical: Spacing.two },
 });

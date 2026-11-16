@@ -1,6 +1,6 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { StatusBar } from 'expo-status-bar';
 
 import { ui } from '@/locale';
 import { LocalStoreRoot } from '@/storage/local-store-root';
@@ -8,12 +8,20 @@ import { LocalStoreRoot } from '@/storage/local-store-root';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <LocalStoreRoot>
-        <Stack screenOptions={{ headerShown: false, title: ui.appName }} />
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            title: ui.appName,
+            headerBackTitle: '返回',
+            headerTintColor: '#1E3A8A',
+            headerStyle: { backgroundColor: '#FFFFFF' },
+            contentStyle: { backgroundColor: '#F8FAFC' },
+          }}
+        />
       </LocalStoreRoot>
     </ThemeProvider>
   );

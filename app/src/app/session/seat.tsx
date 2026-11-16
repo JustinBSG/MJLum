@@ -1,21 +1,41 @@
 import { router, Stack, useFocusEffect, type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import {
+  PageHeader,
+  TableButton,
+  SectionHeading,
+  TableColors as C,
+} from '@/components/table-ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { APP_LOCALE } from '@/locale';
 import { useRuleRepository } from '@/rules/repository';
 import type { RuleSetup } from '@/rules/types';
-import { clearRoster, peekRoster, type StagedRoster } from '@/session/pending-roster';
+import {
+  clearRoster,
+  peekRoster,
+  type StagedRoster,
+} from '@/session/pending-roster';
 import { useSessionRepository } from '@/session/repository';
 import { missingHighFans } from '@/rules/setup';
-import { canStart, claimOutbound, namedPlayer, seatCount, sessionFromRoster, startSession } from '@/session/session';
+import {
+  canStart,
+  claimOutbound,
+  namedPlayer,
+  seatCount,
+  sessionFromRoster,
+  startSession,
+} from '@/session/session';
 
 export default function SeatScreen() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const rulesRepo = useRuleRepository();
   const sessions = useSessionRepository();
   const [rules, setRules] = useState<RuleSetup | null>(null);
@@ -31,30 +51,38 @@ export default function SeatScreen() {
     setNames(Array.from({ length: count }, () => ''));
   }
   if (matching && roster && names.length !== count) {
-    setNames(roster.seatedIds.map((id) => roster.players.find((player) => player.id === id)?.name ?? ''));
+    setNames(
+      roster.seatedIds.map(
+        (id) => roster.players.find((player) => player.id === id)?.name ?? '',
+      ),
+    );
     setDealerIndex(0);
   }
   const openSeats = Math.max(0, count - chosen.length);
   if (roster && !matching && extraNames.length !== openSeats) {
-    setExtraNames(Array.from({ length: openSeats }, (_, index) => extraNames[index] ?? ''));
+    setExtraNames(
+      Array.from({ length: openSeats }, (_, index) => extraNames[index] ?? ''),
+    );
   }
 
   useFocusEffect(
     useCallback(() => {
       let live = true;
-      Promise.all([rulesRepo.getActive(), sessions.getOpen()]).then(([active, open]) => {
-        if (!live) return;
-        if (open) {
-          router.replace('/session' as Href);
-          return;
-        }
-        if (!active) {
-          router.replace('/rules' as Href);
-          return;
-        }
-        setRules(active);
-        setRoster(peekRoster());
-      });
+      Promise.all([rulesRepo.getActive(), sessions.getOpen()]).then(
+        ([active, open]) => {
+          if (!live) return;
+          if (open) {
+            router.replace('/session' as Href);
+            return;
+          }
+          if (!active) {
+            router.replace('/rules' as Href);
+            return;
+          }
+          setRules(active);
+          setRoster(peekRoster());
+        },
+      );
       return () => {
         live = false;
       };
@@ -67,7 +95,9 @@ export default function SeatScreen() {
     if (roster && matching) {
       const players = roster.players.map((player) => {
         const seat = roster.seatedIds.indexOf(player.id);
-        return seat >= 0 ? { ...player, name: names[seat]?.trim() ?? player.name } : player;
+        return seat >= 0
+          ? { ...player, name: names[seat]?.trim() ?? player.name }
+          : player;
       });
       if (players.some((player) => player.name.trim() === '')) return;
       const session = sessionFromRoster({
@@ -83,15 +113,24 @@ export default function SeatScreen() {
     }
     if (roster) {
       const extras = extraNames.map((name) => name.trim());
-      if (chosen.length + extras.length !== count || extras.some((name) => name === '')) return;
+      if (
+        chosen.length + extras.length !== count ||
+        extras.some((name) => name === '')
+      )
+        return;
       const players = [
         ...roster.players,
-        ...extras.map((name, index) => namedPlayer(name, roster.players.length + index)),
+        ...extras.map((name, index) =>
+          namedPlayer(name, roster.players.length + index),
+        ),
       ];
       const session = sessionFromRoster({
         rules,
         players,
-        seatPlayerIds: [...chosen, ...players.slice(roster.players.length).map((player) => player.id)],
+        seatPlayerIds: [
+          ...chosen,
+          ...players.slice(roster.players.length).map((player) => player.id),
+        ],
         dealerIndex: rules.trackDealer ? dealerIndex : null,
         startedAt,
       });
@@ -118,7 +157,8 @@ export default function SeatScreen() {
 
   function toggle(playerId: string) {
     setChosen((current) => {
-      if (current.includes(playerId)) return current.filter((id) => id !== playerId);
+      if (current.includes(playerId))
+        return current.filter((id) => id !== playerId);
       if (current.length >= count) return current;
       return [...current, playerId];
     });
@@ -127,38 +167,57 @@ export default function SeatScreen() {
 
   return (
     <ThemedView style={styles.screen}>
-      <Stack.Screen options={{ title: '入座' }} />
+      <Stack.Screen options={{ title: '入座', headerShown: false }} />
+      <PageHeader title="入座開局" subtitle="最後一步 · 填寫玩家名稱" />
       {rules ? (
-        <ScrollView contentContainerStyle={styles.content}>
-          <ThemedText accessibilityLanguage={APP_LOCALE}>{rules.name}</ThemedText>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            styles.content,
+            { paddingBottom: insets.bottom + 32 },
+          ]}
+        >
+          <View style={styles.ruleCard}>
+            <SectionHeading>{rules.name}</SectionHeading>
+            <ThemedText
+              style={styles.hint}
+            >{`${count} 人麻雀 · ${rules.minFan} 番起糊 · ${rules.maxFan} 番滿糊`}</ThemedText>
+            <TableButton
+              label="更改玩法"
+              icon="settings"
+              onPress={() => router.push('/rules/hong-kong' as Href)}
+            />
+          </View>
+          <SectionHeading>邊幾位入座？</SectionHeading>
+          <ThemedText style={styles.hint}>
+            按牌枱次序填名，再揀第一位莊家。
+          </ThemedText>
           {missingHighFans(rules).length > 0 ? (
-            <ThemedText accessibilityLanguage={APP_LOCALE}>{`請先填 ${missingHighFans(rules).join('、')} 番嘅食糊分數`}</ThemedText>
+            <ThemedText
+              accessibilityLanguage={APP_LOCALE}
+            >{`請先填 ${missingHighFans(rules).join('、')} 番嘅食糊分數`}</ThemedText>
           ) : null}
           {roster && !matching ? (
-            <ThemedText accessibilityLanguage={APP_LOCALE}>請選出今局入座嘅人。未入座者留作後備。</ThemedText>
+            <ThemedText accessibilityLanguage={APP_LOCALE}>
+              請選出今局入座嘅人。未入座者留作後備。
+            </ThemedText>
           ) : null}
           {roster && !matching
             ? roster.players.map((player) => {
                 const seat = chosen.indexOf(player.id);
                 return (
                   <ThemedView key={player.id} style={styles.seat}>
-                    <Pressable
-                      accessibilityLanguage={APP_LOCALE}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: seat >= 0 }}
+                    <TableButton
+                      label={`入座 ${player.name}`}
+                      selected={seat >= 0}
                       onPress={() => toggle(player.id)}
-                      style={styles.mark}>
-                      <ThemedText>{`${seat >= 0 ? '入座 · 已選' : '入座'} ${player.name}`}</ThemedText>
-                    </Pressable>
+                    />
                     {seat >= 0 && rules.trackDealer ? (
-                      <Pressable
-                        accessibilityLanguage={APP_LOCALE}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: dealerIndex === seat }}
+                      <TableButton
+                        label="莊家"
+                        selected={dealerIndex === seat}
                         onPress={() => setDealerIndex(seat)}
-                        style={styles.mark}>
-                        <ThemedText>{dealerIndex === seat ? '莊 · 已選' : '莊'}</ThemedText>
-                      </Pressable>
+                      />
                     ) : null}
                   </ThemedView>
                 );
@@ -173,7 +232,9 @@ export default function SeatScreen() {
               onDealer={setDealerIndex}
               onName={(text) => {
                 const source = roster && !matching ? extraNames : names;
-                const next = source.map((item, itemIndex) => (itemIndex === index ? text : item));
+                const next = source.map((item, itemIndex) =>
+                  itemIndex === index ? text : item,
+                );
                 if (roster && !matching) setExtraNames(next);
                 else setNames(next);
               }}
@@ -182,9 +243,36 @@ export default function SeatScreen() {
               themeSecondary={theme.textSecondary}
             />
           ))}
-          <Pressable accessibilityLanguage={APP_LOCALE} accessibilityRole="button" onPress={start} style={styles.mark}>
-            <ThemedText>開始</ThemedText>
-          </Pressable>
+          {error ? (
+            <ThemedText accessibilityRole="alert" style={{ color: C.negative }}>
+              {error}
+            </ThemedText>
+          ) : null}
+          <TableButton
+            primary
+            label="齊人，開局"
+            icon="arrow"
+            busy={saving}
+            disabled={
+              missingHighFans(rules).length > 0 ||
+              (roster && !matching
+                ? chosen.length + extraNames.length !== count ||
+                  extraNames.some((n) => !n.trim())
+                : !canStart(rules, names, dealerIndex))
+            }
+            onPress={async () => {
+              if (saving) return;
+              setSaving(true);
+              setError(null);
+              try {
+                await start();
+              } catch {
+                setError('未能儲存牌局，請再試。');
+              } finally {
+                setSaving(false);
+              }
+            }}
+          />
         </ScrollView>
       ) : null}
     </ThemedView>
@@ -212,33 +300,57 @@ function SeatField({
 }) {
   return (
     <ThemedView style={styles.seat}>
+      <ThemedText
+        style={styles.seatLabel}
+      >{`座位 ${index + 1} · 玩家名稱`}</ThemedText>
       <TextInput
-        accessibilityLabel="玩家名稱"
+        accessibilityLabel={`座位 ${index + 1}玩家名稱`}
         accessibilityLanguage={APP_LOCALE}
         onChangeText={onName}
         placeholder="玩家名稱"
         placeholderTextColor={themeSecondary}
-        style={[styles.input, { color: themeText, borderColor: themeSecondary }]}
+        style={[
+          styles.input,
+          { color: themeText, borderColor: themeSecondary },
+        ]}
         value={name}
       />
       {showDealer ? (
-        <Pressable
-          accessibilityLanguage={APP_LOCALE}
-          accessibilityRole="button"
-          accessibilityState={{ selected: dealerIndex === index }}
+        <TableButton
+          label={dealerIndex === index ? '本局莊家' : '設為莊家'}
+          selected={dealerIndex === index}
           onPress={() => onDealer(index)}
-          style={styles.mark}>
-          <ThemedText>{dealerIndex === index ? '莊 · 已選' : '莊'}</ThemedText>
-        </Pressable>
+        />
       ) : null}
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.two, paddingBottom: Spacing.six },
-  seat: { gap: Spacing.one },
-  input: { minHeight: 48, borderWidth: 1, paddingHorizontal: Spacing.two, fontSize: 18 },
-  mark: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.two },
+  screen: { flex: 1, backgroundColor: C.paper },
+  content: {
+    width: '100%',
+    maxWidth: 680,
+    alignSelf: 'center',
+    padding: 20,
+    gap: 16,
+  },
+  ruleCard: { backgroundColor: C.soft, padding: 20, borderRadius: 16, gap: 12 },
+  hint: { color: C.muted },
+  seat: {
+    gap: 12,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  seatLabel: { fontWeight: '600' },
+  input: {
+    minHeight: 56,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    borderRadius: 10,
+  },
 });

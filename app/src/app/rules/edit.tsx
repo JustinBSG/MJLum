@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
+import { TableButton } from '@/components/table-ui';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -37,7 +38,10 @@ type Prompt = 'save' | 'abandon' | 'delete' | 'duplicate' | null;
 
 export default function EditRuleSetupScreen() {
   const theme = useTheme();
-  const params = useLocalSearchParams<{ kind?: string | string[]; id?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    kind?: string | string[];
+    id?: string | string[];
+  }>();
   const kind = first(params.kind);
   const id = first(params.id);
   const repo = useRuleRepository();
@@ -123,7 +127,7 @@ export default function EditRuleSetupScreen() {
     if (!named) return;
     if (!(await stageOpen(named))) return;
     await repo.setActive(named);
-    router.back();
+    router.replace('/session/seat');
   }
 
   async function save(overwriteId?: string) {
@@ -131,7 +135,12 @@ export default function EditRuleSetupScreen() {
     const named = namedSetup(setup);
     if (!named) return;
     const saved = await repo.listSaved();
-    const clash = saved.find((item) => item.name === named.name && item.id !== named.id && item.id !== overwriteId);
+    const clash = saved.find(
+      (item) =>
+        item.name === named.name &&
+        item.id !== named.id &&
+        item.id !== overwriteId,
+    );
     if (!overwriteId && clash) {
       setDuplicateId(clash.id);
       setPrompt('duplicate');
@@ -141,7 +150,7 @@ export default function EditRuleSetupScreen() {
     if (!(await stageOpen(stored))) return;
     await repo.save(stored);
     await repo.setActive(stored);
-    router.back();
+    router.replace('/session/seat');
   }
 
   async function remove() {
@@ -150,7 +159,12 @@ export default function EditRuleSetupScreen() {
     router.back();
   }
 
-  function commitExact(text: string, reportError: boolean, apply: (exact: string) => void, current: string) {
+  function commitExact(
+    text: string,
+    reportError: boolean,
+    apply: (exact: string) => void,
+    current: string,
+  ) {
     const next = applyExact(text);
     if (next === null) {
       if (reportError) setError('不能用這個分數');
@@ -161,7 +175,12 @@ export default function EditRuleSetupScreen() {
     apply(next);
   }
 
-  function commitOrdinary(fan: number, current: string | null, text: string, reportError: boolean) {
+  function commitOrdinary(
+    fan: number,
+    current: string | null,
+    text: string,
+    reportError: boolean,
+  ) {
     if (!setup) return;
     const trimmed = text.trim();
     if (trimmed === '') return;
@@ -181,7 +200,11 @@ export default function EditRuleSetupScreen() {
         options={{
           title: '玩法設定',
           headerLeft: () => (
-            <Pressable accessibilityRole="button" onPress={() => setPrompt('save')} style={styles.headerButton}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setPrompt('save')}
+              style={styles.headerButton}
+            >
               <ThemedText>返回</ThemedText>
             </Pressable>
           ),
@@ -190,14 +213,20 @@ export default function EditRuleSetupScreen() {
       {missing || !setup ? (
         <ThemedText style={styles.missing}>未有自訂玩法</ThemedText>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.content}
+        >
           <ThemedText type="small">玩法名稱</ThemedText>
           <TextInput
             accessibilityLabel="玩法名稱"
             defaultValue={setup.name}
             key={setup.id}
             onChangeText={(text) => setSetup(setName(setup, text))}
-            style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+            style={[
+              styles.input,
+              { color: theme.text, borderColor: theme.textSecondary },
+            ]}
           />
 
           <ThemedText type="small">人數</ThemedText>
@@ -230,14 +259,22 @@ export default function EditRuleSetupScreen() {
           <Stepper
             label="起糊"
             value={setup.minFan}
-            onDecrease={() => setSetup(setFanRange(setup, setup.minFan - 1, setup.maxFan))}
-            onIncrease={() => setSetup(setFanRange(setup, setup.minFan + 1, setup.maxFan))}
+            onDecrease={() =>
+              setSetup(setFanRange(setup, setup.minFan - 1, setup.maxFan))
+            }
+            onIncrease={() =>
+              setSetup(setFanRange(setup, setup.minFan + 1, setup.maxFan))
+            }
           />
           <Stepper
             label="滿糊"
             value={setup.maxFan}
-            onDecrease={() => setSetup(setFanRange(setup, setup.minFan, setup.maxFan - 1))}
-            onIncrease={() => setSetup(setFanRange(setup, setup.minFan, setup.maxFan + 1))}
+            onDecrease={() =>
+              setSetup(setFanRange(setup, setup.minFan, setup.maxFan - 1))
+            }
+            onIncrease={() =>
+              setSetup(setFanRange(setup, setup.minFan, setup.maxFan + 1))
+            }
           />
 
           <ThemedText type="small">自摸倍數</ThemedText>
@@ -248,20 +285,35 @@ export default function EditRuleSetupScreen() {
             onBlur={() => {
               const text = drafts.current.multiplier;
               if (text === undefined) return;
-              commitExact(text, true, (next) => setSetup(setMultiplier(setup, next)), setup.multiplier);
+              commitExact(
+                text,
+                true,
+                (next) => setSetup(setMultiplier(setup, next)),
+                setup.multiplier,
+              );
             }}
             onChangeText={(text) => {
               drafts.current.multiplier = text;
-              commitExact(text, false, (next) => setSetup(setMultiplier(setup, next)), setup.multiplier);
+              commitExact(
+                text,
+                false,
+                (next) => setSetup(setMultiplier(setup, next)),
+                setup.multiplier,
+              );
             }}
-            style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+            style={[
+              styles.input,
+              { color: theme.text, borderColor: theme.textSecondary },
+            ]}
           />
           <ThemedText type="small">{`×${formatMultiplier(setup.multiplier)}`}</ThemedText>
 
           <Choice
-            label={setup.jackpotEnabled ? 'Jackpot 啟用' : 'Jackpot 關閉'}
+            label={setup.jackpotEnabled ? '彩池啟用' : '彩池關閉'}
             selected={setup.jackpotEnabled}
-            onPress={() => setSetup(setJackpotEnabled(setup, !setup.jackpotEnabled))}
+            onPress={() =>
+              setSetup(setJackpotEnabled(setup, !setup.jackpotEnabled))
+            }
           />
           {setup.jackpotEnabled ? (
             <>
@@ -273,19 +325,34 @@ export default function EditRuleSetupScreen() {
                 onBlur={() => {
                   const text = drafts.current.pool;
                   if (text === undefined) return;
-                  commitExact(text, true, (next) => setSetup(setJackpotContribution(setup, next)), setup.jackpotContribution);
+                  commitExact(
+                    text,
+                    true,
+                    (next) => setSetup(setJackpotContribution(setup, next)),
+                    setup.jackpotContribution,
+                  );
                 }}
                 onChangeText={(text) => {
                   drafts.current.pool = text;
-                  commitExact(text, false, (next) => setSetup(setJackpotContribution(setup, next)), setup.jackpotContribution);
+                  commitExact(
+                    text,
+                    false,
+                    (next) => setSetup(setJackpotContribution(setup, next)),
+                    setup.jackpotContribution,
+                  );
                 }}
-                style={[styles.input, { color: theme.text, borderColor: theme.textSecondary }]}
+                style={[
+                  styles.input,
+                  { color: theme.text, borderColor: theme.textSecondary },
+                ]}
               />
             </>
           ) : null}
 
           <Choice
-            label={setup.trackDealer ? '紀錄莊家及圈風 開' : '紀錄莊家及圈風 關'}
+            label={
+              setup.trackDealer ? '紀錄莊家及圈風 開' : '紀錄莊家及圈風 關'
+            }
             selected={setup.trackDealer}
             onPress={() => setSetup(setTrackDealer(setup, !setup.trackDealer))}
           />
@@ -293,7 +360,9 @@ export default function EditRuleSetupScreen() {
             <Choice
               label={setup.passDealerOnDraw ? '流局時過莊 開' : '流局時過莊 關'}
               selected={setup.passDealerOnDraw}
-              onPress={() => setSetup(setPassDealerOnDraw(setup, !setup.passDealerOnDraw))}
+              onPress={() =>
+                setSetup(setPassDealerOnDraw(setup, !setup.passDealerOnDraw))
+              }
             />
           ) : null}
 
@@ -307,7 +376,9 @@ export default function EditRuleSetupScreen() {
               <ThemedText>{row.fan}</ThemedText>
               <TextInput
                 accessibilityLabel={`${row.fan}番食糊分數`}
-                defaultValue={row.ordinary === null ? '' : formatAmount(row.ordinary)}
+                defaultValue={
+                  row.ordinary === null ? '' : formatAmount(row.ordinary)
+                }
                 key={row.fan}
                 onBlur={() => {
                   const text = drafts.current[row.fan];
@@ -320,11 +391,17 @@ export default function EditRuleSetupScreen() {
                 }}
                 placeholder="未有紀錄"
                 placeholderTextColor={theme.textSecondary}
-                style={[styles.cell, { color: theme.text, borderColor: theme.textSecondary }]}
+                style={[
+                  styles.cell,
+                  { color: theme.text, borderColor: theme.textSecondary },
+                ]}
               />
               <ThemedView>
-                <ThemedText>{formatAmount(selfDrawAmount(setup, row.fan))}</ThemedText>
-                {setup.playerFormat === 'three' && selfDrawShare(setup, row.fan) ? (
+                <ThemedText>
+                  {formatAmount(selfDrawAmount(setup, row.fan))}
+                </ThemedText>
+                {setup.playerFormat === 'three' &&
+                selfDrawShare(setup, row.fan) ? (
                   <ThemedText type="small">{`每人 ${formatAmount(selfDrawShare(setup, row.fan))}`}</ThemedText>
                 ) : null}
               </ThemedView>
@@ -333,11 +410,24 @@ export default function EditRuleSetupScreen() {
 
           {error ? <ThemedText>{error}</ThemedText> : null}
 
-          <Pressable accessibilityRole="button" onPress={() => setPrompt('abandon')} style={styles.rowButton}>
+          <TableButton label="使用此玩法，繼續" primary onPress={useOnce} />
+          <TableButton
+            label="儲存為常用玩法"
+            onPress={() => setPrompt('save')}
+          />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setPrompt('abandon')}
+            style={styles.rowButton}
+          >
             <ThemedText>放棄設定</ThemedText>
           </Pressable>
           {kind === 'saved' ? (
-            <Pressable accessibilityRole="button" onPress={() => setPrompt('delete')} style={styles.rowButton}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setPrompt('delete')}
+              style={styles.rowButton}
+            >
               <ThemedText>刪除</ThemedText>
             </Pressable>
           ) : null}
@@ -392,9 +482,22 @@ export default function EditRuleSetupScreen() {
   );
 }
 
-function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Choice({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={styles.rowButton}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={styles.rowButton}
+    >
       <ThemedText>{selected ? `${label} · 已選` : label}</ThemedText>
     </Pressable>
   );
@@ -413,11 +516,23 @@ function Stepper({
 }) {
   return (
     <ThemedView style={styles.stepper}>
-      <ThemedText accessibilityLanguage={APP_LOCALE}>{`${label} ${value}`}</ThemedText>
-      <Pressable accessibilityLabel={`${label}減少`} accessibilityRole="button" onPress={onDecrease} style={styles.step}>
+      <ThemedText
+        accessibilityLanguage={APP_LOCALE}
+      >{`${label} ${value}`}</ThemedText>
+      <Pressable
+        accessibilityLabel={`${label}減少`}
+        accessibilityRole="button"
+        onPress={onDecrease}
+        style={styles.step}
+      >
         <ThemedText>－</ThemedText>
       </Pressable>
-      <Pressable accessibilityLabel={`${label}增加`} accessibilityRole="button" onPress={onIncrease} style={styles.step}>
+      <Pressable
+        accessibilityLabel={`${label}增加`}
+        accessibilityRole="button"
+        onPress={onIncrease}
+        style={styles.step}
+      >
         <ThemedText>＋</ThemedText>
       </Pressable>
     </ThemedView>
@@ -436,7 +551,12 @@ function PromptBar({
       <ThemedText accessibilityLanguage={APP_LOCALE}>{title}</ThemedText>
       <ThemedView style={styles.choices}>
         {actions.map((action) => (
-          <Pressable accessibilityRole="button" key={action.label} onPress={action.onPress} style={styles.rowButton}>
+          <Pressable
+            accessibilityRole="button"
+            key={action.label}
+            onPress={action.onPress}
+            style={styles.rowButton}
+          >
             <ThemedText>{action.label}</ThemedText>
           </Pressable>
         ))}
@@ -459,16 +579,59 @@ function first(value: string | string[] | undefined): string | undefined {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.two, paddingBottom: Spacing.six },
+  content: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
+    padding: 20,
+    gap: 16,
+    paddingBottom: Spacing.six,
+  },
   missing: { padding: Spacing.three },
-  input: { minHeight: 48, borderWidth: 1, paddingHorizontal: Spacing.two, fontSize: 18 },
-  cell: { minHeight: 44, minWidth: 96, borderWidth: 1, paddingHorizontal: Spacing.two, fontSize: 18 },
+  input: {
+    minHeight: 56,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  cell: {
+    minHeight: 44,
+    minWidth: 96,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.two,
+    fontSize: 18,
+  },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  rowButton: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.two },
+  rowButton: {
+    minHeight: 52,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+  },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  step: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+  step: {
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   tableHead: { flexDirection: 'row', justifyContent: 'space-between' },
-  tableRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
-  headerButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: Spacing.two },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  headerButton: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.two,
+  },
   prompt: { padding: Spacing.three, gap: Spacing.two },
 });

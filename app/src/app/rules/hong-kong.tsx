@@ -18,11 +18,13 @@ export default function HongKongRulesScreen() {
   useFocusEffect(
     useCallback(() => {
       let live = true;
-      Promise.all([repo.listSaved(), repo.getActive()]).then(([nextSaved, nextActive]) => {
-        if (!live) return;
-        setSaved(nextSaved);
-        setActive(nextActive);
-      });
+      Promise.all([repo.listSaved(), repo.getActive()]).then(
+        ([nextSaved, nextActive]) => {
+          if (!live) return;
+          setSaved(nextSaved);
+          setActive(nextActive);
+        },
+      );
       return () => {
         live = false;
       };
@@ -42,12 +44,13 @@ export default function HongKongRulesScreen() {
           <Pressable
             accessibilityRole="button"
             key={preset.id}
-            onPress={() => router.push(`/rules/edit?kind=preset&id=${preset.id}` as Href)}
-            style={styles.row}>
+            onPress={() =>
+              router.push(`/rules/edit?kind=preset&id=${preset.id}` as Href)
+            }
+            style={styles.row}
+          >
             <ThemedText>{preset.name}</ThemedText>
-            <ThemedText type="small">
-              {presetCaption(preset)} · 全銃
-            </ThemedText>
+            <ThemedText type="small">{presetCaption(preset)} · 全銃</ThemedText>
           </Pressable>
         ))}
 
@@ -57,15 +60,19 @@ export default function HongKongRulesScreen() {
           <Pressable
             accessibilityRole="button"
             key={setup.id}
-            onPress={() => router.push(`/rules/edit?kind=saved&id=${setup.id}` as Href)}
-            style={styles.row}>
+            onPress={() =>
+              router.push(`/rules/edit?kind=saved&id=${setup.id}` as Href)
+            }
+            style={styles.row}
+          >
             <ThemedText>{setup.name}</ThemedText>
           </Pressable>
         ))}
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push('/rules/edit?kind=custom' as Href)}
-          style={styles.row}>
+          style={styles.row}
+        >
           <ThemedText>增加玩法</ThemedText>
         </Pressable>
       </ScrollView>
@@ -75,12 +82,22 @@ export default function HongKongRulesScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: Spacing.three, gap: Spacing.two },
+  content: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
+    padding: 20,
+    gap: 16,
+  },
   row: {
-    minHeight: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    gap: 8,
+    minHeight: 64,
     justifyContent: 'center',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
-    gap: Spacing.one,
   },
 });

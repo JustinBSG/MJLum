@@ -12,9 +12,9 @@ const AXES = [
   { key: 'defense', label: '防守', angle: -Math.PI / 2 + (4 * Math.PI) / 3 },
 ] as const;
 
-const SIZE = 280;
+const SIZE = 240;
 const CENTER = SIZE / 2;
-const RADIUS = 78;
+const RADIUS = 62;
 
 export function RadarChart({
   attack,
@@ -42,12 +42,35 @@ export function RadarChart({
     <View style={styles.chart}>
       <Svg width={SIZE} height={SIZE}>
         <Polygon points={ring(1)} fill={track} stroke={color} strokeWidth={1} />
-        <Polygon points={ring(0.5)} fill="none" stroke={color} strokeWidth={1} />
+        <Polygon
+          points={ring(0.5)}
+          fill="none"
+          stroke={color}
+          strokeWidth={1}
+        />
         {AXES.map((axis) => {
           const end = spot(axis.angle, 1);
-          return <Line key={axis.key} x1={CENTER} y1={CENTER} x2={end.x} y2={end.y} stroke={color} strokeWidth={1} />;
+          return (
+            <Line
+              key={axis.key}
+              x1={CENTER}
+              y1={CENTER}
+              x2={end.x}
+              y2={end.y}
+              stroke={color}
+              strokeWidth={1}
+            />
+          );
         })}
-        <Polygon points={valueRing} fill={color} fillOpacity={0.35} stroke={color} strokeWidth={2} />
+        {attack !== null && strength !== null && defense !== null ? (
+          <Polygon
+            points={valueRing}
+            fill={color}
+            fillOpacity={0.15}
+            stroke={color}
+            strokeWidth={2}
+          />
+        ) : null}
       </Svg>
       {AXES.map((axis) => {
         const point = spot(axis.angle, 1.22);
@@ -55,7 +78,8 @@ export function RadarChart({
           <ThemedText
             accessibilityLanguage={APP_LOCALE}
             key={axis.key}
-            style={[styles.label, { left: point.x - 60, top: point.y - 10 }]}>
+            style={[styles.label, { left: point.x - 50, top: point.y - 10 }]}
+          >
             {axisCaption(axis.label, values[axis.key])}
           </ThemedText>
         );
@@ -81,11 +105,21 @@ function unit(exact: string | null): number {
   const value = Score.fromString(exact);
   const zero = Score.fromString('0');
   const hundred = Score.fromString('100');
-  const clamped = value.compare(zero) < 0 ? zero : value.compare(hundred) > 0 ? hundred : value;
+  const clamped =
+    value.compare(zero) < 0
+      ? zero
+      : value.compare(hundred) > 0
+        ? hundred
+        : value;
   return Number(clamped.numerator) / Number(clamped.denominator) / 100;
 }
 
 const styles = StyleSheet.create({
-  chart: { width: SIZE, height: SIZE },
-  label: { position: 'absolute', width: 120, textAlign: 'center' },
+  chart: { width: SIZE, height: SIZE, alignSelf: 'center' },
+  label: {
+    position: 'absolute',
+    width: 100,
+    fontSize: 14,
+    textAlign: 'center',
+  },
 });
