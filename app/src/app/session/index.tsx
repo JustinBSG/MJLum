@@ -599,11 +599,13 @@ export default function SessionScreen() {
                     ? "找數"
                     : panel === "stats"
                       ? "統計數據"
-                      : panel === "ledger"
-                        ? "詳細記錄"
-                        : panel && panel !== "draw" && panel !== "undo"
-                          ? "牌局設定"
-                          : "現時牌局"}
+                      : panel === "swap"
+                        ? "更換玩家"
+                        : panel === "ledger"
+                          ? "詳細記錄"
+                          : panel && panel !== "draw" && panel !== "undo"
+                            ? "牌局設定"
+                            : "現時牌局"}
               </ThemedText>
             </View>
             <Action label="首頁" onPress={() => router.replace("/")} />
@@ -1319,68 +1321,124 @@ export default function SessionScreen() {
           ) : null}
 
           {panel === "swap" ? (
-            <ThemedView style={styles.panel}>
-              <TextInput
-                accessibilityLabel="玩家名稱"
-                accessibilityLanguage={APP_LOCALE}
-                onChangeText={setReserveName}
-                placeholder="玩家名稱"
-                placeholderTextColor={theme.textSecondary}
-                style={[
-                  styles.input,
-                  { color: theme.text, borderColor: theme.textSecondary },
-                ]}
-                value={reserveName}
-              />
-              <Choice label="加入" onPress={addNamedReserve} selected={false} />
+            <View style={{ gap: 16 }}>
+              <View style={styles.panel}>
+                <View style={styles.heading}>
+                  <ThemedText
+                    accessibilityRole="header"
+                    style={styles.zoneTitle}
+                  >
+                    在座玩家
+                  </ThemedText>
+                  <ThemedText
+                    style={styles.badge}
+                  >{`${session.seats.length} 位`}</ThemedText>
+                </View>
+                <ThemedText type="small" themeColor="textSecondary">
+                  揀要換出嘅玩家，再按一次可取消。
+                </ThemedText>
+                <View style={styles.row}>
+                  {session.seats.map((seat) => {
+                    const player = session.players.find(
+                      (item) => item.id === seat.playerId,
+                    );
+                    return (
+                      <Choice
+                        key={seat.index}
+                        label={`座位 ${seat.index + 1} · ${player?.name ?? ""}`}
+                        onPress={() =>
+                          setSeatIndex((current) =>
+                            current === seat.index ? null : seat.index,
+                          )
+                        }
+                        selected={seatIndex === seat.index}
+                      />
+                    );
+                  })}
+                </View>
+              </View>
+              <View style={styles.panel}>
+                <View style={styles.heading}>
+                  <ThemedText
+                    accessibilityRole="header"
+                    style={styles.zoneTitle}
+                  >
+                    未入座玩家
+                  </ThemedText>
+                  <ThemedText
+                    style={styles.badge}
+                  >{`${reserves.length} 位`}</ThemedText>
+                </View>
+                <ThemedText type="small" themeColor="textSecondary">
+                  揀要換入嘅玩家，再按一次可取消。
+                </ThemedText>
+                {reserves.length > 0 ? (
+                  <View style={styles.row}>
+                    {reserves.map((player) => (
+                      <Choice
+                        key={player.id}
+                        label={player.name}
+                        onPress={() =>
+                          setIncomingId((current) =>
+                            current === player.id ? null : player.id,
+                          )
+                        }
+                        selected={incomingId === player.id}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <ThemedText
+                    type="small"
+                    themeColor="textSecondary"
+                    style={styles.emptyReserve}
+                  >
+                    未有未入座玩家，可喺下方加入。
+                  </ThemedText>
+                )}
+                <View style={styles.addReserve}>
+                  <ThemedText type="small" style={{ fontWeight: "600" }}>
+                    加入未入座玩家
+                  </ThemedText>
+                  <TextInput
+                    accessibilityLabel="新增未入座玩家名稱"
+                    accessibilityLanguage={APP_LOCALE}
+                    onChangeText={setReserveName}
+                    placeholder="玩家名稱"
+                    placeholderTextColor={theme.textSecondary}
+                    style={[
+                      styles.input,
+                      { color: theme.text, borderColor: theme.textSecondary },
+                    ]}
+                    value={reserveName}
+                  />
+                  <Choice
+                    label="加入玩家"
+                    onPress={addNamedReserve}
+                    selected={false}
+                    disabled={reserveName.trim() === ""}
+                  />
+                </View>
+              </View>
               <Choice
                 label={`入原玩家帳 ${billToOriginal ? "開" : "關"}`}
                 onPress={() => setBillToOriginal((value) => !value)}
                 selected={billToOriginal}
               />
-              {reserves.map((player) => (
-                <Choice
-                  key={player.id}
-                  label={`${player.name}`}
-                  onPress={() =>
-                    setIncomingId((current) =>
-                      current === player.id ? null : player.id,
-                    )
-                  }
-                  selected={incomingId === player.id}
-                />
-              ))}
-              {session.seats.map((seat) => {
-                const player = session.players.find(
-                  (item) => item.id === seat.playerId,
-                );
-                return (
-                  <Choice
-                    key={seat.index}
-                    label={`${seat.index + 1} ${player?.name ?? ""}`}
-                    onPress={() =>
-                      setSeatIndex((current) =>
-                        current === seat.index ? null : seat.index,
-                      )
-                    }
-                    selected={seatIndex === seat.index}
-                  />
-                );
-              })}
-              <ThemedView style={styles.row}>
+              <View style={styles.row}>
                 <Choice
                   label="取消"
                   onPress={() => setPanel(null)}
                   selected={false}
                 />
-                <Choice
-                  label="確定"
+                <Action
+                  label="確認換人"
+                  primary
                   onPress={confirmSwap}
-                  selected={false}
                   disabled={incomingId === null || seatIndex === null}
                 />
-              </ThemedView>
-            </ThemedView>
+              </View>
+            </View>
           ) : null}
 
           {panel === "roster" && session ? (
@@ -2025,6 +2083,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: palette.surface,
     borderWidth: 1,
+    borderColor: palette.line,
+  },
+  zoneTitle: { fontSize: 20, fontWeight: "700", color: palette.primary },
+  emptyReserve: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: palette.background,
+  },
+  addReserve: {
+    gap: 12,
+    paddingTop: 16,
+    borderTopWidth: 1,
     borderColor: palette.line,
   },
   heading: {
