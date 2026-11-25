@@ -62,6 +62,7 @@ The following points are decided:
 - Only one device is used at the table. The first release does not support more than one device following the same session.
 - The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. This release scores Hong Kong mahjong only. 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將 wait until after the second release. Utilities in this release are statistics, titles, a radar chart, a dice utility, and fan-help. The already-decided 麻雀諗 product rules in the list above that are not about external display / wireless TV are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; and no metadata sharing.
 - The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section, including the 25 November 2026 decision to show Spotify now-playing info on the unique AirPlay 現時賽果 screen. Other extra features beyond the first-release point-counter scope can also come in a later release.
+- A 25 November 2026 (Asia/Hong Kong) 麻雀諗 product decision plans, for the **next release after** the AirPlay / second release, showing current phone info on the AirPlay 現時賽果 screen (such as battery level, time, and date), and a setting for whether notifications are shown on that screen. These items are not second-release fulfilment and are not Version 1 · Release 1 (1.0.0) work. Details are in the External display section.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
@@ -79,6 +80,8 @@ The already-decided 麻雀諗 product rules that apply in the first release are:
 
 The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section, including the 25 November 2026 decision to show Spotify now-playing info on the unique AirPlay 現時賽果 screen. Other extra features beyond that first-release point-counter scope can also come in a later release.
 
+A 25 November 2026 (Asia/Hong Kong) 麻雀諗 product decision plans, for the **next release after** the AirPlay / second release, showing current phone info on the AirPlay 現時賽果 screen (such as battery level, time, and date), and a setting for whether notifications are shown on that screen. These items are not second-release fulfilment and are not Version 1 · Release 1 (1.0.0) work. Details are in the External display section.
+
 ## How screens and functions fit together
 
 The following function areas are planned so the app can serve as a table scorekeeper. Screen names, information architecture, and how the user moves between them are **unspecified**. UI/UX for these areas is to be designed later by AI, following this guide and using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
@@ -89,8 +92,9 @@ The following function areas are planned so the app can serve as a table scoreke
 - **Statistics, titles, and radar chart:** included in the first release. Session-wide statistics follow the local reference where that behaviour is established. Title-award rules and the radar mapping are 麻雀諗 product decisions, recorded below. Rate denominators and the 平均番數 formula remain unspecified.
 - **Dice utility and fan-help:** included in the first release. These are table utilities; their established behaviour, the 麻雀諗 dice purpose, and the demonstrated 番數? text are recorded below.
 - **Sharing of metadata or session data:** not supported. The app is a simple local tool and does not share results, history, player information, settlement, or other session information.
-- **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only.
+- **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only. A setting for whether notifications are shown on the AirPlay screen is planned for the release after AirPlay; its default and which notifications it covers are unspecified.
 - **External display (second release):** planned as a wireless connection to a smart TV, showing 現時賽果 only, plus planned Spotify now-playing info (song name, duration, and similar) on the unique AirPlay 現時賽果 screen, on iOS and Android. On iOS / iPhone the path is AirPlay for unique 現時賽果. On Android the path must be an official wireless path (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified. Playing or remote-controlling Spotify from the app is unspecified. Technical detail is in `docs/development.md`.
+- **Phone info and AirPlay notification setting (release after AirPlay):** planned work for the next release after the AirPlay / second release, not for that AirPlay release itself: show current phone info on the AirPlay 現時賽果 screen, such as battery level, time, and date; and add a setting for whether notifications are shown on the AirPlay screen. Layout, artwork, the setting default, which notifications are covered, interaction on the TV, and Android-path behaviour are unspecified. Details are in the External display section.
 - **History:** the app keeps all in-game records across sessions, stored locally only. How the user browses, resumes, or deletes past sessions is unspecified, except that storage is local only and should be kept light.
 
 No wireframes, component list, or visual style are specified in this document on purpose.
@@ -667,6 +671,23 @@ The following are still **unspecified** (second-release planning, not first-rele
 
 The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above, plus this planned now-playing info, remain the decided 麻雀諗 display model for the second release. Technical detail is in `docs/development.md`.
 
+**麻雀諗 product decision (25 November 2026, Asia/Hong Kong), for the next release after the AirPlay / second release:**
+
+1. Show current phone info on the AirPlay 現時賽果 screen, such as battery level, time, and date.
+2. Add a setting for whether notifications are shown on the AirPlay screen.
+
+These two items are planned work for that later release. They are not AirPlay / second-release fulfilment, and they are not Version 1 · Release 1 (1.0.0) scope. The already-recorded Spotify now-playing info remains planned for the AirPlay / second release and is not moved. These later items would appear on that same unique AirPlay 現時賽果 screen; they do not move other pages to the TV.
+
+The following details are still **unspecified** (planning for the release after AirPlay; do not invent them):
+
+- The exact layout of battery, time, and date
+- Artwork
+- The default of the notification setting
+- Which notifications are covered (system versus in-app)
+- Any interaction on the TV
+- Whether, and how, the same phone info and notification setting apply on the still-unchosen official Android wireless path
+
+
 ## Unanswered questions
 
 These decisions are still open and should be specified before implementation is treated as complete. The first release still includes the corresponding options and categories; the gaps below are missing formulas or flows, not a decision to omit the feature.
@@ -692,5 +713,6 @@ Still open:
 
 1. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
 2. The still-open second-release product and policy checks for planned Spotify now-playing info, recorded in the External display section and in `docs/development.md`: local-only / no-account versus Spotify authorization; Spotify Developer Policy (attribution, no standalone metadata product, synchronizing sound recordings with visual media, and “game, including trivia quizzes,” the last two unsettleable from the public text); AirPlay audio takeover; privacy / disconnect / data-deletion versus no-account; and whether now-playing info is also shown on the official Android wireless path.
+3. The still-unspecified details of the planned phone info and AirPlay notification setting for the release after AirPlay, recorded in the External display section: exact layout of battery, time, and date; artwork; the default of the notification setting; which notifications are covered (system versus in-app); any interaction on the TV; and Android-path behaviour.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.

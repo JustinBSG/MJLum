@@ -6,7 +6,7 @@ Current device deployment and standalone installation steps are in the [Android 
 
 Documentation is in English; the app interface remains Traditional Chinese (Hong Kong). The original screen label 現時賽果 means Current Scores; 半銃 means half-discard payment. See the [guide glossary](guide.md#interface-and-rule-terminology) for other literal labels.
 
-This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong), with a 25 November 2026 (Asia/Hong Kong) addition for planned Spotify now-playing info on the unique AirPlay 現時賽果 screen. It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
+This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong), with a 25 November 2026 (Asia/Hong Kong) addition for planned Spotify now-playing info on the unique AirPlay 現時賽果 screen, and a same-date addition for planned phone info and an AirPlay notification setting in the release after AirPlay. It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
 
 **麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
@@ -97,6 +97,28 @@ This is not first-release or Version 1 · Release 1 (1.0.0) work, and this file 
 - [Spotify Developer Policy](https://developer.spotify.com/policy): attribution and a required link back to the content; must not offer metadata as a standalone product; prohibition on synchronizing sound recordings with visual media; prohibition on creating a “game, including trivia quizzes.” Whether a Mahjong scorekeeper TV overlay plus now-playing falls under those last two is unsettleable from the public text.
 - AirPlay may also take over audio. Public docs do not clearly let the app pin Spotify sound to the iPhone while only the scoreboard goes to the display. See [Use AirPlay to stream video or mirror the screen](https://support.apple.com/en-us/102661) and [Use AirPlay to stream audio](https://support.apple.com/en-us/105068).
 - Privacy, disconnect, and data-deletion requirements in Spotify policy also sit in tension with no-account, if authorization is used at all. This file does not invent a design.
+
+## Planned phone info and AirPlay notification setting (release after AirPlay)
+
+**麻雀諗 product decision (25 November 2026, Asia/Hong Kong):** the following are planned work for the **next release after** the AirPlay / second release. They are not AirPlay / second-release fulfilment, and they are not Version 1 · Release 1 (1.0.0) work.
+
+1. Show current phone info on the AirPlay 現時賽果 screen, such as battery level, time, and date.
+2. Add a setting for whether notifications are shown on the AirPlay screen.
+
+The already-recorded Spotify now-playing info remains planned work for the AirPlay / second release and is not moved by this decision. This file does not start implementation.
+
+These later items would appear on that same unique AirPlay 現時賽果 screen after the second release. They do not move other pages to the TV, and they do not change the second-release display model (現時賽果 only, plus the planned Spotify now-playing info recorded above).
+
+The following details are still **unspecified** and must not be invented:
+
+- The exact layout of battery, time, and date on the screen
+- Artwork
+- The default of the notification setting
+- Which notifications are covered (system versus in-app)
+- Any interaction on the TV
+- Whether, and how, the same phone info and notification setting apply on the still-unchosen official Android wireless path
+
+A technical implementation path for these two items has not been recorded and is not invented here.
 
 ## Android official wireless paths
 
@@ -218,7 +240,7 @@ No other official-page conflicts were found on this pass for the APIs and packag
 
 ## Remaining open technical decisions
 
-Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to second-release planning, not first-release blockers.
+Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to second-release planning, not first-release blockers. Items 13–14 belong to planning for the release after AirPlay, not to second-release fulfilment.
 
 1. **Android wireless path:** Miracast-class Presentation, Cast, or both. Wireless is chosen for the second-release TV path; wired is not the chosen fulfilment.
 2. **Whether a hosted Cast receiver is acceptable** under local-only / no-cloud / no-account, and whether relay casting should be off.
@@ -232,6 +254,8 @@ Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to s
 10. **AirPlay audio routing.** AirPlay may also take over audio. Public docs do not clearly let the app pin Spotify sound to the iPhone while only the scoreboard goes to the display.
 11. **Spotify privacy / disconnect / data-deletion versus no-account.** Those policy requirements sit in tension with no-account if authorization is used at all. Do not invent a design.
 12. **Android now-playing scope.** Whether the same Spotify now-playing info is also shown on the still-unchosen official Android wireless path is unspecified.
+13. **Phone-info presentation (release after AirPlay).** Exact layout of battery, time, and date on the AirPlay 現時賽果 screen, and any artwork, are unspecified.
+14. **AirPlay notification setting (release after AirPlay).** The default of the setting, which notifications it covers (system versus in-app), any interaction on the TV, and Android-path behaviour are unspecified.
 
 ### Conservative suggestion (not a locked decision)
 

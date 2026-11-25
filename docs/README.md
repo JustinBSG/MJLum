@@ -11,7 +11,7 @@ MJLum (麻雀諗) is a scorekeeper for in-person Hong Kong Mahjong. The third ch
 | [guide.md](guide.md) | Scoring, session behavior, and product decisions, with reference evidence distinguished from inference |
 | [product.md](product.md) | Entry point to product rules |
 | [features.md](features.md) | Implemented features and interface interactions |
-| [development.md](development.md) | Development background and second-release TV display planning, including planned Spotify now-playing info |
+| [development.md](development.md) | Development background, second-release TV display planning including planned Spotify now-playing info, and planned phone info and an AirPlay notification setting for the release after AirPlay |
 | [../app/README.md](../app/README.md) | Environment setup, Expo Go, validation, and asset-generation commands |
 | [../design-system/mjlum/MASTER.md](../design-system/mjlum/MASTER.md) | Adopted design system |
 | [../design-system/mjlum/IMPLEMENTATION.md](../design-system/mjlum/IMPLEMENTATION.md) | Screen mapping and shared components |
@@ -23,7 +23,7 @@ Write documentation headings, explanations, and instructions in English. Keep th
 
 ## Scope and evidence
 
-The first release supports Hong Kong Mahjong on one device, with local data, no accounts, no ads, and no cloud synchronization or data sharing. Wireless TV score display is planned for the second release, including planned Spotify now-playing info on the unique AirPlay 現時賽果 screen (see [guide.md](guide.md) and [development.md](development.md)). Taiwanese Mahjong, Japanese Mahjong, Pong/Kong (horse-racing) variants, and Hong Kong-style Taiwanese Mahjong are deferred until later.
+The first release supports Hong Kong Mahjong on one device, with local data, no accounts, no ads, and no cloud synchronization or data sharing. Wireless TV score display is planned for the second release, including planned Spotify now-playing info on the unique AirPlay 現時賽果 screen. A 25 November 2026 麻雀諗 product decision plans, for the next release after AirPlay, showing current phone info (such as battery level, time, and date) on that screen and a setting for whether notifications are shown there (see [guide.md](guide.md) and [development.md](development.md)). Taiwanese Mahjong, Japanese Mahjong, Pong/Kong (horse-racing) variants, and Hong Kong-style Taiwanese Mahjong are deferred until later.
 
 The guide distinguishes **MJLum product decisions**, **reference-demonstrated behavior**, and **unspecified behavior**. A release designation does not turn a proposed formula into reference evidence. Unsupported scoring combinations remain blocked in the implementation.
 
