@@ -6,7 +6,7 @@ Current device deployment and standalone installation steps are in the [Android 
 
 Documentation is in English; the app interface remains Traditional Chinese (Hong Kong). The original screen label 現時賽果 means Current Scores; 半銃 means half-discard payment. See the [guide glossary](guide.md#interface-and-rule-terminology) for other literal labels.
 
-This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong), with a 25 November 2026 (Asia/Hong Kong) addition for planned Spotify now-playing info on the unique AirPlay 現時賽果 screen, and a same-date addition for planned phone info and an AirPlay notification setting in the release after AirPlay. It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
+This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong), with 25 November 2026 (Asia/Hong Kong) additions for planned Spotify now-playing info on the unique AirPlay 現時賽果 screen (second release), planned phone info and an AirPlay notification setting (release after AirPlay), and a later-planning product note that YouTube (only) may share the AirPlay screen with 現時賽果. It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
 
 **麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
@@ -120,6 +120,21 @@ The following details are still **unspecified** and must not be invented:
 
 A technical implementation path for these two items has not been recorded and is not invented here.
 
+## Later planning: YouTube on the AirPlay screen
+
+**麻雀諗 product note (25 November 2026, Asia/Hong Kong), for later planning:** only YouTube is fine to share the AirPlay screen with 現時賽果. Netflix and Disney+ are not planned. He may split the AirPlay screen into two: one side shows 現時賽果, the other shows YouTube, so people can watch video or play an MV on the AirPlay screen during the game for background music or noise.
+
+This is later planning, not AirPlay / second-release fulfilment, not work for the release after AirPlay that records phone info and a notification setting, and not Version 1 · Release 1 (1.0.0) work. It does not cancel or move those earlier planned items. This file does not start implementation.
+
+Recording that he may split the screen is a planning note, not a decided layout. Exact split (which side, sizes, whether both are always visible), whether this uses the official unique-scene path or some other display mode, Android behaviour, accounts versus the recorded local-only / no-account rule, and any implementation path remain unspecified and must not be invented. This note does not invent a split-screen layout, control placement, or a “scores on one side, player on the other” design that claims to satisfy YouTube’s rules and the noninteractive unique-scene model at the same time.
+
+**Still-open official-doc / policy tensions** (leave these open; do not invent a yes or no):
+
+- Official docs do not describe placing a YouTube IFrame / `YTPlayerView` on the unique noninteractive AirPlay 現時賽果 scene.
+- [YouTube Developer Policies](https://developers.google.com/youtube/terms/developer-policies) prohibit modifying, building upon, or blocking any portion of a YouTube player, separating audio and video, and playing from a background player (a player not displayed on the screen the user is viewing).
+- [Required Minimum Functionality](https://developers.google.com/youtube/terms/required-minimum-functionality) forbids overlays or other visual elements in front of any part of the player, including controls, and requires a player with controls to be large enough to show them fully.
+- The unique scene is documented as noninteractive and was previously recorded as 現時賽果-only (plus planned Spotify now-playing info for the second release, and planned phone info / a notification setting for the release after that).
+
 ## Android official wireless paths
 
 The official pattern for a dedicated second surface is: the system creates a presentation display, then the app attaches `android.app.Presentation`. [`DisplayManager.getDisplays(DISPLAY_CATEGORY_PRESENTATION)`](https://developer.android.com/reference/android/hardware/display/DisplayManager) lists secondary displays suitable for presentations, including external or wireless displays; when several exist, the first entry is preferred. `DisplayManager.DisplayListener` reports added, changed, and removed displays.
@@ -213,6 +228,12 @@ No other official-page conflicts were found on this pass for the APIs and packag
 - [Design and Branding Guidelines](https://developer.spotify.com/documentation/design)
 - [Compliance Tips](https://developer.spotify.com/compliance-tips)
 
+### YouTube docs (recorded 25 November 2026, later-planning note)
+
+- [IFrame Player API](https://developers.google.com/youtube/iframe_api_reference)
+- [Developer Policies](https://developers.google.com/youtube/terms/developer-policies) (last updated 6 November 2026)
+- [Required Minimum Functionality](https://developers.google.com/youtube/terms/required-minimum-functionality) (last updated 6 November 2026)
+
 ### Expo docs
 
 - [Introduction to development builds](https://docs.expo.dev/develop/development-builds/introduction/)
@@ -240,7 +261,7 @@ No other official-page conflicts were found on this pass for the APIs and packag
 
 ## Remaining open technical decisions
 
-Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to second-release planning, not first-release blockers. Items 13–14 belong to planning for the release after AirPlay, not to second-release fulfilment.
+Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to second-release planning, not first-release blockers. Items 13–14 belong to planning for the release after AirPlay, not to second-release fulfilment. Items 15–16 belong to later planning for the YouTube AirPlay-screen note, not to second-release fulfilment or to the post-AirPlay phone-info list.
 
 1. **Android wireless path:** Miracast-class Presentation, Cast, or both. Wireless is chosen for the second-release TV path; wired is not the chosen fulfilment.
 2. **Whether a hosted Cast receiver is acceptable** under local-only / no-cloud / no-account, and whether relay casting should be off.
@@ -256,6 +277,8 @@ Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to s
 12. **Android now-playing scope.** Whether the same Spotify now-playing info is also shown on the still-unchosen official Android wireless path is unspecified.
 13. **Phone-info presentation (release after AirPlay).** Exact layout of battery, time, and date on the AirPlay 現時賽果 screen, and any artwork, are unspecified.
 14. **AirPlay notification setting (release after AirPlay).** The default of the setting, which notifications it covers (system versus in-app), any interaction on the TV, and Android-path behaviour are unspecified.
+15. **YouTube on the AirPlay screen (later planning).** Official docs do not describe placing a YouTube IFrame / `YTPlayerView` on the unique noninteractive AirPlay 現時賽果 scene. YouTube Developer Policies prohibit modifying, building upon, or blocking any portion of a YouTube player, separating audio and video, and playing from a background player (a player not displayed on the screen the user is viewing). Required Minimum Functionality forbids overlays or other visual elements in front of any part of the player, including controls, and requires a player with controls to be large enough to show them fully. The unique scene is documented as noninteractive and was previously recorded as 現時賽果-only, plus the earlier planned items. Do not invent a yes or no, and do not invent a layout that claims to satisfy both.
+16. **YouTube later-planning scope.** Exact split (which side, sizes, whether both are always visible), whether this uses the official unique-scene path or some other display mode, Android behaviour, accounts versus local-only, and any implementation path remain unspecified.
 
 ### Conservative suggestion (not a locked decision)
 
