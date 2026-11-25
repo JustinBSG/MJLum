@@ -6,7 +6,7 @@ Current device deployment and standalone installation steps are in the [Android 
 
 Documentation is in English; the app interface remains Traditional Chinese (Hong Kong). The original screen label 現時賽果 means Current Scores; 半銃 means half-discard payment. See the [guide glossary](guide.md#interface-and-rule-terminology) for other literal labels.
 
-This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong). It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
+This file is the coder-ready tech and development document as of 15 November 2026 (Asia/Hong Kong), with a 25 November 2026 (Asia/Hong Kong) addition for planned Spotify now-playing info on the unique AirPlay 現時賽果 screen. It records the chosen development approach, the wireless second-screen plan for the second release, suggested libraries (versions re-checked on 14 November 2026), official API constraints, and remaining open technical decisions.
 
 **麻雀諗 product decision:** Expo / React Native is the development approach. Individual libraries below are **suggestions** unless a sentence states that a piece is required (Expo itself, and `expo-dev-client` plus prebuild for unique second-screen work in the second release) or that an official platform API must be used for a given path. Do not treat a suggested package as locked.
 
@@ -42,7 +42,7 @@ These are 麻雀諗 product decisions for the **second release**. They are not f
 
 - The second-release plan is a **wireless** connection to a smart TV, on both iOS and Android.
 - Start and end with the same in-app share-screen button.
-- The external display shows **現時賽果 only**. Settlement and every other page are opened in the app.
+- The external display shows **現時賽果 only**, plus the planned Spotify now-playing info recorded in [Planned Spotify now-playing info](#planned-spotify-now-playing-info-second-release). Settlement and every other page are opened in the app.
 - On iOS / iPhone, the path is AirPlay unique (not only mirrored) content.
 - On Android, the path must be an official wireless Android-to-smart-TV path. Unofficial or commercial Android AirPlay senders are not fulfilment. There is no official Apple AirPlay sender SDK or API for Android apps.
 - Official wired HDMI / USB-C Presentation exists on both platforms, but it is **not** the chosen fulfilment.
@@ -59,7 +59,7 @@ How far the in-app share-screen button may rely on a system picker, rather than 
 
 ## iOS wireless path
 
-The iPhone path is AirPlay to a smart TV, showing unique 現時賽果.
+The iPhone path is AirPlay to a smart TV, showing unique 現時賽果, plus the planned Spotify now-playing info recorded below.
 
 Official pieces:
 
@@ -73,6 +73,30 @@ Suggested ways to implement this under Expo (not locked):
 - A **custom native module** wrapping `AVRoutePickerView` plus the scene accessory is a valid suggestion if no mature official Expo module covers the path. It requires a development build / prebuild.
 - [`expo-scene-accessories`](https://www.npmjs.com/package/expo-scene-accessories) `0.1.0-alpha.0` (npm, 25 September 2026, 18:11 HKT, MIT) is a third-party wrapper. Its README claims `ExternalNonInteractiveAccessory` can render React Native UI on iOS 27+ external or AirPlay displays. Requirements stated by the package: Expo SDK 58+, New Architecture, Xcode 27.1+, a development build; Expo Go is not supported. On Android, on the web, and on older iOS, the components render nothing and `isSceneAccessorySupported()` returns `false`. This does not replace an Android module. It is an iOS 27 alpha and is too early to lock.
 - [`react-native-external-display`](https://www.npmjs.com/package/react-native-external-display) `0.6.6` (MIT, last published 1 September 2024, 09:23 HKT) historically renders unique React Native content on an external display, as a native module that would need prebuild. Given that publish date, it is unlikely to implement iOS 27 `UISceneAccessory`. Audit it before any iOS 27 use; it is not a given.
+
+## Planned Spotify now-playing info (second release)
+
+**麻雀諗 product decision (25 November 2026, Asia/Hong Kong):** add showing Spotify now-playing info (song name, duration, and similar) on the unique AirPlay 現時賽果 screen as planned work for the second release. Playing music or showing now-playing was not previously a recorded product decision. This decision is to **display** that info. Playing or remote-controlling Spotify from 麻雀諗 remains unspecified / not decided.
+
+The unique external display remains 現時賽果 only, plus this planned now-playing info. Other pages, including settlement, stay in the app. Placement of the song name or duration, artwork, and any controls on the TV are not specified and must not be invented. Whether the same now-playing info is also shown on the still-unchosen official Android wireless path is unspecified.
+
+This is not first-release or Version 1 · Release 1 (1.0.0) work, and this file does not start implementation.
+
+**Already-recorded 麻雀諗 product rules** that this item sits alongside, and does not cancel: data is local only — no backup, no cloud, and no account; the app does not share metadata or session data; share-screen is a local display connection, not a data share.
+
+**Official-doc / research-backed technical path** (recorded from official docs on 25 November 2026; not a new invention):
+
+- The official Spotify Platform is required to read now-playing metadata (title, artist, duration or progress, and similar): the [iOS App Remote SDK](https://developer.spotify.com/documentation/ios) and/or the [Web API currently-playing](https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track) and [playback-state](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback) endpoints. [Apple MediaPlayer](https://developer.apple.com/documentation/mediaplayer/mpnowplayinginfocenter) / system Now Playing cannot officially read Spotify metadata.
+- Drawing that metadata on the unique external display is ordinary UI on the existing `windowExternalDisplayNonInteractive` / [`UISceneAccessory.externalNonInteractive`](https://developer.apple.com/documentation/uikit/presenting-content-on-a-connected-display) path. No separate AirPlay-metadata API is required.
+- Expo Go and the iOS Simulator cannot host App Remote. A development build on a physical iPhone with the Spotify app installed is required for App Remote.
+- An iPad is not an official AirPlay receiver. A 2018+ Mac with AirPlay Receiver remains a valid official development stand-in.
+
+**Still-open product and policy checks** (leave these open; do not invent a yes or no). They belong to second-release planning, not first-release blockers, and this product decision does not resolve them:
+
+- The recorded local-only / no-account / no-cloud rule versus a Spotify developer app plus user authorization (and Web API network calls).
+- [Spotify Developer Policy](https://developer.spotify.com/policy): attribution and a required link back to the content; must not offer metadata as a standalone product; prohibition on synchronizing sound recordings with visual media; prohibition on creating a “game, including trivia quizzes.” Whether a Mahjong scorekeeper TV overlay plus now-playing falls under those last two is unsettleable from the public text.
+- AirPlay may also take over audio. Public docs do not clearly let the app pin Spotify sound to the iPhone while only the scoreboard goes to the display. See [Use AirPlay to stream video or mirror the screen](https://support.apple.com/en-us/102661) and [Use AirPlay to stream audio](https://support.apple.com/en-us/105068).
+- Privacy, disconnect, and data-deletion requirements in Spotify policy also sit in tension with no-account, if authorization is used at all. This file does not invent a design.
 
 ## Android official wireless paths
 
@@ -152,6 +176,20 @@ No other official-page conflicts were found on this pass for the APIs and packag
 - [Integrate Cast into an Android app](https://developers.google.com/cast/docs/android_sender/integrate)
 - [CastRemoteDisplay](https://developers.google.com/android/reference/com/google/android/gms/cast/CastRemoteDisplay)
 - [Cast developer registration help](https://support.google.com/cast-developer/answer/4512496?hl=en)
+- [MPNowPlayingInfoCenter](https://developer.apple.com/documentation/mediaplayer/mpnowplayinginfocenter)
+- [Use AirPlay to stream video or mirror the screen](https://support.apple.com/en-us/102661)
+- [Use AirPlay to stream audio](https://support.apple.com/en-us/105068)
+
+### Spotify docs (recorded 25 November 2026)
+
+- [iOS SDK overview](https://developer.spotify.com/documentation/ios)
+- [Getting Started with the iOS SDK](https://developer.spotify.com/documentation/ios/getting-started)
+- [Get Currently Playing Track](https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track)
+- [Get Playback State](https://developer.spotify.com/documentation/web-api/reference/get-information-about-the-users-current-playback)
+- [Developer Policy](https://developer.spotify.com/policy) (effective 15 May 2025)
+- [Developer Terms](https://developer.spotify.com/terms)
+- [Design and Branding Guidelines](https://developer.spotify.com/documentation/design)
+- [Compliance Tips](https://developer.spotify.com/compliance-tips)
 
 ### Expo docs
 
@@ -180,7 +218,7 @@ No other official-page conflicts were found on this pass for the APIs and packag
 
 ## Remaining open technical decisions
 
-Do not invent product answers for these gaps. Items 1–5 belong to second-release planning, not first-release blockers.
+Do not invent product answers for these gaps. Items 1–5 and 8–12 belong to second-release planning, not first-release blockers.
 
 1. **Android wireless path:** Miracast-class Presentation, Cast, or both. Wireless is chosen for the second-release TV path; wired is not the chosen fulfilment.
 2. **Whether a hosted Cast receiver is acceptable** under local-only / no-cloud / no-account, and whether relay casting should be off.
@@ -189,6 +227,11 @@ Do not invent product answers for these gaps. Items 1–5 belong to second-relea
 5. **Connection-drop / no-mirror fallback behaviour.** Still unspecified as a product rule, including whether unique 現時賽果 must be torn down in a way that also ends the system route so the display does not fall back to mirroring the phone.
 6. **Rounding and storage of non-terminating decimals** (already an open first-release product gap, for example some 半銃 splits such as 32/3).
 7. **Distribution accounts** (Apple Developer Program, Play Console, sideload / TestFlight, and similar) remain an open technical decision. This file does not recommend buying accounts.
+8. **Local-only / no-account versus Spotify authorization.** The recorded local-only / no-account / no-cloud rule versus a Spotify developer app plus user authorization (and Web API network calls) is unresolved. The 25 November 2026 product decision to plan now-playing display does not resolve it.
+9. **Spotify Developer Policy checks.** Attribution and a required link back to the content; must not offer metadata as a standalone product; prohibition on synchronizing sound recordings with visual media; prohibition on creating a “game, including trivia quizzes.” Whether a Mahjong scorekeeper TV overlay plus now-playing falls under those last two is unsettleable from the public text.
+10. **AirPlay audio routing.** AirPlay may also take over audio. Public docs do not clearly let the app pin Spotify sound to the iPhone while only the scoreboard goes to the display.
+11. **Spotify privacy / disconnect / data-deletion versus no-account.** Those policy requirements sit in tension with no-account if authorization is used at all. Do not invent a design.
+12. **Android now-playing scope.** Whether the same Spotify now-playing info is also shown on the still-unchosen official Android wireless path is unspecified.
 
 ### Conservative suggestion (not a locked decision)
 

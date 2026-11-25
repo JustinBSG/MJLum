@@ -4,7 +4,7 @@
 
 The GitHub repository for this app is [MJLum](https://github.com/JustinBSG/MJLum).
 
-This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 15 November 2026, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
+This document is the scoring and session guide for 麻雀諗. It records decided product direction as of 15 November 2026, plus later dated 麻雀諗 product decisions in the sections below, and the demonstrated rules a complete scorekeeper app will need. Where a flow, screen, or rule has not been specified yet, it is marked as **unspecified**. Those sections describe the intended topic only; they do not invent UI layout, control labels, or scoring rules.
 
 Scoring, session, and settings behaviour that is marked **taken from the local reference** (reference-demonstrated) is established by that reference and should be followed. **MJLum product decisions** are decided for this app and must not be treated as reference-established fact. Behaviour that was not found in the reference and has not been decided is marked **unspecified** and must not be invented. This document does not copy a competitor UI. Ads that appear in the local reference are the reference app’s, not 麻雀諗 features.
 
@@ -46,7 +46,7 @@ Preset names such as 3番4, 二五雞, 五一, 一二蚊, 半辣上, and 辣辣�
 
 麻雀諗 is a table scorekeeper for in-person Hong Kong Mahjong. It is not a tile game: it does not deal, draw, or display a playable wall of tiles, and it is not meant to replace physical tiles at the table.
 
-Players use the app to keep and show scores during a live game. In the second release, the scoreboard can also be shown on a smart TV wirelessly.
+Players use the app to keep and show scores during a live game. In the second release, the scoreboard can also be shown on a smart TV wirelessly, and planned Spotify now-playing info (song name, duration, and similar) can be shown on that unique AirPlay 現時賽果 screen.
 
 ## Decided product direction
 
@@ -61,7 +61,7 @@ The following points are decided:
 - The UI language and locale is Traditional Chinese — Hong Kong only.
 - Only one device is used at the table. The first release does not support more than one device following the same session.
 - The first release has exactly the same functionality as the local reference. That includes all reference scoring options, such as 半銃, 詐糊, 出銃者包自摸, 出銃者包輸, and Jackpot. Formulas that have been demonstrated are recorded in the sections below. Formulas that still have not been demonstrated remain unspecified and must not be invented. This release scores Hong Kong mahjong only. 台灣麻將, 日本麻雀, 碰槓牌（跑馬仔）, and 港式台灣麻將 wait until after the second release. Utilities in this release are statistics, titles, a radar chart, a dice utility, and fan-help. The already-decided 麻雀諗 product rules in the list above that are not about external display / wireless TV are part of this first release, not extra features: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data; and no metadata sharing.
-- The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section. Other extra features beyond the first-release point-counter scope can also come in a later release.
+- The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section, including the 25 November 2026 decision to show Spotify now-playing info on the unique AirPlay 現時賽果 screen. Other extra features beyond the first-release point-counter scope can also come in a later release.
 - The app keeps all in-game records (all the things in the game) across sessions, stored locally only.
 - Data is local only: no backup, no cloud, and no account or sign-in requirement. Storage should be kept light.
 - The app does not share metadata or session data, including results, history, player information, settlement, or other session information. It is a simple local tool. For the second-release external display, the share-screen control is a local display connection, not sharing of metadata.
@@ -77,20 +77,20 @@ Same-functionality here means the scoring, session, settings, statistics, titles
 
 The already-decided 麻雀諗 product rules that apply in the first release are: no ads; a distinct UI; Traditional Chinese — Hong Kong only; one device at the table; iOS and Android; local-only data with all in-game records kept across sessions; and no sharing of metadata or session data.
 
-The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section. Other extra features beyond that first-release point-counter scope can also come in a later release.
+The second release is the wireless connection to a smart TV, together with the related external-display product rules recorded in the External display section, including the 25 November 2026 decision to show Spotify now-playing info on the unique AirPlay 現時賽果 screen. Other extra features beyond that first-release point-counter scope can also come in a later release.
 
 ## How screens and functions fit together
 
 The following function areas are planned so the app can serve as a table scorekeeper. Screen names, information architecture, and how the user moves between them are **unspecified**. UI/UX for these areas is to be designed later by AI, following this guide and using https://github.com/nextlevelbuilder/ui-ux-pro-max-skill to assist generation.
 
-- **Scoreboard / table view:** planned as the in-app view that shows current scores. Other pages are opened in the app to check. In the second release, the external display shows 現時賽果 only.
+- **Scoreboard / table view:** planned as the in-app view that shows current scores. Other pages are opened in the app to check. In the second release, the external display shows 現時賽果 only, plus the planned Spotify now-playing info recorded in the External display section.
 - **Session and scoring entry:** planned as the way players start or continue a game and record scoring events. Scoring and session behavior that was taken from the local reference is recorded below.
 - **Settlement:** a user-requested view of current net session balances. 麻雀諗 shows those results and lets the user finish payment themselves (product decision). Details are in the Settlement section.
 - **Statistics, titles, and radar chart:** included in the first release. Session-wide statistics follow the local reference where that behaviour is established. Title-award rules and the radar mapping are 麻雀諗 product decisions, recorded below. Rate denominators and the 平均番數 formula remain unspecified.
 - **Dice utility and fan-help:** included in the first release. These are table utilities; their established behaviour, the 麻雀諗 dice purpose, and the demonstrated 番數? text are recorded below.
 - **Sharing of metadata or session data:** not supported. The app is a simple local tool and does not share results, history, player information, settlement, or other session information.
 - **Settings:** follow the local reference, as listed in the Settings section. The app itself is ad-free (this is a product rule, not an optional setting), and the UI language and locale is Traditional Chinese — Hong Kong only.
-- **External display (second release):** planned as a wireless connection to a smart TV, showing 現時賽果 only, on iOS and Android. On iOS / iPhone the path is AirPlay for unique 現時賽果. On Android the path must be an official wireless path (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified. Technical detail is in `docs/development.md`.
+- **External display (second release):** planned as a wireless connection to a smart TV, showing 現時賽果 only, plus planned Spotify now-playing info (song name, duration, and similar) on the unique AirPlay 現時賽果 screen, on iOS and Android. On iOS / iPhone the path is AirPlay for unique 現時賽果. On Android the path must be an official wireless path (Miracast-class Presentation and/or Cast — not yet chosen). Unofficial Android AirPlay senders are not fulfilment. Official wired HDMI / USB-C Presentation exists, but is not the chosen fulfilment. The user starts and ends the connection with the same share-screen button in the app. Any other page must be opened in the app to check. The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display. The look of that 現時賽果 display is left to later AI design. Behavior when the connection drops is unspecified. Playing or remote-controlling Spotify from the app is unspecified. Technical detail is in `docs/development.md`.
 - **History:** the app keeps all in-game records across sessions, stored locally only. How the user browses, resumes, or deletes past sessions is unspecified, except that storage is local only and should be kept light.
 
 No wireframes, component list, or visual style are specified in this document on purpose.
@@ -101,7 +101,7 @@ Intended use, at a high level:
 
 1. People play Hong Kong Mahjong in person with physical tiles.
 2. One device at the table is used to keep the table's scores in 麻雀諗. The recorder enters who won, the fan value, and how the win happened; the app applies the chosen score table.
-3. Optionally, in the second release, 現時賽果 is shown on a smart TV wirelessly. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check.
+3. Optionally, in the second release, 現時賽果 is shown on a smart TV wirelessly, and planned Spotify now-playing info may appear on that unique AirPlay 現時賽果 screen. The user starts and ends that connection with the share-screen button in the app. Any other page is opened in the app to check.
 
 Detailed first-run, player-setup, and in-game screen layout are **unspecified** and are left to later AI UI/UX design, following this guide.
 
@@ -538,7 +538,7 @@ The transfer list above is what the local reference demonstrated. It is not a �
 
 **MJLum product decision:** settlement (找數) shows each non-zero net, including anyone who has left a seat with a balance, plus the Jackpot remainder. A zero is omitted. A non-zero pool is marked 尚未分配 and is not treated as another player. The user finishes payment themselves. 麻雀諗 does not compute payment instructions, does not choose a set of transfers, and does not need a transfer-choice algorithm, tie-breaking among transfer sets, or a currency label. Paid-tracking and payment execution stay out.
 
-Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only. The share-screen connection remains a local display connection, not a share of session data to another person or service.
+Settlement is checked in the app. When a second-release external display is connected, it is not checked on that display. That display shows 現時賽果 only, plus the planned Spotify now-playing info recorded in the External display section. The share-screen connection remains a local display connection, not a share of session data to another person or service.
 
 ## Statistics, titles, radar, dice, and fan-help
 
@@ -647,16 +647,25 @@ The following are decided for the second release:
 - On Android, the path must be an official wireless Android-to-smart-TV path (Wi-Fi Display / Miracast-class Presentation and/or Google Cast — which of those to ship is not yet chosen). Unofficial or commercial Android AirPlay senders are not fulfilment.
 - Official wired HDMI / USB-C Presentation exists, but it is not the chosen fulfilment.
 - Start screen sharing by clicking the share-screen button in the app; end sharing by clicking the same button again. Connection start and end are that toggle. Share-screen is a local display connection, not sharing of metadata.
-- The external display should show 現時賽果 only. Any other page must be opened in the app to check.
+- The external display should show 現時賽果 only, plus the planned Spotify now-playing info below. Any other page must be opened in the app to check.
 - The reason is that players and the user can check the score immediately, and the developer does not need to design interaction or controls for the external display.
-- The look of that 現時賽果 display is left to later AI design.
+- The look of that 現時賽果 display, including how any now-playing info is presented, is left to later AI design. Do not invent placement, artwork, or TV controls.
+
+**麻雀諗 product decision (25 November 2026, Asia/Hong Kong):** showing Spotify now-playing info (song name, duration, and similar) on the unique AirPlay 現時賽果 screen is planned work for that release. Playing music or showing now-playing was not previously a recorded product decision. This is a decision to display that info, not a decision to play or remote-control Spotify from the app. Playing or remote-controlling Spotify from 麻雀諗 remains unspecified / not decided. This is not Version 1 · Release 1 (1.0.0) scope.
+
+The official-doc / research-backed technical path is recorded in `docs/development.md`: the official Spotify Platform is required (iOS App Remote SDK and/or Web API currently-playing / playback-state); Apple MediaPlayer / system Now Playing cannot officially read Spotify metadata; drawing the metadata is ordinary UI on the existing unique-display path, with no separate AirPlay-metadata API; Expo Go and the Simulator cannot host App Remote; an iPad is not an official AirPlay receiver, and a 2018+ Mac with AirPlay Receiver remains a valid official development stand-in.
 
 The following are still **unspecified** (second-release planning, not first-release blockers):
 
 - What happens if the external display disconnects during a session
 - Which official Android wireless path to ship (Miracast-class Presentation, Cast, or both), and the other open technical decisions recorded in `docs/development.md`
+- Whether the same Spotify now-playing info is also shown on that official Android wireless path
+- The recorded local-only / no-account / no-cloud rule versus a Spotify developer app plus user authorization (and Web API network calls)
+- Spotify Developer Policy: attribution and a required link back to the content; must not offer metadata as a standalone product; prohibition on synchronizing sound recordings with visual media; prohibition on creating a “game, including trivia quizzes.” Whether a Mahjong scorekeeper TV overlay plus now-playing falls under those last two is unsettleable from the public text
+- AirPlay may also take over audio; public docs do not clearly let the app pin Spotify sound to the iPhone while only the scoreboard goes to the display
+- Privacy, disconnect, and data-deletion requirements in Spotify policy, which also sit in tension with no-account if authorization is used at all; do not invent a design
 
-The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above remain the decided 麻雀諗 display model for the second release. Technical detail is in `docs/development.md`.
+The local reference does not demonstrate live external-display behavior. The share-screen toggle and the 現時賽果-only rule above, plus this planned now-playing info, remain the decided 麻雀諗 display model for the second release. Technical detail is in `docs/development.md`.
 
 ## Unanswered questions
 
@@ -682,5 +691,6 @@ The technical approach for building the iOS and Android apps is Expo plus librar
 Still open:
 
 1. What happens if the external display disconnects during a session (second-release planning, not a first-release blocker).
+2. The still-open second-release product and policy checks for planned Spotify now-playing info, recorded in the External display section and in `docs/development.md`: local-only / no-account versus Spotify authorization; Spotify Developer Policy (attribution, no standalone metadata product, synchronizing sound recordings with visual media, and “game, including trivia quizzes,” the last two unsettleable from the public text); AirPlay audio takeover; privacy / disconnect / data-deletion versus no-account; and whether now-playing info is also shown on the official Android wireless path.
 
 This list can grow as product decisions are made. New decided rules should be added to the sections above and removed from this still-open list.
